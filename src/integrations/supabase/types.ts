@@ -33,6 +33,7 @@ export type Database = {
           classification:
             | Database["public"]["Enums"]["leadership_classification"]
             | null
+          coaching_insights: Json | null
           composite_mean: number | null
           created_at: string
           d1: number | null
@@ -48,6 +49,7 @@ export type Database = {
           e4: number | null
           e5: number | null
           e6: number | null
+          edition: Database["public"]["Enums"]["assessment_edition"] | null
           excellence_mean: number | null
           id: string
           l1: number | null
@@ -58,6 +60,8 @@ export type Database = {
           l6: number | null
           leadership_dna_mean: number | null
           notes_private: string | null
+          reflections: Json | null
+          risk_flags: string[] | null
           semester_label: string
           timepoint: Database["public"]["Enums"]["assessment_timepoint"]
           updated_at: string
@@ -81,6 +85,7 @@ export type Database = {
           classification?:
             | Database["public"]["Enums"]["leadership_classification"]
             | null
+          coaching_insights?: Json | null
           composite_mean?: number | null
           created_at?: string
           d1?: number | null
@@ -96,6 +101,7 @@ export type Database = {
           e4?: number | null
           e5?: number | null
           e6?: number | null
+          edition?: Database["public"]["Enums"]["assessment_edition"] | null
           excellence_mean?: number | null
           id?: string
           l1?: number | null
@@ -106,6 +112,8 @@ export type Database = {
           l6?: number | null
           leadership_dna_mean?: number | null
           notes_private?: string | null
+          reflections?: Json | null
+          risk_flags?: string[] | null
           semester_label: string
           timepoint: Database["public"]["Enums"]["assessment_timepoint"]
           updated_at?: string
@@ -129,6 +137,7 @@ export type Database = {
           classification?:
             | Database["public"]["Enums"]["leadership_classification"]
             | null
+          coaching_insights?: Json | null
           composite_mean?: number | null
           created_at?: string
           d1?: number | null
@@ -144,6 +153,7 @@ export type Database = {
           e4?: number | null
           e5?: number | null
           e6?: number | null
+          edition?: Database["public"]["Enums"]["assessment_edition"] | null
           excellence_mean?: number | null
           id?: string
           l1?: number | null
@@ -154,6 +164,8 @@ export type Database = {
           l6?: number | null
           leadership_dna_mean?: number | null
           notes_private?: string | null
+          reflections?: Json | null
+          risk_flags?: string[] | null
           semester_label?: string
           timepoint?: Database["public"]["Enums"]["assessment_timepoint"]
           updated_at?: string
@@ -203,6 +215,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      nudges: {
+        Row: {
+          body: string
+          created_at: string
+          domain: string
+          frequency: Database["public"]["Enums"]["nudge_frequency"]
+          id: string
+          status: Database["public"]["Enums"]["nudge_status"]
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          domain: string
+          frequency: Database["public"]["Enums"]["nudge_frequency"]
+          id?: string
+          status?: Database["public"]["Enums"]["nudge_status"]
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          domain?: string
+          frequency?: Database["public"]["Enums"]["nudge_frequency"]
+          id?: string
+          status?: Database["public"]["Enums"]["nudge_status"]
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -280,6 +325,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      assessment_edition: "standard" | "transformational"
       assessment_timepoint: "pre" | "mid" | "end"
       goal_status: "planned" | "in_progress" | "completed"
       leadership_classification:
@@ -287,6 +333,8 @@ export type Database = {
         | "Developing"
         | "Emerging"
         | "Transformational"
+      nudge_frequency: "daily" | "weekly"
+      nudge_status: "scheduled" | "sent" | "snoozed" | "completed"
       user_role: "student" | "coach" | "admin"
     }
     CompositeTypes: {
@@ -415,6 +463,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      assessment_edition: ["standard", "transformational"],
       assessment_timepoint: ["pre", "mid", "end"],
       goal_status: ["planned", "in_progress", "completed"],
       leadership_classification: [
@@ -423,6 +472,8 @@ export const Constants = {
         "Emerging",
         "Transformational",
       ],
+      nudge_frequency: ["daily", "weekly"],
+      nudge_status: ["scheduled", "sent", "snoozed", "completed"],
       user_role: ["student", "coach", "admin"],
     },
   },

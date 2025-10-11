@@ -150,10 +150,10 @@ const Results = () => {
 
       if (existingPlan) {
         // Append to existing goals
-        const currentGoals = (existingPlan.goals as any[]) || [];
+        const currentGoals = (existingPlan.goals as unknown as any[]) || [];
         const { error } = await supabase
           .from("growth_plans")
-          .update({ goals: [...currentGoals, newGoal] })
+          .update({ goals: [...currentGoals, newGoal] as unknown as any })
           .eq("id", existingPlan.id);
         
         if (error) throw error;
@@ -164,7 +164,7 @@ const Results = () => {
           .insert({
             user_id: user.id,
             semester_label: assessment.semester_label,
-            goals: [newGoal],
+            goals: [newGoal] as unknown as any,
           });
         
         if (error) throw error;

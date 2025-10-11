@@ -39,6 +39,16 @@ All colors MUST be HSL.
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
+    /* Classification colors */
+    --foundational: 0 67% 70%;
+    --foundational-foreground: 0 67% 31%;
+    --developing: 35 100% 76%;
+    --developing-foreground: 35 100% 47%;
+    --emerging: 210 100% 90%;
+    --emerging-foreground: 210 79% 46%;
+    --transformational: 48 100% 93%;
+    --transformational-foreground: 43 100% 35%;
+
     --border: 215 20% 88%;
     --input: 215 20% 88%;
     --ring: 215 85% 25%;

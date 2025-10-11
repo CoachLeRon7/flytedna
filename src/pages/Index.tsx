@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Target, TrendingUp, Users, Award, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-leadership.jpg";
+import logo from "@/assets/flyte-academy-logo.png";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -37,6 +38,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      {/* Navigation */}
+      <nav className="absolute top-0 left-0 right-0 z-20 bg-background/80 backdrop-blur-sm border-b border-border">
+        <div className="container mx-auto px-4 py-4">
+          <img src={logo} alt="FLY.TE Academy Logo" className="h-16 w-auto" />
+        </div>
+      </nav>
+
       {/* Hero Section */}
       <section className="relative h-[600px] flex items-center justify-center overflow-hidden">
         <div 
@@ -177,7 +185,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="bg-background border-t border-border py-8">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>&copy; 2025 FLDI Leadership Platform. All rights reserved.</p>
+          <p>&copy; 2025 FLY.TE Academy. All rights reserved.</p>
         </div>
       </footer>
     </div>

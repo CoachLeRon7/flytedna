@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { User } from "@supabase/supabase-js";
 import { FileText, TrendingUp, Target, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import logo from "@/assets/flyte-academy-logo.png";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -64,9 +65,7 @@ const Dashboard = () => {
       {/* Header */}
       <header className="bg-background border-b border-border">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-            FLDI Dashboard
-          </h1>
+          <img src={logo} alt="FLY.TE Academy Logo" className="h-12 w-auto" />
           <Button variant="outline" onClick={handleSignOut}>
             <LogOut className="mr-2 h-4 w-4" />
             Sign Out

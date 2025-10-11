@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import logo from "@/assets/flyte-academy-logo.png";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -99,10 +100,10 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
       <Card className="w-full max-w-md shadow-elegant">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-3xl font-bold text-center bg-gradient-hero bg-clip-text text-transparent">
-            FLDI Platform
-          </CardTitle>
+        <CardHeader className="space-y-4">
+          <div className="flex justify-center">
+            <img src={logo} alt="FLY.TE Academy Logo" className="h-24 w-auto" />
+          </div>
           <CardDescription className="text-center">
             Sign in to your account or create a new one
           </CardDescription>

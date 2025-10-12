@@ -138,7 +138,7 @@ export default function CoachDashboard() {
 
       // Load all profiles (will filter by team later)
       const { data: profilesData, error: profilesError } = await supabase
-        .from("profiles")
+        .from("profiles_secure")
         .select("*");
 
       if (profilesError) throw profilesError;

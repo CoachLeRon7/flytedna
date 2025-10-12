@@ -182,6 +182,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "assessments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_secure"
+            referencedColumns: ["id"]
+          },
         ]
       }
       growth_plans: {
@@ -215,6 +222,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "growth_plans_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_secure"
             referencedColumns: ["id"]
           },
         ]
@@ -343,7 +357,50 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_secure: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          first_name: string | null
+          id: string | null
+          last_name: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
+          sport: string | null
+          team_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: never
+          first_name?: string | null
+          id?: string | null
+          last_name?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          sport?: string | null
+          team_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: never
+          first_name?: string | null
+          id?: string | null
+          last_name?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          sport?: string | null
+          team_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_profiles_team"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       are_teammates: {
@@ -364,6 +421,14 @@ export type Database = {
       is_coach_for_team: {
         Args: { _coach_id: string; _team_id: string }
         Returns: boolean
+      }
+      mask_email: {
+        Args: {
+          profile_email: string
+          profile_id: string
+          profile_team_id: string
+        }
+        Returns: string
       }
     }
     Enums: {

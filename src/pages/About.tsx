@@ -175,11 +175,12 @@ const About = () => {
               {steps.map((step, index) => {
                 const bgColors = ['bg-primary', 'bg-accent', 'bg-success', 'bg-student-accent'];
                 const borderColors = ['border-primary/20', 'border-accent/20', 'border-success/20', 'border-student-accent/20'];
+                const textColors = ['text-primary-foreground', 'text-accent-foreground', 'text-success-foreground', 'text-white'];
                 return (
                   <Card key={index} className={`shadow-card hover:shadow-elegant transition-all duration-300 border-l-4 ${borderColors[index % borderColors.length]}`}>
                     <CardHeader>
                       <div className="flex items-start gap-4">
-                        <div className={`w-14 h-14 rounded-full ${bgColors[index % bgColors.length]} text-white flex items-center justify-center text-2xl font-bold flex-shrink-0 shadow-lg`}>
+                        <div className={`w-14 h-14 rounded-full ${bgColors[index % bgColors.length]} ${textColors[index % textColors.length]} flex items-center justify-center text-2xl font-bold flex-shrink-0 shadow-lg`}>
                           {step.number}
                         </div>
                         <div>

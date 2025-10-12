@@ -29,8 +29,20 @@ const Dashboard = () => {
       if (!session) {
         navigate("/auth");
       } else {
+        // Get actual role from server-side user_roles table
+        const { data: roleData, error: roleError } = await supabase.rpc('get_user_role', {
+          _user_id: session.user.id
+        });
+        
+        if (roleError) {
+          console.error("Error fetching user role:", roleError);
+          setLoading(false);
+          return;
+        }
+        
+        const role = roleData || "student";
+        
         // Redirect coaches and admins to appropriate dashboard
-        const role = session.user?.user_metadata?.role || "student";
         if (role === "coach") {
           navigate("/coach");
           return;
@@ -53,7 +65,13 @@ const Dashboard = () => {
         if (!session) {
           navigate("/auth");
         } else {
-          const role = session.user?.user_metadata?.role || "student";
+          // Get actual role from server-side user_roles table
+          const { data: roleData } = await supabase.rpc('get_user_role', {
+            _user_id: session.user.id
+          });
+          
+          const role = roleData || "student";
+          
           if (role === "coach") {
             navigate("/coach");
           } else if (role === "admin") {

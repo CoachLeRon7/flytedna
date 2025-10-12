@@ -83,38 +83,36 @@ export default function CoachDashboard() {
 
   const checkRoleAndLoadData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate("/auth");
-        return;
-      }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
 
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single();
+    const { data: role, error: roleError } = await supabase.rpc('get_user_role', {
+      _user_id: user.id
+    });
 
-      if (profileError || !profile) {
-        toast({
-          title: "Error",
-          description: "Failed to load profile",
-          variant: "destructive",
-        });
-        return;
-      }
+    if (roleError || !role) {
+      toast({
+        title: "Error",
+        description: "Failed to verify permissions",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      if (profile.role !== "coach" && profile.role !== "admin") {
-        toast({
-          title: "Access Denied",
-          description: "This page is only accessible to coaches and admins",
-          variant: "destructive",
-        });
-        navigate("/");
-        return;
-      }
+    if (role !== "coach" && role !== "admin") {
+      toast({
+        title: "Access Denied",
+        description: "This page is only accessible to coaches and admins",
+        variant: "destructive",
+      });
+      navigate("/");
+      return;
+    }
 
-      setUserRole(profile.role);
+    setUserRole(role);
       await loadTeamsAndData(user.id);
     } catch (error) {
       console.error("Error checking role:", error);

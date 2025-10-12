@@ -31,27 +31,26 @@ export default function AdminDashboard() {
 
   const checkAccessAndLoadData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate("/auth");
-        return;
-      }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single();
+    const { data: isAdmin, error: roleError } = await supabase.rpc('has_role', {
+      _user_id: user.id,
+      _role: 'admin'
+    });
 
-      if (profile?.role !== "admin") {
-        toast({
-          title: "Access Denied",
-          description: "This page is only accessible to administrators",
-          variant: "destructive",
-        });
-        navigate("/");
-        return;
-      }
+    if (roleError || !isAdmin) {
+      toast({
+        title: "Access Denied",
+        description: "This page is only accessible to administrators",
+        variant: "destructive",
+      });
+      navigate("/");
+      return;
+    }
 
       await loadDashboardData();
     } catch (error) {
@@ -71,8 +70,19 @@ export default function AdminDashboard() {
     const { data: teams } = await supabase.from("teams").select("*");
     const { data: assessments } = await supabase.from("assessments").select("*");
 
-    const totalAthletes = profiles?.filter(p => p.role === "student").length || 0;
-    const totalCoaches = profiles?.filter(p => p.role === "coach").length || 0;
+    // Count roles using user_roles table
+    const { data: studentRoles } = await supabase
+      .from("user_roles")
+      .select("user_id", { count: "exact" })
+      .eq("role", "student");
+    
+    const { data: coachRoles } = await supabase
+      .from("user_roles")
+      .select("user_id", { count: "exact" })
+      .eq("role", "coach");
+
+    const totalAthletes = studentRoles?.length || 0;
+    const totalCoaches = coachRoles?.length || 0;
     const totalTeams = teams?.length || 0;
 
     const avgComposite = assessments?.length

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Target, TrendingUp, Users, Award, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import heroImage from "@/assets/hero-leadership.jpg";
+import heroImage from "@/assets/hero-leadership.webp";
 import logo from "@/assets/flyte-academy-logo-optimized.webp";
 
 const Index = () => {

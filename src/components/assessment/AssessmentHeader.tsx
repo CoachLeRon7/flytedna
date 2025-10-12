@@ -7,7 +7,7 @@ export const AssessmentHeader = () => {
         <div className="flex items-center justify-between">
           <img src={logo} alt="FLY.TE Academy" className="h-32 w-auto" />
           <div className="text-right">
-            <h1 className="text-xl font-bold text-foreground font-cooper">
+            <h1 className="text-3xl font-bold text-foreground font-cooper">
               FLDI – Transformational Edition
             </h1>
             <p className="text-sm text-muted-foreground mt-1">

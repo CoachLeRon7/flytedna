@@ -346,6 +346,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      are_teammates: {
+        Args: { _user_id1: string; _user_id2: string }
+        Returns: boolean
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
@@ -355,6 +359,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["user_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_coach_for_team: {
+        Args: { _coach_id: string; _team_id: string }
         Returns: boolean
       }
     }

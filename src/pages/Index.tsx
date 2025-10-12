@@ -74,6 +74,7 @@ const Index = () => {
               size="lg" 
               variant="secondary"
               className="bg-background/20 backdrop-blur-sm text-primary-foreground border-primary-foreground/30 hover:bg-background/30"
+              onClick={() => navigate("/about")}
             >
               Learn More
             </Button>

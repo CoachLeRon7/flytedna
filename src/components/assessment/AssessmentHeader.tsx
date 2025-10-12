@@ -1,4 +1,4 @@
-import logo from "@/assets/flyte-academy-logo-optimized.webp";
+import logo from "@/assets/flyte-academy-logo.png";
 
 export const AssessmentHeader = () => {
   return (

@@ -173,9 +173,9 @@ const About = () => {
 
             <div className="space-y-6 mb-12">
               {steps.map((step, index) => {
-                const bgColors = ['bg-primary', 'bg-accent', 'bg-success', 'bg-student-accent'];
-                const borderColors = ['border-primary/20', 'border-accent/20', 'border-success/20', 'border-student-accent/20'];
-                const textColors = ['text-primary-foreground', 'text-accent-foreground', 'text-success-foreground', 'text-white'];
+                const bgColors = ['bg-primary', 'bg-accent', 'bg-success', 'bg-light-red'];
+                const borderColors = ['border-primary/20', 'border-accent/20', 'border-success/20', 'border-light-red/20'];
+                const textColors = ['text-primary-foreground', 'text-accent-foreground', 'text-success-foreground', 'text-light-red-foreground'];
                 return (
                   <Card key={index} className={`shadow-card hover:shadow-elegant transition-all duration-300 border-l-4 ${borderColors[index % borderColors.length]}`}>
                     <CardHeader>

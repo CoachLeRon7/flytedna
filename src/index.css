@@ -39,6 +39,10 @@ All colors MUST be HSL.
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
+    /* Light red for highlights */
+    --light-red: 0 70% 88%;
+    --light-red-foreground: 0 70% 30%;
+
     /* Classification colors */
     --foundational: 0 67% 70%;
     --foundational-foreground: 0 67% 31%;
@@ -118,6 +122,9 @@ All colors MUST be HSL.
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
+
+    --light-red: 0 70% 88%;
+    --light-red-foreground: 0 70% 30%;
 
     --border: 215 25% 20%;
     --input: 215 25% 20%;

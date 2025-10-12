@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { getUserFriendlyError } from "@/lib/errorHandling";
 
 interface RoleRequest {
   id: string;
@@ -84,9 +85,10 @@ export function RoleRequestsManager() {
         setRequests([]);
       }
     } catch (error: any) {
+      console.error('Error loading role requests:', error);
       toast({
         title: "Error",
-        description: "Failed to load role requests",
+        description: "Failed to load role requests. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -113,7 +115,7 @@ export function RoleRequestsManager() {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: "destructive",
       });
     } finally {
@@ -151,7 +153,7 @@ export function RoleRequestsManager() {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: "destructive",
       });
     } finally {

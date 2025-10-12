@@ -10,6 +10,27 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import logo from "@/assets/flyte-academy-logo.png";
+import { z } from "zod";
+import { getUserFriendlyError } from "@/lib/errorHandling";
+
+// Validation schemas
+const signInSchema = z.object({
+  email: z.string().email("Invalid email format").max(255, "Email must be less than 255 characters"),
+  password: z.string().min(1, "Password is required"),
+});
+
+const signUpSchema = z.object({
+  email: z.string().email("Invalid email format").max(255, "Email must be less than 255 characters"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number"),
+  firstName: z.string().trim().min(1, "First name is required").max(100, "First name must be less than 100 characters"),
+  lastName: z.string().trim().min(1, "Last name is required").max(100, "Last name must be less than 100 characters"),
+  role: z.enum(["student", "coach", "admin"]),
+  sport: z.string().trim().max(100, "Sport must be less than 100 characters").optional(),
+});
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -35,16 +56,29 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // Validate input
+      const validationResult = signUpSchema.safeParse(signUpData);
+      if (!validationResult.success) {
+        const firstError = validationResult.error.issues[0];
+        toast({
+          title: "Validation Error",
+          description: firstError.message,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.auth.signUp({
-        email: signUpData.email,
+        email: signUpData.email.trim(),
         password: signUpData.password,
         options: {
           emailRedirectTo: `${window.location.origin}/dashboard`,
           data: {
-            first_name: signUpData.firstName,
-            last_name: signUpData.lastName,
+            first_name: signUpData.firstName.trim(),
+            last_name: signUpData.lastName.trim(),
             role: signUpData.role,
-            sport: signUpData.sport,
+            sport: signUpData.sport?.trim() || null,
           },
         },
       });
@@ -64,7 +98,7 @@ const Auth = () => {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: "destructive",
       });
     } finally {
@@ -77,8 +111,21 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // Validate input
+      const validationResult = signInSchema.safeParse(signInData);
+      if (!validationResult.success) {
+        const firstError = validationResult.error.issues[0];
+        toast({
+          title: "Validation Error",
+          description: firstError.message,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: signInData.email,
+        email: signInData.email.trim(),
         password: signInData.password,
       });
 
@@ -93,7 +140,7 @@ const Auth = () => {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: "destructive",
       });
     } finally {
@@ -196,8 +243,11 @@ const Auth = () => {
                     value={signUpData.password}
                     onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })}
                     required
-                    minLength={6}
+                    minLength={8}
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Must be at least 8 characters with uppercase, lowercase, and number
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="role">I am a...</Label>

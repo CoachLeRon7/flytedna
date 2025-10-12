@@ -14,6 +14,7 @@ import { ReviewSection } from "@/components/assessment/ReviewSection";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Save } from "lucide-react";
 import { Form } from "@/components/ui/form";
+import { getUserFriendlyError } from "@/lib/errorHandling";
 
 const assessmentSchema = z.object({
   semester_label: z.string().min(1, "Semester label is required"),
@@ -209,11 +210,11 @@ const Assessment = () => {
       });
 
       navigate(`/results?assessment_id=${assessment.id}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting assessment:", error);
       toast({
         title: "Submission Error",
-        description: "Failed to save your assessment. Please try again.",
+        description: getUserFriendlyError(error),
         variant: "destructive",
       });
     } finally {

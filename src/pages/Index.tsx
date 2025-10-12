@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Target, TrendingUp, Users, Award, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-leadership.webp";
-import logo from "@/assets/flyte-academy-logo.png";
+import logo from "@/assets/flyte-academy-logo-optimized.webp";
 
 const Index = () => {
   const navigate = useNavigate();

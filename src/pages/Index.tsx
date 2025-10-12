@@ -41,7 +41,7 @@ const Index = () => {
       {/* Navigation */}
       <nav className="absolute top-0 left-0 right-0 z-20 bg-background/80 backdrop-blur-sm border-b border-border">
         <div className="container mx-auto px-4 py-4">
-          <img src={logo} alt="FLY.TE Academy Logo" className="h-16 w-auto" />
+          <img src={logo} alt="FLY.TE Academy Logo" className="h-24 w-auto" />
         </div>
       </nav>
 

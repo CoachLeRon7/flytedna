@@ -65,7 +65,7 @@ const Dashboard = () => {
       {/* Header */}
       <header className="bg-background border-b border-border">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <img src={logo} alt="FLY.TE Academy Logo" className="h-20 w-auto" />
+          <img src={logo} alt="FLY.TE Academy Logo" className="h-60 w-auto" />
           <Button variant="outline" onClick={handleSignOut}>
             <LogOut className="mr-2 h-4 w-4" />
             Sign Out

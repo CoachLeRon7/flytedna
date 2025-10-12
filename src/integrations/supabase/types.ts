@@ -266,6 +266,39 @@ export type Database = {
         }
         Relationships: []
       }
+      pending_role_requests: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string | null
+          requested_role: Database["public"]["Enums"]["user_role"]
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason?: string | null
+          requested_role: Database["public"]["Enums"]["user_role"]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string | null
+          requested_role?: Database["public"]["Enums"]["user_role"]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -429,6 +462,14 @@ export type Database = {
           profile_team_id: string
         }
         Returns: string
+      }
+      process_role_request: {
+        Args: {
+          approve: boolean
+          rejection_reason?: string
+          request_id: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

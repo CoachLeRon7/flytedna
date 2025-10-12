@@ -51,9 +51,13 @@ const Auth = () => {
 
       if (error) throw error;
 
+      const roleMessage = signUpData.role === 'student' 
+        ? "Welcome to FLDI. Redirecting to your dashboard..."
+        : `Account created! Your ${signUpData.role} role request is pending administrator approval. You'll have student access until approved.`;
+      
       toast({
         title: "Account created!",
-        description: "Welcome to FLDI. Redirecting to your dashboard...",
+        description: roleMessage,
       });
 
       navigate("/dashboard");

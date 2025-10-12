@@ -10,6 +10,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { useToast } from "@/hooks/use-toast";
 import { Compass, Users, TrendingUp, Download, Settings, Shield, MessageSquare, LogOut } from "lucide-react";
 import logo from "@/assets/flyte-academy-logo.png";
+import { RoleRequestsManager } from "@/components/admin/RoleRequestsManager";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -216,6 +217,8 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="management" className="space-y-6">
+            <RoleRequestsManager />
+            
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -224,10 +227,6 @@ export default function AdminDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Button className="w-full justify-start" variant="outline">
-                  <Users className="mr-2 h-4 w-4" />
-                  Manage Users & Roles
-                </Button>
                 <Button className="w-full justify-start" variant="outline">
                   <Settings className="mr-2 h-4 w-4" />
                   Configure Teams & Assignments

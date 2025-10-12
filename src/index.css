@@ -49,6 +49,14 @@ All colors MUST be HSL.
     --transformational: 48 100% 93%;
     --transformational-foreground: 43 100% 35%;
 
+    /* Role-specific accent colors */
+    --student-accent: 355 75% 48%;
+    --student-accent-foreground: 0 0% 100%;
+    --coach-accent: 43 90% 55%;
+    --coach-accent-foreground: 43 100% 15%;
+    --admin-accent: 215 85% 25%;
+    --admin-accent-foreground: 0 0% 100%;
+
     --border: 215 20% 88%;
     --input: 215 20% 88%;
     --ring: 215 85% 25%;

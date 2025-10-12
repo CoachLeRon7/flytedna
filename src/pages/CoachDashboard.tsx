@@ -5,9 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import { AthleteDetailDrawer } from "@/components/coach/AthleteDetailDrawer";
+import { Target, LogOut, AlertTriangle } from "lucide-react";
+import logo from "@/assets/flyte-academy-logo.png";
 
 interface Assessment {
   id: string;
@@ -277,6 +280,16 @@ export default function CoachDashboard() {
     };
   });
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
+
+  // Calculate watchlist (low discipline/accountability)
+  const watchlist = athleteRows.filter(
+    row => row.discipline < 3.0 || row.accountability < 3.0
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -286,8 +299,30 @@ export default function CoachDashboard() {
   }
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
-      <h1 className="text-4xl font-bold">Coach Dashboard</h1>
+    <div className="min-h-screen bg-muted/30">
+      {/* Header with Coach Branding */}
+      <header className="bg-[hsl(var(--coach-accent))] border-b">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <img src={logo} alt="FLY.TE Academy Logo" className="h-12 w-auto" />
+            <div className="flex items-center gap-2 text-[hsl(var(--coach-accent-foreground))]">
+              <Target className="h-5 w-5" />
+              <span className="text-lg font-semibold">Coach</span>
+              <Badge variant="secondary" className="ml-2">Build Better Leaders</Badge>
+            </div>
+          </div>
+          <Button variant="outline" onClick={handleSignOut}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Sign Out
+          </Button>
+        </div>
+      </header>
+
+      <div className="container mx-auto py-8 space-y-6">
+        <div>
+          <h1 className="text-4xl font-bold mb-2">Team Overview</h1>
+          <p className="text-muted-foreground">Monitor athlete development and provide guidance</p>
+        </div>
 
       {/* Filters */}
       <Card>
@@ -344,7 +379,7 @@ export default function CoachDashboard() {
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="border-l-4 border-l-[hsl(var(--coach-accent))]">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Total Athletes</CardTitle>
           </CardHeader>
@@ -358,18 +393,31 @@ export default function CoachDashboard() {
             <CardTitle className="text-sm font-medium">Average Composite</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{avgComposite}</div>
+            <div className="text-3xl font-bold text-[hsl(var(--coach-accent))]">{avgComposite}</div>
           </CardContent>
         </Card>
 
-        <Card className="md:col-span-2">
+        <Card className={watchlist.length > 0 ? "border-l-4 border-l-destructive" : ""}>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-destructive" />
+              Watchlist
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-destructive">{watchlist.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">Athletes needing attention</p>
+          </CardContent>
+        </Card>
+
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Classification Breakdown</CardTitle>
           </CardHeader>
-          <CardContent className="flex gap-2 flex-wrap">
+          <CardContent className="flex gap-1 flex-wrap">
             {["Foundational", "Developing", "Emerging", "Transformational"].map((cls) => (
-              <Badge key={cls} className={getClassificationColor(cls)}>
-                {cls}: {classificationCounts[cls] || 0}
+              <Badge key={cls} className={`text-xs ${getClassificationColor(cls)}`}>
+                {cls.slice(0, 1)}: {classificationCounts[cls] || 0}
               </Badge>
             ))}
           </CardContent>
@@ -467,6 +515,7 @@ export default function CoachDashboard() {
           onClose={() => setSelectedAthlete(null)}
         />
       )}
+      </div>
     </div>
   );
 }

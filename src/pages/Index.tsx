@@ -41,7 +41,7 @@ const Index = () => {
       {/* Navigation */}
       <nav className="absolute top-0 left-0 right-0 z-20 bg-background/80 backdrop-blur-sm border-b border-border">
         <div className="container mx-auto px-4 py-4">
-          <img src={logo} alt="FLY.TE Academy Logo" className="h-24 w-auto" />
+          {/* Logo removed - now in hero */}
         </div>
       </nav>
 
@@ -55,6 +55,7 @@ const Index = () => {
         </div>
         
         <div className="relative z-10 container mx-auto px-4 text-center">
+          <img src={logo} alt="FLY.TE Academy Logo" className="h-72 w-auto mx-auto mb-8 animate-fade-in" />
           <h1 className="text-5xl md:text-6xl font-bold text-primary-foreground mb-6 animate-fade-in">
             Five Leadership Domains
           </h1>

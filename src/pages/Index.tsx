@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Target, TrendingUp, Users, Award, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-leadership.jpg";
-import logo from "@/assets/flyte-academy-logo.png";
+import logo from "@/assets/flyte-academy-logo-optimized.webp";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -55,7 +55,7 @@ const Index = () => {
         </div>
         
         <div className="relative z-10 container mx-auto px-4 text-center">
-          <img src={logo} alt="FLY.TE Academy Logo" className="h-72 w-auto mx-auto mb-8 animate-fade-in" />
+          <img src={logo} alt="FLY.TE Academy Logo" width="288" height="288" className="h-72 w-auto mx-auto mb-8 animate-fade-in" />
           <h1 className="text-5xl md:text-6xl font-bold text-primary-foreground mb-6 animate-fade-in">
             Five Leadership Domains
           </h1>

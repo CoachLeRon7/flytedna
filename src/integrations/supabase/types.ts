@@ -306,7 +306,6 @@ export type Database = {
           first_name: string
           id: string
           last_name: string
-          role: Database["public"]["Enums"]["user_role"]
           sport: string | null
           team_id: string | null
           updated_at: string
@@ -317,7 +316,6 @@ export type Database = {
           first_name: string
           id: string
           last_name: string
-          role?: Database["public"]["Enums"]["user_role"]
           sport?: string | null
           team_id?: string | null
           updated_at?: string
@@ -328,7 +326,6 @@ export type Database = {
           first_name?: string
           id?: string
           last_name?: string
-          role?: Database["public"]["Enums"]["user_role"]
           sport?: string | null
           team_id?: string | null
           updated_at?: string
@@ -397,7 +394,6 @@ export type Database = {
           first_name: string | null
           id: string | null
           last_name: string | null
-          role: Database["public"]["Enums"]["user_role"] | null
           sport: string | null
           team_id: string | null
           updated_at: string | null
@@ -408,7 +404,6 @@ export type Database = {
           first_name?: string | null
           id?: string | null
           last_name?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
           sport?: string | null
           team_id?: string | null
           updated_at?: string | null
@@ -419,7 +414,6 @@ export type Database = {
           first_name?: string | null
           id?: string | null
           last_name?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
           sport?: string | null
           team_id?: string | null
           updated_at?: string | null

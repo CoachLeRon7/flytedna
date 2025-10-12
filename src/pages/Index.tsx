@@ -47,12 +47,13 @@ const Index = () => {
 
       {/* Hero Section */}
       <section className="relative h-[600px] flex items-center justify-center overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${heroImage})` }}
-        >
-          <div className="absolute inset-0 bg-gradient-hero opacity-90" />
-        </div>
+        <img 
+          src={heroImage} 
+          alt="Leadership background" 
+          className="absolute inset-0 w-full h-full object-cover"
+          fetchPriority="high"
+        />
+        <div className="absolute inset-0 bg-gradient-hero opacity-90" />
         
         <div className="relative z-10 container mx-auto px-4 text-center">
           <img src={logo} alt="FLY.TE Academy Logo" width="288" height="288" className="h-72 w-auto mx-auto mb-8 animate-fade-in" />

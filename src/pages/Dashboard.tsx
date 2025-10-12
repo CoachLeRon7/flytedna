@@ -22,6 +22,12 @@ const Dashboard = () => {
       
       if (!session) {
         navigate("/auth");
+      } else {
+        // Redirect coaches and admins to coach dashboard
+        const role = session.user?.user_metadata?.role || "student";
+        if (role === "coach" || role === "admin") {
+          navigate("/coach");
+        }
       }
     });
 
@@ -32,6 +38,12 @@ const Dashboard = () => {
         
         if (!session) {
           navigate("/auth");
+        } else {
+          // Redirect coaches and admins to coach dashboard
+          const role = session.user?.user_metadata?.role || "student";
+          if (role === "coach" || role === "admin") {
+            navigate("/coach");
+          }
         }
       }
     );
@@ -58,19 +70,6 @@ const Dashboard = () => {
 
   const userMetadata = user?.user_metadata;
   const firstName = userMetadata?.first_name || "Student";
-  const role = userMetadata?.role || "student";
-
-  // Redirect coaches and admins to coach dashboard
-  useEffect(() => {
-    if (role === "coach" || role === "admin") {
-      navigate("/coach");
-    }
-  }, [role, navigate]);
-
-  // Don't render student dashboard for coaches/admins
-  if (role === "coach" || role === "admin") {
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-muted/30">

@@ -63,6 +63,7 @@ export type Database = {
           reflections: Json | null
           risk_flags: string[] | null
           semester_label: string
+          share_reflections: boolean | null
           timepoint: Database["public"]["Enums"]["assessment_timepoint"]
           updated_at: string
           user_id: string
@@ -115,6 +116,7 @@ export type Database = {
           reflections?: Json | null
           risk_flags?: string[] | null
           semester_label: string
+          share_reflections?: boolean | null
           timepoint: Database["public"]["Enums"]["assessment_timepoint"]
           updated_at?: string
           user_id: string
@@ -167,6 +169,7 @@ export type Database = {
           reflections?: Json | null
           risk_flags?: string[] | null
           semester_label?: string
+          share_reflections?: boolean | null
           timepoint?: Database["public"]["Enums"]["assessment_timepoint"]
           updated_at?: string
           user_id?: string

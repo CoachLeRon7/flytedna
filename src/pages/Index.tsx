@@ -66,7 +66,7 @@ const Index = () => {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button 
               size="lg" 
-              className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-elegant w-full sm:w-auto"
+              className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-elegant w-full sm:w-auto px-8"
               onClick={() => navigate("/auth")}
             >
               Get Started <ArrowRight className="ml-2 h-5 w-5" />
@@ -74,7 +74,7 @@ const Index = () => {
             <Button 
               size="lg" 
               variant="secondary"
-              className="bg-background/20 backdrop-blur-sm text-primary-foreground border border-primary-foreground/30 hover:bg-background/30 w-full sm:w-auto"
+              className="bg-background/20 backdrop-blur-sm text-primary-foreground border border-primary-foreground/30 hover:bg-background/30 w-full sm:w-auto px-8"
               onClick={() => navigate("/about")}
             >
               Learn More

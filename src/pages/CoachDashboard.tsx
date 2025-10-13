@@ -10,6 +10,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { useToast } from "@/hooks/use-toast";
 import { AthleteDetailDrawer } from "@/components/coach/AthleteDetailDrawer";
 import { TeamColorCustomizer } from "@/components/coach/TeamColorCustomizer";
+import { NotificationBell } from "@/components/NotificationBell";
 import { Target, LogOut, AlertTriangle, ClipboardCheck, Bell } from "lucide-react";
 import logo from "@/assets/flyte-academy-logo.png";
 
@@ -310,10 +311,13 @@ export default function CoachDashboard() {
               <Badge variant="secondary" className="ml-2">Build Better Leaders</Badge>
             </div>
           </div>
-          <Button variant="outline" onClick={handleSignOut}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <Button variant="outline" onClick={handleSignOut}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 

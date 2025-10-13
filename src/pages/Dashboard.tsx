@@ -12,6 +12,7 @@ import { LeadershipSnapshot } from "@/components/student/LeadershipSnapshot";
 import { NudgesList } from "@/components/student/NudgesList";
 import { PeerAssessmentPrompt } from "@/components/student/PeerAssessmentPrompt";
 import { TeamSelector } from "@/components/student/TeamSelector";
+import { NotificationBell } from "@/components/NotificationBell";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -157,10 +158,13 @@ const Dashboard = () => {
               <Badge variant="secondary" className="ml-2 bg-white/20 text-white border-white/40">Own Your Growth</Badge>
             </div>
           </div>
-          <Button variant="outline" onClick={handleSignOut} className="bg-white/10 text-white border-white/20 hover:bg-white/20">
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <Button variant="outline" onClick={handleSignOut} className="bg-white/10 text-white border-white/20 hover:bg-white/20">
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 

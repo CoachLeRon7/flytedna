@@ -12,12 +12,15 @@ import { Compass, Users, TrendingUp, Download, Settings, Shield, MessageSquare, 
 import logo from "@/assets/flyte-academy-logo.png";
 import { RoleRequestsManager } from "@/components/admin/RoleRequestsManager";
 import { TeamManagementDialog } from "@/components/admin/TeamManagementDialog";
+import { AnnouncementDialog } from "@/components/admin/AnnouncementDialog";
+import { NotificationBell } from "@/components/NotificationBell";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [teamManagementOpen, setTeamManagementOpen] = useState(false);
+  const [announcementOpen, setAnnouncementOpen] = useState(false);
   const [stats, setStats] = useState({
     totalAthletes: 0,
     totalCoaches: 0,
@@ -135,10 +138,13 @@ export default function AdminDashboard() {
               <Badge variant="secondary" className="ml-2">Empower the Mission</Badge>
             </div>
           </div>
-          <Button variant="outline" onClick={handleSignOut} className="bg-white/10 text-white border-white/20 hover:bg-white/20">
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <Button variant="outline" onClick={handleSignOut} className="bg-white/10 text-white border-white/20 hover:bg-white/20">
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -247,7 +253,11 @@ export default function AdminDashboard() {
                   <Settings className="mr-2 h-4 w-4" />
                   Configure Teams & Assignments
                 </Button>
-                <Button className="w-full justify-start" variant="outline">
+                <Button 
+                  className="w-full justify-start" 
+                  variant="outline"
+                  onClick={() => setAnnouncementOpen(true)}
+                >
                   <MessageSquare className="mr-2 h-4 w-4" />
                   Send Program Announcements
                 </Button>
@@ -288,6 +298,11 @@ export default function AdminDashboard() {
       <TeamManagementDialog 
         open={teamManagementOpen} 
         onOpenChange={setTeamManagementOpen}
+      />
+      
+      <AnnouncementDialog 
+        open={announcementOpen} 
+        onOpenChange={setAnnouncementOpen}
       />
     </div>
   );

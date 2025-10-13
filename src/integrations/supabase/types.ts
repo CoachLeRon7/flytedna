@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          created_by: string
+          email_sent: boolean | null
+          id: string
+          message: string
+          recipients_count: number | null
+          sent_at: string
+          target_audience: string
+          title: string
+        }
+        Insert: {
+          created_by: string
+          email_sent?: boolean | null
+          id?: string
+          message: string
+          recipients_count?: number | null
+          sent_at?: string
+          target_audience: string
+          title: string
+        }
+        Update: {
+          created_by?: string
+          email_sent?: boolean | null
+          id?: string
+          message?: string
+          recipients_count?: number | null
+          sent_at?: string
+          target_audience?: string
+          title?: string
+        }
+        Relationships: []
+      }
       assessments: {
         Row: {
           a1: number | null
@@ -340,6 +373,44 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles_secure"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          announcement_id: string | null
+          created_at: string
+          id: string
+          message: string
+          read: boolean | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          announcement_id?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          announcement_id?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
             referencedColumns: ["id"]
           },
         ]

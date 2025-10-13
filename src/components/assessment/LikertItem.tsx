@@ -34,32 +34,33 @@ export const LikertItem = ({ form, name, question, questionNumber }: LikertItemP
             {questionNumber}. {question}
           </FormLabel>
           <FormControl>
-            <RadioGroup
-              onValueChange={(value) => field.onChange(Number(value))}
-              value={field.value?.toString()}
-              className="flex flex-col md:flex-row md:justify-between gap-3 mt-4"
-            >
-              {[1, 2, 3, 4, 5].map((value) => (
-                <FormItem
-                  key={value}
-                  className="flex flex-col items-center space-y-2 space-x-0"
-                >
-                  <FormControl>
-                    <RadioGroupItem value={value.toString()} />
-                  </FormControl>
-                  <FormLabel className="text-xs text-muted-foreground font-normal text-center cursor-pointer">
-                    {value}
-                    <br />
-                    <span className="hidden md:inline">{LIKERT_LABELS[value - 1]}</span>
-                  </FormLabel>
-                </FormItem>
-              ))}
-            </RadioGroup>
+            <div className="space-y-3">
+              <div className="flex justify-between text-xs text-muted-foreground px-1">
+                <span className="font-medium">Strongly Disagree</span>
+                <span className="font-medium">Strongly Agree</span>
+              </div>
+              <RadioGroup
+                onValueChange={(value) => field.onChange(Number(value))}
+                value={field.value?.toString()}
+                className="grid grid-cols-5 gap-2"
+              >
+                {[1, 2, 3, 4, 5].map((value) => (
+                  <FormItem
+                    key={value}
+                    className="flex flex-col items-center space-y-2 space-x-0"
+                  >
+                    <FormControl>
+                      <RadioGroupItem value={value.toString()} className="h-5 w-5" />
+                    </FormControl>
+                    <FormLabel className="text-xs text-center cursor-pointer leading-tight px-1">
+                      <span className="font-semibold block">{value}</span>
+                      <span className="text-muted-foreground text-[10px] block mt-1">{LIKERT_LABELS[value - 1]}</span>
+                    </FormLabel>
+                  </FormItem>
+                ))}
+              </RadioGroup>
+            </div>
           </FormControl>
-          <div className="md:hidden flex justify-between text-xs text-muted-foreground mt-2">
-            <span>Strongly Disagree</span>
-            <span>Strongly Agree</span>
-          </div>
           <FormMessage />
         </FormItem>
       )}

@@ -14,6 +14,7 @@ const Assessment = lazy(() => import("./pages/Assessment"));
 const Results = lazy(() => import("./pages/Results"));
 const GrowthPlan = lazy(() => import("./pages/GrowthPlan"));
 const CoachDashboard = lazy(() => import("./pages/CoachDashboard"));
+const CoachAssessment = lazy(() => import("./pages/CoachAssessment"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/results" element={<Results />} />
             <Route path="/growth-plan" element={<GrowthPlan />} />
             <Route path="/coach" element={<CoachDashboard />} />
+            <Route path="/coach/assess" element={<CoachAssessment />} />
             <Route path="/admin" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

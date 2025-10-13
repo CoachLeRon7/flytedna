@@ -191,6 +191,117 @@ export type Database = {
           },
         ]
       }
+      coach_assessments: {
+        Row: {
+          a1: number | null
+          a2: number | null
+          a3: number | null
+          accountability_mean: number | null
+          athlete_id: string
+          b1: number | null
+          b2: number | null
+          b3: number | null
+          belonging_mean: number | null
+          classification:
+            | Database["public"]["Enums"]["leadership_classification"]
+            | null
+          coach_id: string
+          composite_mean: number | null
+          created_at: string
+          d1: number | null
+          d2: number | null
+          d3: number | null
+          discipline_mean: number | null
+          e1: number | null
+          e2: number | null
+          e3: number | null
+          excellence_mean: number | null
+          id: string
+          l1: number | null
+          l2: number | null
+          l3: number | null
+          leadership_dna_mean: number | null
+          reflection_greatest_impact: string | null
+          reflection_growth_area: string | null
+          reflection_voluntary_followership: string | null
+          semester_label: string
+          timepoint: Database["public"]["Enums"]["assessment_timepoint"]
+          updated_at: string
+        }
+        Insert: {
+          a1?: number | null
+          a2?: number | null
+          a3?: number | null
+          accountability_mean?: number | null
+          athlete_id: string
+          b1?: number | null
+          b2?: number | null
+          b3?: number | null
+          belonging_mean?: number | null
+          classification?:
+            | Database["public"]["Enums"]["leadership_classification"]
+            | null
+          coach_id: string
+          composite_mean?: number | null
+          created_at?: string
+          d1?: number | null
+          d2?: number | null
+          d3?: number | null
+          discipline_mean?: number | null
+          e1?: number | null
+          e2?: number | null
+          e3?: number | null
+          excellence_mean?: number | null
+          id?: string
+          l1?: number | null
+          l2?: number | null
+          l3?: number | null
+          leadership_dna_mean?: number | null
+          reflection_greatest_impact?: string | null
+          reflection_growth_area?: string | null
+          reflection_voluntary_followership?: string | null
+          semester_label: string
+          timepoint: Database["public"]["Enums"]["assessment_timepoint"]
+          updated_at?: string
+        }
+        Update: {
+          a1?: number | null
+          a2?: number | null
+          a3?: number | null
+          accountability_mean?: number | null
+          athlete_id?: string
+          b1?: number | null
+          b2?: number | null
+          b3?: number | null
+          belonging_mean?: number | null
+          classification?:
+            | Database["public"]["Enums"]["leadership_classification"]
+            | null
+          coach_id?: string
+          composite_mean?: number | null
+          created_at?: string
+          d1?: number | null
+          d2?: number | null
+          d3?: number | null
+          discipline_mean?: number | null
+          e1?: number | null
+          e2?: number | null
+          e3?: number | null
+          excellence_mean?: number | null
+          id?: string
+          l1?: number | null
+          l2?: number | null
+          l3?: number | null
+          leadership_dna_mean?: number | null
+          reflection_greatest_impact?: string | null
+          reflection_growth_area?: string | null
+          reflection_voluntary_followership?: string | null
+          semester_label?: string
+          timepoint?: Database["public"]["Enums"]["assessment_timepoint"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       growth_plans: {
         Row: {
           created_at: string

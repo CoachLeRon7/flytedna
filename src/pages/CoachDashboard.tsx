@@ -477,25 +477,56 @@ export default function CoachDashboard() {
                 <TableHead>Discipline</TableHead>
                 <TableHead>Belonging</TableHead>
                 <TableHead>Classification</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {athleteRows.map((row) => (
                 <TableRow
                   key={row.userId}
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => setSelectedAthlete(row.userId)}
+                  className="hover:bg-muted/50"
                 >
-                  <TableCell className="font-medium">{row.name}</TableCell>
-                  <TableCell>{row.sport}</TableCell>
-                  <TableCell>{row.composite.toFixed(2)}</TableCell>
-                  <TableCell>{row.leadershipDna.toFixed(2)}</TableCell>
-                  <TableCell>{row.excellence.toFixed(2)}</TableCell>
-                  <TableCell>{row.accountability.toFixed(2)}</TableCell>
-                  <TableCell>{row.discipline.toFixed(2)}</TableCell>
-                  <TableCell>{row.belonging.toFixed(2)}</TableCell>
-                  <TableCell>
+                  <TableCell 
+                    className="font-medium cursor-pointer"
+                    onClick={() => setSelectedAthlete(row.userId)}
+                  >
+                    {row.name}
+                  </TableCell>
+                  <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
+                    {row.sport}
+                  </TableCell>
+                  <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
+                    {row.composite.toFixed(2)}
+                  </TableCell>
+                  <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
+                    {row.leadershipDna.toFixed(2)}
+                  </TableCell>
+                  <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
+                    {row.excellence.toFixed(2)}
+                  </TableCell>
+                  <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
+                    {row.accountability.toFixed(2)}
+                  </TableCell>
+                  <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
+                    {row.discipline.toFixed(2)}
+                  </TableCell>
+                  <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
+                    {row.belonging.toFixed(2)}
+                  </TableCell>
+                  <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
                     <Badge className={getClassificationColor(row.classification)}>{row.classification}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/coach/assess?athleteId=${row.userId}`);
+                      }}
+                    >
+                      Assess
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

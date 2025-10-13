@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Sheet,
@@ -9,8 +10,10 @@ import {
 } from "@/components/ui/sheet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from "recharts";
+import { ClipboardCheck } from "lucide-react";
 
 interface Assessment {
   id: string;
@@ -40,6 +43,7 @@ interface AthleteDetailDrawerProps {
 }
 
 export function AthleteDetailDrawer({ athleteId, semester, open, onClose }: AthleteDetailDrawerProps) {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [assessments, setAssessments] = useState<Record<string, Assessment>>({});
   const [loading, setLoading] = useState(true);
@@ -134,12 +138,24 @@ export function AthleteDetailDrawer({ athleteId, semester, open, onClose }: Athl
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>
-            {profile?.first_name} {profile?.last_name}
-          </SheetTitle>
-          <SheetDescription>
-            {profile?.sport} • {semester}
-          </SheetDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <SheetTitle>
+                {profile?.first_name} {profile?.last_name}
+              </SheetTitle>
+              <SheetDescription>
+                {profile?.sport} • {semester}
+              </SheetDescription>
+            </div>
+            <Button
+              size="sm"
+              onClick={() => navigate(`/coach/assess?athleteId=${athleteId}`)}
+              className="flex items-center gap-2"
+            >
+              <ClipboardCheck className="h-4 w-4" />
+              Assess Athlete
+            </Button>
+          </div>
         </SheetHeader>
 
         <Tabs defaultValue="pre" className="mt-6">

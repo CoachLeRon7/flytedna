@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import { AthleteDetailDrawer } from "@/components/coach/AthleteDetailDrawer";
-import { Target, LogOut, AlertTriangle } from "lucide-react";
+import { Target, LogOut, AlertTriangle, ClipboardCheck, Bell } from "lucide-react";
 import logo from "@/assets/flyte-academy-logo.png";
 
 interface Assessment {
@@ -374,6 +374,55 @@ export default function CoachDashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Coach Assessment Prompt - Prominent */}
+      {athleteRows.length > 0 && (
+        <Card className="border-[hsl(var(--coach-accent))] border-2 shadow-elegant bg-gradient-to-br from-background to-[hsl(var(--coach-accent))]/5">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <div className="w-10 h-10 rounded-lg bg-[hsl(var(--coach-accent))]/10 flex items-center justify-center">
+                  <ClipboardCheck className="h-5 w-5 text-[hsl(var(--coach-accent))]" />
+                </div>
+                Coach Assessments
+                <Badge className="bg-[hsl(var(--coach-accent))] text-white animate-pulse">
+                  <Bell className="h-3 w-3 mr-1" />
+                  Athletes Ready
+                </Badge>
+              </CardTitle>
+            </div>
+            <p className="text-base text-muted-foreground mt-2">
+              🎯 Provide leadership evaluations for your athletes
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {athleteRows.slice(0, 6).map((athlete) => (
+                <div
+                  key={athlete.userId}
+                  className="flex items-center justify-between p-4 rounded-lg border-2 hover:border-[hsl(var(--coach-accent))] hover:shadow-md transition-all bg-card"
+                >
+                  <div>
+                    <p className="font-semibold">{athlete.name}</p>
+                    <p className="text-sm text-muted-foreground">{athlete.sport}</p>
+                  </div>
+                  <Button
+                    className="bg-[hsl(var(--coach-accent))] hover:bg-[hsl(var(--coach-accent))]/90"
+                    onClick={() => navigate(`/coach/assess?athleteId=${athlete.userId}`)}
+                  >
+                    Assess
+                  </Button>
+                </div>
+              ))}
+            </div>
+            {athleteRows.length > 6 && (
+              <p className="text-sm text-muted-foreground mt-3 text-center">
+                +{athleteRows.length - 6} more athletes available to assess
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

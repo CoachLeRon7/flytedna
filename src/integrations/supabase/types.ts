@@ -561,21 +561,30 @@ export type Database = {
           coach_ids: string[] | null
           created_at: string
           id: string
+          institution: string | null
           name: string
+          primary_color: string | null
+          secondary_color: string | null
           sport: string
         }
         Insert: {
           coach_ids?: string[] | null
           created_at?: string
           id?: string
+          institution?: string | null
           name: string
+          primary_color?: string | null
+          secondary_color?: string | null
           sport: string
         }
         Update: {
           coach_ids?: string[] | null
           created_at?: string
           id?: string
+          institution?: string | null
           name?: string
+          primary_color?: string | null
+          secondary_color?: string | null
           sport?: string
         }
         Relationships: []

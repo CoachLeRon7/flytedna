@@ -11,6 +11,7 @@ import logo from "@/assets/flyte-academy-logo.png";
 import { LeadershipSnapshot } from "@/components/student/LeadershipSnapshot";
 import { NudgesList } from "@/components/student/NudgesList";
 import { PeerAssessmentPrompt } from "@/components/student/PeerAssessmentPrompt";
+import { TeamSelector } from "@/components/student/TeamSelector";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -195,6 +196,14 @@ const Dashboard = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Team Selector */}
+        <div className="mb-8">
+          <TeamSelector 
+            currentTeamId={profile?.team_id} 
+            onTeamSelected={() => loadStudentData(user!.id)}
+          />
+        </div>
 
         {/* Leadership Snapshot */}
         <div className="mb-8">

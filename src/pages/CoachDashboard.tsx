@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import { AthleteDetailDrawer } from "@/components/coach/AthleteDetailDrawer";
+import { TeamColorCustomizer } from "@/components/coach/TeamColorCustomizer";
 import { Target, LogOut, AlertTriangle, ClipboardCheck, Bell } from "lucide-react";
 import logo from "@/assets/flyte-academy-logo.png";
 
@@ -422,6 +423,11 @@ export default function CoachDashboard() {
             )}
           </CardContent>
         </Card>
+      )}
+
+      {/* Team Color Customizer */}
+      {selectedTeam !== "all" && (
+        <TeamColorCustomizer teamId={selectedTeam} />
       )}
 
       {/* Summary Cards */}

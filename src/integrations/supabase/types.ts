@@ -475,6 +475,7 @@ export type Database = {
         | "Developing"
         | "Emerging"
         | "Transformational"
+        | "Unanchored"
       nudge_frequency: "daily" | "weekly"
       nudge_status: "scheduled" | "sent" | "snoozed" | "completed"
       user_role: "student" | "coach" | "admin"
@@ -613,6 +614,7 @@ export const Constants = {
         "Developing",
         "Emerging",
         "Transformational",
+        "Unanchored",
       ],
       nudge_frequency: ["daily", "weekly"],
       nudge_status: ["scheduled", "sent", "snoozed", "completed"],

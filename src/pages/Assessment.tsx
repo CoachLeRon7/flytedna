@@ -20,40 +20,40 @@ const assessmentSchema = z.object({
   semester_label: z.string().min(1, "Semester label is required"),
   timepoint: z.enum(["pre", "mid", "end"]),
   // Leadership DNA
-  L1: z.number().min(1).max(5),
-  L2: z.number().min(1).max(5),
-  L3: z.number().min(1).max(5),
-  L4: z.number().min(1).max(5),
-  L5: z.number().min(1).max(5),
-  L6: z.number().min(1).max(5),
+  L1: z.number().min(1).max(5).optional(),
+  L2: z.number().min(1).max(5).optional(),
+  L3: z.number().min(1).max(5).optional(),
+  L4: z.number().min(1).max(5).optional(),
+  L5: z.number().min(1).max(5).optional(),
+  L6: z.number().min(1).max(5).optional(),
   // Excellence
-  E1: z.number().min(1).max(5),
-  E2: z.number().min(1).max(5),
-  E3: z.number().min(1).max(5),
-  E4: z.number().min(1).max(5),
-  E5: z.number().min(1).max(5),
-  E6: z.number().min(1).max(5),
+  E1: z.number().min(1).max(5).optional(),
+  E2: z.number().min(1).max(5).optional(),
+  E3: z.number().min(1).max(5).optional(),
+  E4: z.number().min(1).max(5).optional(),
+  E5: z.number().min(1).max(5).optional(),
+  E6: z.number().min(1).max(5).optional(),
   // Accountability
-  A1: z.number().min(1).max(5),
-  A2: z.number().min(1).max(5),
-  A3: z.number().min(1).max(5),
-  A4: z.number().min(1).max(5),
-  A5: z.number().min(1).max(5),
-  A6: z.number().min(1).max(5),
+  A1: z.number().min(1).max(5).optional(),
+  A2: z.number().min(1).max(5).optional(),
+  A3: z.number().min(1).max(5).optional(),
+  A4: z.number().min(1).max(5).optional(),
+  A5: z.number().min(1).max(5).optional(),
+  A6: z.number().min(1).max(5).optional(),
   // Discipline
-  D1: z.number().min(1).max(5),
-  D2: z.number().min(1).max(5),
-  D3: z.number().min(1).max(5),
-  D4: z.number().min(1).max(5),
-  D5: z.number().min(1).max(5),
-  D6: z.number().min(1).max(5),
+  D1: z.number().min(1).max(5).optional(),
+  D2: z.number().min(1).max(5).optional(),
+  D3: z.number().min(1).max(5).optional(),
+  D4: z.number().min(1).max(5).optional(),
+  D5: z.number().min(1).max(5).optional(),
+  D6: z.number().min(1).max(5).optional(),
   // Belonging
-  B1: z.number().min(1).max(5),
-  B2: z.number().min(1).max(5),
-  B3: z.number().min(1).max(5),
-  B4: z.number().min(1).max(5),
-  B5: z.number().min(1).max(5),
-  B6: z.number().min(1).max(5),
+  B1: z.number().min(1).max(5).optional(),
+  B2: z.number().min(1).max(5).optional(),
+  B3: z.number().min(1).max(5).optional(),
+  B4: z.number().min(1).max(5).optional(),
+  B5: z.number().min(1).max(5).optional(),
+  B6: z.number().min(1).max(5).optional(),
   // Reflections (optional)
   reflections: z.object({
     habits_gap: z.string().optional(),
@@ -86,6 +86,41 @@ const Assessment = () => {
     defaultValues: {
       semester_label: "",
       timepoint: "pre",
+      // Leadership DNA defaults
+      L1: undefined,
+      L2: undefined,
+      L3: undefined,
+      L4: undefined,
+      L5: undefined,
+      L6: undefined,
+      // Excellence defaults
+      E1: undefined,
+      E2: undefined,
+      E3: undefined,
+      E4: undefined,
+      E5: undefined,
+      E6: undefined,
+      // Accountability defaults
+      A1: undefined,
+      A2: undefined,
+      A3: undefined,
+      A4: undefined,
+      A5: undefined,
+      A6: undefined,
+      // Discipline defaults
+      D1: undefined,
+      D2: undefined,
+      D3: undefined,
+      D4: undefined,
+      D5: undefined,
+      D6: undefined,
+      // Belonging defaults
+      B1: undefined,
+      B2: undefined,
+      B3: undefined,
+      B4: undefined,
+      B5: undefined,
+      B6: undefined,
       reflections: {
         habits_gap: "",
         lead_from_discomfort: "",
@@ -97,35 +132,28 @@ const Assessment = () => {
   });
 
   const validateCurrentStep = async () => {
-    const fieldsToValidate: (keyof AssessmentFormData)[] = [];
+    const values = form.getValues();
 
     switch (currentStep) {
       case 0: // Intro
-        fieldsToValidate.push("semester_label", "timepoint");
-        break;
+        return values.semester_label && values.timepoint;
       case 1: // Leadership DNA
-        fieldsToValidate.push("L1", "L2", "L3", "L4", "L5", "L6");
-        break;
+        return values.L1 && values.L2 && values.L3 && values.L4 && values.L5 && values.L6;
       case 2: // Excellence
-        fieldsToValidate.push("E1", "E2", "E3", "E4", "E5", "E6");
-        break;
+        return values.E1 && values.E2 && values.E3 && values.E4 && values.E5 && values.E6;
       case 3: // Accountability
-        fieldsToValidate.push("A1", "A2", "A3", "A4", "A5", "A6");
-        break;
+        return values.A1 && values.A2 && values.A3 && values.A4 && values.A5 && values.A6;
       case 4: // Discipline
-        fieldsToValidate.push("D1", "D2", "D3", "D4", "D5", "D6");
-        break;
+        return values.D1 && values.D2 && values.D3 && values.D4 && values.D5 && values.D6;
       case 5: // Belonging
-        fieldsToValidate.push("B1", "B2", "B3", "B4", "B5", "B6");
-        break;
+        return values.B1 && values.B2 && values.B3 && values.B4 && values.B5 && values.B6;
       case 6: // Reflections (optional, no validation)
         return true;
       case 7: // Review (no validation, just review)
         return true;
     }
 
-    const result = await form.trigger(fieldsToValidate);
-    return result;
+    return true;
   };
 
   const handleNext = async () => {

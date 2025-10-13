@@ -11,11 +11,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Compass, Users, TrendingUp, Download, Settings, Shield, MessageSquare, LogOut } from "lucide-react";
 import logo from "@/assets/flyte-academy-logo.png";
 import { RoleRequestsManager } from "@/components/admin/RoleRequestsManager";
+import { TeamManagementDialog } from "@/components/admin/TeamManagementDialog";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
+  const [teamManagementOpen, setTeamManagementOpen] = useState(false);
   const [stats, setStats] = useState({
     totalAthletes: 0,
     totalCoaches: 0,
@@ -237,7 +239,11 @@ export default function AdminDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Button className="w-full justify-start" variant="outline">
+                <Button 
+                  className="w-full justify-start" 
+                  variant="outline"
+                  onClick={() => setTeamManagementOpen(true)}
+                >
                   <Settings className="mr-2 h-4 w-4" />
                   Configure Teams & Assignments
                 </Button>
@@ -278,6 +284,11 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </main>
+
+      <TeamManagementDialog 
+        open={teamManagementOpen} 
+        onOpenChange={setTeamManagementOpen}
+      />
     </div>
   );
 }

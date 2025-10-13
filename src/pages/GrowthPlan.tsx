@@ -199,7 +199,12 @@ const GrowthPlan = () => {
       <header className="bg-background border-b border-border print:hidden">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
-            <img src={logo} alt="FLY.TE Academy" className="h-20 w-auto" />
+            <img 
+              src={logo} 
+              alt="FLY.TE Academy" 
+              className="h-20 w-auto cursor-pointer hover:opacity-80 transition-opacity" 
+              onClick={() => navigate("/")}
+            />
             <Button variant="outline" onClick={() => navigate("/results")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Results

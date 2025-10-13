@@ -304,7 +304,12 @@ export default function CoachDashboard() {
       <header className="bg-[hsl(var(--coach-accent))] border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <img src={logo} alt="FLY.TE Academy Logo" className="h-24 w-auto" />
+            <img 
+              src={logo} 
+              alt="FLY.TE Academy Logo" 
+              className="h-24 w-auto cursor-pointer hover:opacity-80 transition-opacity" 
+              onClick={() => navigate("/")}
+            />
             <div className="flex items-center gap-2 text-[hsl(var(--coach-accent-foreground))]">
               <Target className="h-5 w-5" />
               <span className="text-lg font-semibold">Coach</span>

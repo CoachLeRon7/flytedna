@@ -153,7 +153,12 @@ const Auth = () => {
       <Card className="w-full max-w-md shadow-elegant">
         <CardHeader className="space-y-4">
           <div className="flex justify-center">
-            <img src={logo} alt="FLY.TE Academy Logo" className="h-128 w-auto" />
+            <img 
+              src={logo} 
+              alt="FLY.TE Academy Logo" 
+              className="h-128 w-auto cursor-pointer hover:opacity-80 transition-opacity" 
+              onClick={() => navigate("/")}
+            />
           </div>
           <CardDescription className="text-center">
             Sign in to your account or create a new one

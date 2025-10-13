@@ -131,7 +131,12 @@ export default function AdminDashboard() {
       <header className="bg-[hsl(var(--admin-accent))] border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <img src={logo} alt="FLY.TE Academy Logo" className="h-24 w-auto" />
+            <img 
+              src={logo} 
+              alt="FLY.TE Academy Logo" 
+              className="h-24 w-auto cursor-pointer hover:opacity-80 transition-opacity" 
+              onClick={() => navigate("/")}
+            />
             <div className="flex items-center gap-2 text-[hsl(var(--admin-accent-foreground))]">
               <Compass className="h-5 w-5" />
               <span className="text-lg font-semibold">Administrator</span>

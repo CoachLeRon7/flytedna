@@ -10,6 +10,7 @@ import { ArrowLeft, Target, Plus } from "lucide-react";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/flyte-academy-logo.png";
+import { PeerFeedbackSection } from "@/components/student/PeerFeedbackSection";
 
 const Results = () => {
   const [searchParams] = useSearchParams();
@@ -352,6 +353,23 @@ const Results = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Peer Feedback Section */}
+        <div className="mb-8">
+          <PeerFeedbackSection 
+            userId={assessment.user_id}
+            timepoint={assessment.timepoint}
+            semesterLabel={assessment.semester_label}
+            selfScores={{
+              leadership_dna_mean: assessment.leadership_dna_mean,
+              excellence_mean: assessment.excellence_mean,
+              accountability_mean: assessment.accountability_mean,
+              discipline_mean: assessment.discipline_mean,
+              belonging_mean: assessment.belonging_mean,
+              composite_mean: assessment.composite_mean,
+            }}
+          />
+        </div>
 
         {/* Footer CTAs */}
         <div className="flex flex-col sm:flex-row justify-center gap-4">

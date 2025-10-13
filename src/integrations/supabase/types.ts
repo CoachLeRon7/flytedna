@@ -377,6 +377,111 @@ export type Database = {
         }
         Relationships: []
       }
+      peer_assessments: {
+        Row: {
+          a1: number | null
+          a2: number | null
+          a3: number | null
+          accountability_mean: number | null
+          assessed_user_id: string
+          assessor_id: string
+          b1: number | null
+          b2: number | null
+          b3: number | null
+          belonging_mean: number | null
+          classification:
+            | Database["public"]["Enums"]["leadership_classification"]
+            | null
+          composite_mean: number | null
+          created_at: string
+          d1: number | null
+          d2: number | null
+          d3: number | null
+          discipline_mean: number | null
+          e1: number | null
+          e2: number | null
+          e3: number | null
+          excellence_mean: number | null
+          id: string
+          l1: number | null
+          l2: number | null
+          l3: number | null
+          leadership_dna_mean: number | null
+          optional_comment: string | null
+          semester_label: string
+          timepoint: Database["public"]["Enums"]["assessment_timepoint"]
+          updated_at: string
+        }
+        Insert: {
+          a1?: number | null
+          a2?: number | null
+          a3?: number | null
+          accountability_mean?: number | null
+          assessed_user_id: string
+          assessor_id: string
+          b1?: number | null
+          b2?: number | null
+          b3?: number | null
+          belonging_mean?: number | null
+          classification?:
+            | Database["public"]["Enums"]["leadership_classification"]
+            | null
+          composite_mean?: number | null
+          created_at?: string
+          d1?: number | null
+          d2?: number | null
+          d3?: number | null
+          discipline_mean?: number | null
+          e1?: number | null
+          e2?: number | null
+          e3?: number | null
+          excellence_mean?: number | null
+          id?: string
+          l1?: number | null
+          l2?: number | null
+          l3?: number | null
+          leadership_dna_mean?: number | null
+          optional_comment?: string | null
+          semester_label: string
+          timepoint: Database["public"]["Enums"]["assessment_timepoint"]
+          updated_at?: string
+        }
+        Update: {
+          a1?: number | null
+          a2?: number | null
+          a3?: number | null
+          accountability_mean?: number | null
+          assessed_user_id?: string
+          assessor_id?: string
+          b1?: number | null
+          b2?: number | null
+          b3?: number | null
+          belonging_mean?: number | null
+          classification?:
+            | Database["public"]["Enums"]["leadership_classification"]
+            | null
+          composite_mean?: number | null
+          created_at?: string
+          d1?: number | null
+          d2?: number | null
+          d3?: number | null
+          discipline_mean?: number | null
+          e1?: number | null
+          e2?: number | null
+          e3?: number | null
+          excellence_mean?: number | null
+          id?: string
+          l1?: number | null
+          l2?: number | null
+          l3?: number | null
+          leadership_dna_mean?: number | null
+          optional_comment?: string | null
+          semester_label?: string
+          timepoint?: Database["public"]["Enums"]["assessment_timepoint"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pending_role_requests: {
         Row: {
           created_at: string
@@ -498,6 +603,22 @@ export type Database = {
       }
     }
     Views: {
+      peer_feedback_aggregated: {
+        Row: {
+          assessed_user_id: string | null
+          avg_accountability: number | null
+          avg_belonging: number | null
+          avg_composite: number | null
+          avg_discipline: number | null
+          avg_excellence: number | null
+          avg_leadership_dna: number | null
+          comments: string[] | null
+          response_count: number | null
+          semester_label: string | null
+          timepoint: Database["public"]["Enums"]["assessment_timepoint"] | null
+        }
+        Relationships: []
+      }
       profiles_secure: {
         Row: {
           created_at: string | null
@@ -544,6 +665,18 @@ export type Database = {
       are_teammates: {
         Args: { _user_id1: string; _user_id2: string }
         Returns: boolean
+      }
+      get_teammates_for_peer_assessment: {
+        Args: {
+          _semester_label: string
+          _timepoint: Database["public"]["Enums"]["assessment_timepoint"]
+        }
+        Returns: {
+          first_name: string
+          has_completed_self_assessment: boolean
+          last_name: string
+          user_id: string
+        }[]
       }
       get_user_role: {
         Args: { _user_id: string }

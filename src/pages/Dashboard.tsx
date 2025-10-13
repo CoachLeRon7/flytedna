@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/flyte-academy-logo.png";
 import { LeadershipSnapshot } from "@/components/student/LeadershipSnapshot";
 import { NudgesList } from "@/components/student/NudgesList";
+import { PeerAssessmentPrompt } from "@/components/student/PeerAssessmentPrompt";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -257,6 +258,11 @@ const Dashboard = () => {
 
           {/* Nudges */}
           {user && <NudgesList userId={user.id} />}
+        </div>
+
+        {/* Peer Assessment Prompt */}
+        <div className="mb-8">
+          <PeerAssessmentPrompt />
         </div>
 
         {/* Quick Stats */}

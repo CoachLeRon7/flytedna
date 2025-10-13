@@ -204,6 +204,11 @@ const Dashboard = () => {
           />
         </div>
 
+        {/* Peer Assessment Prompt - Prominent Placement */}
+        <div className="mb-8">
+          <PeerAssessmentPrompt />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card className="shadow-card hover:shadow-elegant transition-shadow cursor-pointer" onClick={() => navigate("/assessment")}>
             <CardHeader>
@@ -258,11 +263,6 @@ const Dashboard = () => {
 
           {/* Nudges */}
           {user && <NudgesList userId={user.id} />}
-        </div>
-
-        {/* Peer Assessment Prompt */}
-        <div className="mb-8">
-          <PeerAssessmentPrompt />
         </div>
 
         {/* Quick Stats */}

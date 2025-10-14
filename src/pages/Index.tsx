@@ -74,7 +74,7 @@ const Index = () => {
             <Button 
               size="lg" 
               variant="secondary"
-              className="bg-background/20 backdrop-blur-sm text-primary-foreground border border-primary-foreground/30 hover:bg-background/30 w-full sm:w-auto px-8"
+              className="bg-background/20 backdrop-blur-sm text-primary-foreground border border-primary-foreground/30 hover:bg-background/30 w-full sm:w-auto px-10"
               onClick={() => navigate("/about")}
             >
               Learn More

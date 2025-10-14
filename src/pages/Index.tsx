@@ -130,8 +130,8 @@ const Index = () => {
                   className={`bg-gradient-to-br ${gradients[index % gradients.length]} shadow-card hover:shadow-elegant hover:scale-105 transition-all duration-300 animate-fade-in border-2`} 
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <CardHeader>
-                    <div className={`w-14 h-14 rounded-xl ${iconBgs[index % iconBgs.length]} flex items-center justify-center mb-4 shadow-md`}>
+                  <CardHeader className="text-center">
+                    <div className={`w-14 h-14 rounded-xl ${iconBgs[index % iconBgs.length]} flex items-center justify-center mb-4 shadow-md mx-auto`}>
                       <Icon className={`h-7 w-7 ${iconColors[index % iconColors.length]}`} />
                     </div>
                     <CardTitle className="text-foreground">{domain.title}</CardTitle>

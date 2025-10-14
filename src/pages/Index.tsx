@@ -84,9 +84,14 @@ const Index = () => {
       </section>
 
       {/* What is FLDI */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4">
+      <section className="py-20 bg-gradient-to-br from-primary/5 via-accent/5 to-success/5 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.1),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(251,146,60,0.1),transparent_50%)]" />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center mb-16">
+            <div className="inline-block bg-gradient-to-r from-primary/10 to-accent/10 px-6 py-2 rounded-full mb-4">
+              <span className="text-primary font-semibold text-sm uppercase tracking-wide">The Framework</span>
+            </div>
             <h2 className="text-4xl font-bold text-foreground mb-4">
               What is the FLDI?
             </h2>
@@ -98,11 +103,36 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {domains.map((domain, index) => {
               const Icon = domain.icon;
+              const gradients = [
+                'from-primary/10 to-primary/5 border-primary/20',
+                'from-accent/10 to-accent/5 border-accent/20',
+                'from-success/10 to-success/5 border-success/20',
+                'from-student-accent/10 to-student-accent/5 border-student-accent/20',
+                'from-coach-accent/10 to-coach-accent/5 border-coach-accent/20',
+              ];
+              const iconColors = [
+                'text-primary',
+                'text-accent',
+                'text-success',
+                'text-student-accent',
+                'text-coach-accent',
+              ];
+              const iconBgs = [
+                'bg-primary/20',
+                'bg-accent/20',
+                'bg-success/20',
+                'bg-student-accent/20',
+                'bg-coach-accent/20',
+              ];
               return (
-                <Card key={index} className="shadow-card hover:shadow-elegant transition-shadow duration-300 animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+                <Card 
+                  key={index} 
+                  className={`bg-gradient-to-br ${gradients[index % gradients.length]} shadow-card hover:shadow-elegant hover:scale-105 transition-all duration-300 animate-fade-in border-2`} 
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
                   <CardHeader>
-                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                      <Icon className="h-6 w-6 text-primary" />
+                    <div className={`w-14 h-14 rounded-xl ${iconBgs[index % iconBgs.length]} flex items-center justify-center mb-4 shadow-md`}>
+                      <Icon className={`h-7 w-7 ${iconColors[index % iconColors.length]}`} />
                     </div>
                     <CardTitle className="text-foreground">{domain.title}</CardTitle>
                     <CardDescription>{domain.description}</CardDescription>

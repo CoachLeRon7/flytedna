@@ -145,9 +145,14 @@ const Index = () => {
       </section>
 
       {/* How It Works */}
-      <section className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
+      <section className="py-20 bg-gradient-to-br from-accent/5 via-success/5 to-primary/5 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(251,146,60,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,rgba(34,197,94,0.1),transparent_50%)]" />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center mb-16">
+            <div className="inline-block bg-gradient-to-r from-accent/10 to-success/10 px-6 py-2 rounded-full mb-4">
+              <span className="text-accent font-semibold text-sm uppercase tracking-wide">The Process</span>
+            </div>
             <h2 className="text-4xl font-bold text-foreground mb-4">
               How It Works
             </h2>
@@ -157,9 +162,9 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <Card className="text-center shadow-card">
+            <Card className="text-center shadow-card hover:shadow-elegant hover:scale-105 transition-all duration-300 bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-primary/20 animate-fade-in" style={{ animationDelay: '0ms' }}>
               <CardHeader>
-                <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground flex items-center justify-center text-2xl font-bold mx-auto mb-4 shadow-lg">
                   1
                 </div>
                 <CardTitle>Take Assessment</CardTitle>
@@ -169,9 +174,9 @@ const Index = () => {
               </CardHeader>
             </Card>
 
-            <Card className="text-center shadow-card">
+            <Card className="text-center shadow-card hover:shadow-elegant hover:scale-105 transition-all duration-300 bg-gradient-to-br from-accent/10 to-accent/5 border-2 border-accent/20 animate-fade-in" style={{ animationDelay: '100ms' }}>
               <CardHeader>
-                <div className="w-16 h-16 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-accent to-accent/80 text-accent-foreground flex items-center justify-center text-2xl font-bold mx-auto mb-4 shadow-lg">
                   2
                 </div>
                 <CardTitle>View Results</CardTitle>
@@ -181,9 +186,9 @@ const Index = () => {
               </CardHeader>
             </Card>
 
-            <Card className="text-center shadow-card">
+            <Card className="text-center shadow-card hover:shadow-elegant hover:scale-105 transition-all duration-300 bg-gradient-to-br from-success/10 to-success/5 border-2 border-success/20 animate-fade-in" style={{ animationDelay: '200ms' }}>
               <CardHeader>
-                <div className="w-16 h-16 rounded-full bg-success text-success-foreground flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-success to-success/80 text-success-foreground flex items-center justify-center text-2xl font-bold mx-auto mb-4 shadow-lg">
                   3
                 </div>
                 <CardTitle>Create Growth Plan</CardTitle>

@@ -42,10 +42,14 @@ export default {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
-        success: {
-          DEFAULT: "hsl(var(--success))",
-          foreground: "hsl(var(--success-foreground))",
-        },
+          success: {
+            DEFAULT: "hsl(var(--success))",
+            foreground: "hsl(var(--success-foreground))",
+          },
+          "light-red": {
+            DEFAULT: "hsl(var(--light-red))",
+            foreground: "hsl(var(--light-red-foreground))",
+          },
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",

@@ -174,29 +174,45 @@ export default function CoachDashboard() {
       filteredProfiles = profiles.filter((p) => p.team_id && teamIds.includes(p.team_id));
     }
 
-    // Filter assessments by semester and timepoint
-    const filteredAssessments = assessments.filter(
-      (a) =>
-        a.semester_label === selectedSemester &&
-        a.timepoint === selectedTimepoint &&
-        filteredProfiles.some((p) => p.id === a.user_id)
-    );
+    // Create athlete rows from ALL profiles, not just those with assessments
+    const rows: AthleteRow[] = filteredProfiles.map((profile) => {
+      // Try to find an assessment for this athlete
+      const assessment = assessments.find(
+        (a) =>
+          a.user_id === profile.id &&
+          a.semester_label === selectedSemester &&
+          a.timepoint === selectedTimepoint
+      );
 
-    // Create athlete rows
-    const rows: AthleteRow[] = filteredAssessments.map((assessment) => {
-      const profile = filteredProfiles.find((p) => p.id === assessment.user_id);
-      return {
-        userId: assessment.user_id,
-        name: profile ? `${profile.first_name} ${profile.last_name}` : "Unknown",
-        sport: profile?.sport || "N/A",
-        composite: assessment.composite_mean || 0,
-        leadershipDna: assessment.leadership_dna_mean || 0,
-        excellence: assessment.excellence_mean || 0,
-        accountability: assessment.accountability_mean || 0,
-        discipline: assessment.discipline_mean || 0,
-        belonging: assessment.belonging_mean || 0,
-        classification: assessment.classification || "N/A",
-      };
+      // If assessment exists, use real data; otherwise use defaults
+      if (assessment) {
+        return {
+          userId: profile.id,
+          name: `${profile.first_name} ${profile.last_name}`,
+          sport: profile.sport || "N/A",
+          composite: assessment.composite_mean || 0,
+          leadershipDna: assessment.leadership_dna_mean || 0,
+          excellence: assessment.excellence_mean || 0,
+          accountability: assessment.accountability_mean || 0,
+          discipline: assessment.discipline_mean || 0,
+          belonging: assessment.belonging_mean || 0,
+          classification: assessment.classification || "N/A",
+        };
+      } else {
+        // No assessment found - show athlete with "Not Completed" status
+        return {
+          userId: profile.id,
+          name: `${profile.first_name} ${profile.last_name}`,
+          sport: profile.sport || "N/A",
+          composite: 0,
+          leadershipDna: 0,
+          excellence: 0,
+          accountability: 0,
+          discipline: 0,
+          belonging: 0,
+          classification: "Not Completed",
+        };
+      }
     });
 
     setAthleteRows(rows);
@@ -212,6 +228,8 @@ export default function CoachDashboard() {
         return "bg-[hsl(var(--emerging))] text-[hsl(var(--emerging-foreground))]";
       case "Transformational":
         return "bg-[hsl(var(--transformational))] text-[hsl(var(--transformational-foreground))]";
+      case "Not Completed":
+        return "bg-gray-200 text-gray-700 border border-gray-300";
       default:
         return "bg-muted text-muted-foreground";
     }
@@ -397,7 +415,7 @@ export default function CoachDashboard() {
                 Coach Assessments
                 <Badge className="bg-[hsl(var(--coach-accent))] text-white animate-pulse">
                   <Bell className="h-3 w-3 mr-1" />
-                  Athletes Ready
+                  Action Needed
                 </Badge>
               </CardTitle>
             </div>
@@ -560,22 +578,22 @@ export default function CoachDashboard() {
                     {row.sport}
                   </TableCell>
                   <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
-                    {row.composite.toFixed(2)}
+                    {row.classification === "Not Completed" ? "-" : row.composite.toFixed(2)}
                   </TableCell>
                   <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
-                    {row.leadershipDna.toFixed(2)}
+                    {row.classification === "Not Completed" ? "-" : row.leadershipDna.toFixed(2)}
                   </TableCell>
                   <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
-                    {row.excellence.toFixed(2)}
+                    {row.classification === "Not Completed" ? "-" : row.excellence.toFixed(2)}
                   </TableCell>
                   <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
-                    {row.accountability.toFixed(2)}
+                    {row.classification === "Not Completed" ? "-" : row.accountability.toFixed(2)}
                   </TableCell>
                   <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
-                    {row.discipline.toFixed(2)}
+                    {row.classification === "Not Completed" ? "-" : row.discipline.toFixed(2)}
                   </TableCell>
                   <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
-                    {row.belonging.toFixed(2)}
+                    {row.classification === "Not Completed" ? "-" : row.belonging.toFixed(2)}
                   </TableCell>
                   <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
                     <Badge className={getClassificationColor(row.classification)}>{row.classification}</Badge>

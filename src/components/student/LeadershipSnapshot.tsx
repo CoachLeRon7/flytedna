@@ -3,6 +3,7 @@ import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Responsi
 
 interface Assessment {
   composite_mean: number;
+  final_composite_mean?: number;
   leadership_dna_mean: number;
   excellence_mean: number;
   accountability_mean: number;
@@ -43,7 +44,7 @@ export function LeadershipSnapshot({ latestAssessment, assessmentHistory }: Lead
 
   const trendData = assessmentHistory.map(a => ({
     timepoint: a.timepoint.charAt(0).toUpperCase() + a.timepoint.slice(1),
-    composite: a.composite_mean || 0,
+    composite: a.final_composite_mean || a.composite_mean || 0,
   }));
 
   return (

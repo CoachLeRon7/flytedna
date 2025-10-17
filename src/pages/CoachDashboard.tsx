@@ -20,6 +20,11 @@ interface Assessment {
   semester_label: string;
   timepoint: "pre" | "mid" | "end";
   composite_mean: number;
+  final_composite_mean: number;
+  peer_adjusted_composite: number | null;
+  coach_adjusted_composite: number | null;
+  peer_modifier: number;
+  coach_modifier: number;
   leadership_dna_mean: number;
   excellence_mean: number;
   accountability_mean: number;
@@ -43,12 +48,16 @@ interface AthleteRow {
   name: string;
   sport: string;
   composite: number;
+  finalComposite: number;
+  peerModifier: number;
+  coachModifier: number;
   leadershipDna: number;
   excellence: number;
   accountability: number;
   discipline: number;
   belonging: number;
   classification: string;
+  status: string;
 }
 
 interface Team {
@@ -191,12 +200,16 @@ export default function CoachDashboard() {
           name: `${profile.first_name} ${profile.last_name}`,
           sport: profile.sport || "N/A",
           composite: assessment.composite_mean || 0,
+          finalComposite: assessment.final_composite_mean || assessment.composite_mean || 0,
+          peerModifier: assessment.peer_modifier || 0,
+          coachModifier: assessment.coach_modifier || 0,
           leadershipDna: assessment.leadership_dna_mean || 0,
           excellence: assessment.excellence_mean || 0,
           accountability: assessment.accountability_mean || 0,
           discipline: assessment.discipline_mean || 0,
           belonging: assessment.belonging_mean || 0,
           classification: assessment.classification || "N/A",
+          status: "Completed",
         };
       } else {
         // No assessment found - show athlete with "Not Completed" status
@@ -205,12 +218,16 @@ export default function CoachDashboard() {
           name: `${profile.first_name} ${profile.last_name}`,
           sport: profile.sport || "N/A",
           composite: 0,
+          finalComposite: 0,
+          peerModifier: 0,
+          coachModifier: 0,
           leadershipDna: 0,
           excellence: 0,
           accountability: 0,
           discipline: 0,
           belonging: 0,
           classification: "Not Completed",
+          status: "Not Completed",
         };
       }
     });
@@ -237,9 +254,10 @@ export default function CoachDashboard() {
 
   // Calculate summary statistics
   const totalAthletes = athleteRows.length;
+  const completedAssessments = athleteRows.filter(row => row.status === "Completed");
   const avgComposite =
-    totalAthletes > 0
-      ? (athleteRows.reduce((sum, row) => sum + row.composite, 0) / totalAthletes).toFixed(2)
+    completedAssessments.length > 0
+      ? (completedAssessments.reduce((sum, row) => sum + row.finalComposite, 0) / completedAssessments.length).toFixed(2)
       : "0.00";
 
   const classificationCounts = athleteRows.reduce(
@@ -290,7 +308,7 @@ export default function CoachDashboard() {
     );
     const avg =
       tpAssessments.length > 0
-        ? tpAssessments.reduce((sum, a) => sum + (a.composite_mean || 0), 0) / tpAssessments.length
+        ? tpAssessments.reduce((sum, a) => sum + (a.final_composite_mean || a.composite_mean || 0), 0) / tpAssessments.length
         : 0;
     return {
       timepoint: tp.charAt(0).toUpperCase() + tp.slice(1),
@@ -578,7 +596,16 @@ export default function CoachDashboard() {
                     {row.sport}
                   </TableCell>
                   <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
-                    {row.classification === "Not Completed" ? "-" : row.composite.toFixed(2)}
+                    {row.status === "Not Completed" ? "-" : (
+                      <div>
+                        <div className="font-semibold">{row.finalComposite.toFixed(2)}</div>
+                        {(row.peerModifier !== 0 || row.coachModifier !== 0) && (
+                          <div className="text-xs text-muted-foreground">
+                            Self: {row.composite.toFixed(2)}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </TableCell>
                   <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
                     {row.classification === "Not Completed" ? "-" : row.leadershipDna.toFixed(2)}

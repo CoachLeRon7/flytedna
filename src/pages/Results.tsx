@@ -238,21 +238,63 @@ const Results = () => {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 mb-8">
-          {/* Left: Composite Score Card */}
+          {/* Left: Composite Score Card with 360° Breakdown */}
           <Card className="shadow-card">
             <CardHeader>
-              <CardTitle>Composite Score</CardTitle>
-              <CardDescription>Overall leadership development score</CardDescription>
+              <CardTitle>360° Composite Score</CardTitle>
+              <CardDescription>Integrated self, peer, and coach assessment</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="text-center">
                 <div className="text-6xl font-bold text-primary mb-4">
-                  {assessment.composite_mean?.toFixed(2) || "N/A"}
+                  {assessment.final_composite_mean?.toFixed(2) || assessment.composite_mean?.toFixed(2) || "N/A"}
                 </div>
                 <Badge className={`${getClassificationColor(assessment.classification)} text-lg px-4 py-2`}>
                   {assessment.classification || "Processing..."}
                 </Badge>
                 <p className="text-sm text-muted-foreground mt-4">out of 5.0</p>
+              </div>
+              
+              {/* Score Breakdown */}
+              <div className="border-t pt-4 space-y-3">
+                <h4 className="font-semibold text-sm text-muted-foreground">Score Components:</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Self-Assessment (60%)</span>
+                    <span className="font-semibold">{assessment.composite_mean?.toFixed(2)}</span>
+                  </div>
+                  {assessment.peer_adjusted_composite && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Peer Feedback (15%)</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">{assessment.peer_adjusted_composite.toFixed(2)}</span>
+                        {assessment.peer_modifier !== 0 && (
+                          <span className={`text-xs ${assessment.peer_modifier > 0 ? 'text-green-600' : 'text-orange-600'}`}>
+                            {assessment.peer_modifier > 0 ? '+' : ''}{assessment.peer_modifier.toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {assessment.coach_adjusted_composite && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Coach Assessment (25%)</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">{assessment.coach_adjusted_composite.toFixed(2)}</span>
+                        {assessment.coach_modifier !== 0 && (
+                          <span className={`text-xs ${assessment.coach_modifier > 0 ? 'text-green-600' : 'text-orange-600'}`}>
+                            {assessment.coach_modifier > 0 ? '+' : ''}{assessment.coach_modifier.toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {(!assessment.peer_adjusted_composite && !assessment.coach_adjusted_composite) && (
+                  <p className="text-xs text-muted-foreground italic">
+                    Your score will be adjusted when peer and coach assessments are completed.
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>

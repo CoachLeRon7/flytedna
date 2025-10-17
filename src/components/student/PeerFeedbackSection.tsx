@@ -138,6 +138,14 @@ export const PeerFeedbackSection = ({ userId, timepoint, semesterLabel, selfScor
             <span className="text-2xl font-bold">{feedback.avg_composite.toFixed(2)}</span>
           </div>
           <Progress value={feedback.avg_composite * 20} className="h-2" />
+          {selfScores && (
+            <div className="mt-3 p-3 bg-muted/50 rounded-lg">
+              <p className="text-sm font-medium mb-1">Impact on Your Final Score</p>
+              <p className="text-xs text-muted-foreground">
+                Peer feedback (15% weight): {feedback.avg_composite > selfScores.composite_mean ? "+" : ""}{((feedback.avg_composite - selfScores.composite_mean) * 0.15).toFixed(2)} points
+              </p>
+            </div>
+          )}
         </div>
 
         <div>

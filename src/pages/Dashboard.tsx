@@ -197,9 +197,9 @@ const Dashboard = () => {
                 <p className="font-semibold">{latestAssessment?.classification || "Not assessed"}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Composite Score</p>
+                <p className="text-sm text-muted-foreground">360° Composite Score</p>
                 <p className="font-semibold text-[hsl(var(--student-accent))]">
-                  {latestAssessment?.composite_mean?.toFixed(2) || "N/A"}
+                  {latestAssessment?.final_composite_mean?.toFixed(2) || latestAssessment?.composite_mean?.toFixed(2) || "N/A"}
                 </p>
               </div>
             </div>

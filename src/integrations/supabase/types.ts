@@ -66,6 +66,8 @@ export type Database = {
           classification:
             | Database["public"]["Enums"]["leadership_classification"]
             | null
+          coach_adjusted_composite: number | null
+          coach_modifier: number | null
           coaching_insights: Json | null
           composite_mean: number | null
           created_at: string
@@ -84,6 +86,7 @@ export type Database = {
           e6: number | null
           edition: Database["public"]["Enums"]["assessment_edition"] | null
           excellence_mean: number | null
+          final_composite_mean: number | null
           id: string
           l1: number | null
           l2: number | null
@@ -93,6 +96,8 @@ export type Database = {
           l6: number | null
           leadership_dna_mean: number | null
           notes_private: string | null
+          peer_adjusted_composite: number | null
+          peer_modifier: number | null
           reflections: Json | null
           risk_flags: string[] | null
           semester_label: string
@@ -119,6 +124,8 @@ export type Database = {
           classification?:
             | Database["public"]["Enums"]["leadership_classification"]
             | null
+          coach_adjusted_composite?: number | null
+          coach_modifier?: number | null
           coaching_insights?: Json | null
           composite_mean?: number | null
           created_at?: string
@@ -137,6 +144,7 @@ export type Database = {
           e6?: number | null
           edition?: Database["public"]["Enums"]["assessment_edition"] | null
           excellence_mean?: number | null
+          final_composite_mean?: number | null
           id?: string
           l1?: number | null
           l2?: number | null
@@ -146,6 +154,8 @@ export type Database = {
           l6?: number | null
           leadership_dna_mean?: number | null
           notes_private?: string | null
+          peer_adjusted_composite?: number | null
+          peer_modifier?: number | null
           reflections?: Json | null
           risk_flags?: string[] | null
           semester_label: string
@@ -172,6 +182,8 @@ export type Database = {
           classification?:
             | Database["public"]["Enums"]["leadership_classification"]
             | null
+          coach_adjusted_composite?: number | null
+          coach_modifier?: number | null
           coaching_insights?: Json | null
           composite_mean?: number | null
           created_at?: string
@@ -190,6 +202,7 @@ export type Database = {
           e6?: number | null
           edition?: Database["public"]["Enums"]["assessment_edition"] | null
           excellence_mean?: number | null
+          final_composite_mean?: number | null
           id?: string
           l1?: number | null
           l2?: number | null
@@ -199,6 +212,8 @@ export type Database = {
           l6?: number | null
           leadership_dna_mean?: number | null
           notes_private?: string | null
+          peer_adjusted_composite?: number | null
+          peer_modifier?: number | null
           reflections?: Json | null
           risk_flags?: string[] | null
           semester_label?: string
@@ -745,6 +760,10 @@ export type Database = {
       are_teammates: {
         Args: { _user_id1: string; _user_id2: string }
         Returns: boolean
+      }
+      calculate_adjusted_composite: {
+        Args: { _assessment_id: string }
+        Returns: undefined
       }
       get_teammates_for_peer_assessment: {
         Args: {

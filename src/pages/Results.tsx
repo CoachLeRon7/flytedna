@@ -6,11 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Target, Plus } from "lucide-react";
+import { ArrowLeft, Target, Plus, BookOpen } from "lucide-react";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/flyte-academy-logo.png";
 import { PeerFeedbackSection } from "@/components/student/PeerFeedbackSection";
+import { DomainBreakdownTable } from "@/components/student/DomainBreakdownTable";
+import { DomainExplanationCard } from "@/components/student/DomainExplanationCard";
+import { TrendAnalysisCard } from "@/components/student/TrendAnalysisCard";
 
 const Results = () => {
   const [searchParams] = useSearchParams();
@@ -18,6 +21,10 @@ const Results = () => {
   const { toast } = useToast();
   const assessmentId = searchParams.get("assessment_id");
   const [assessment, setAssessment] = useState<any>(null);
+  const [previousAssessment, setPreviousAssessment] = useState<any>(null);
+  const [peerFeedback, setPeerFeedback] = useState<any>(null);
+  const [coachFeedback, setCoachFeedback] = useState<any>(null);
+  const [userRole, setUserRole] = useState<string>("student");
   const [loading, setLoading] = useState(true);
   const [shareReflections, setShareReflections] = useState(true);
   const [addingToGrowthPlan, setAddingToGrowthPlan] = useState<string | null>(null);
@@ -74,6 +81,56 @@ const Results = () => {
         
         setAssessment(data);
         setShareReflections(data.notes_private !== "REFLECTIONS_PRIVATE=true");
+
+        // Fetch user role
+        const { data: roleData } = await supabase
+          .rpc("get_user_role", { _user_id: user.id });
+        if (roleData) {
+          setUserRole(roleData);
+        }
+
+        // Fetch previous assessment for trend analysis
+        const { data: prevAssessment } = await supabase
+          .from("assessments")
+          .select("*")
+          .eq("user_id", data.user_id)
+          .eq("semester_label", data.semester_label)
+          .neq("id", data.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (prevAssessment) {
+          setPreviousAssessment(prevAssessment);
+        }
+
+        // Fetch peer feedback aggregated data
+        const { data: peerData } = await supabase
+          .from("peer_feedback_aggregated")
+          .select("*")
+          .eq("assessed_user_id", data.user_id)
+          .eq("timepoint", data.timepoint)
+          .eq("semester_label", data.semester_label)
+          .maybeSingle();
+        
+        if (peerData) {
+          setPeerFeedback(peerData);
+        }
+
+        // Fetch coach assessment
+        const { data: coachData } = await supabase
+          .from("coach_assessments")
+          .select("*")
+          .eq("athlete_id", data.user_id)
+          .eq("timepoint", data.timepoint)
+          .eq("semester_label", data.semester_label)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (coachData) {
+          setCoachFeedback(coachData);
+        }
       } catch (error) {
         console.error("Error fetching assessment:", error);
         navigate("/dashboard");
@@ -330,6 +387,229 @@ const Results = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Domain Breakdown Table - Role-based visibility */}
+        {(userRole === "coach" || userRole === "admin") && (
+          <div className="mb-8">
+            <DomainBreakdownTable
+              scores={[
+                {
+                  domain: "leadership_dna",
+                  label: "Leadership DNA",
+                  self: assessment.leadership_dna_mean || 0,
+                  peer: peerFeedback?.avg_leadership_dna,
+                  coach: coachFeedback?.leadership_dna_mean,
+                  final: assessment.final_composite_mean || assessment.leadership_dna_mean || 0,
+                },
+                {
+                  domain: "excellence",
+                  label: "Excellence",
+                  self: assessment.excellence_mean || 0,
+                  peer: peerFeedback?.avg_excellence,
+                  coach: coachFeedback?.excellence_mean,
+                  final: assessment.final_composite_mean || assessment.excellence_mean || 0,
+                },
+                {
+                  domain: "accountability",
+                  label: "Accountability",
+                  self: assessment.accountability_mean || 0,
+                  peer: peerFeedback?.avg_accountability,
+                  coach: coachFeedback?.accountability_mean,
+                  final: assessment.final_composite_mean || assessment.accountability_mean || 0,
+                },
+                {
+                  domain: "discipline",
+                  label: "Discipline",
+                  self: assessment.discipline_mean || 0,
+                  peer: peerFeedback?.avg_discipline,
+                  coach: coachFeedback?.discipline_mean,
+                  final: assessment.final_composite_mean || assessment.discipline_mean || 0,
+                },
+                {
+                  domain: "belonging",
+                  label: "Belonging & Impact",
+                  self: assessment.belonging_mean || 0,
+                  peer: peerFeedback?.avg_belonging,
+                  coach: coachFeedback?.belonging_mean,
+                  final: assessment.final_composite_mean || assessment.belonging_mean || 0,
+                },
+              ]}
+              userRole={userRole}
+            />
+          </div>
+        )}
+
+        {/* Understanding Your Scores */}
+        <Card className="mb-8 shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-primary" />
+              Understanding Your Scores
+            </CardTitle>
+            <CardDescription>
+              What each leadership domain means and how to interpret your results
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <DomainExplanationCard
+              explanation={{
+                domain: "leadership_dna",
+                label: "Leadership DNA",
+                score: assessment.leadership_dna_mean || 0,
+                description: "Your foundational leadership identity - how you see yourself as a leader and inspire others through vision and influence.",
+                sampleQuestions: [
+                  "I have a clear vision for my team's future",
+                  "Others naturally look to me for direction",
+                  "I inspire teammates through my actions"
+                ],
+                interpretation: assessment.leadership_dna_mean >= 4.0 
+                  ? "You demonstrate strong leadership identity and vision. You're seen as a natural leader who inspires and guides others."
+                  : assessment.leadership_dna_mean >= 3.0
+                  ? "You're developing your leadership identity. Continue building confidence in your vision and influence."
+                  : "Focus on clarifying your leadership vision and practicing influence skills. Seek mentorship from established leaders.",
+                coachingTips: [
+                  "Create opportunities for athlete to lead team meetings or practice sessions",
+                  "Help them articulate their personal leadership philosophy",
+                  "Provide feedback on how their actions inspire (or don't inspire) teammates"
+                ],
+                riskFlag: assessment.leadership_dna_mean < 3.0,
+              }}
+              showCoachingTips={userRole === "coach" || userRole === "admin"}
+            />
+            
+            <DomainExplanationCard
+              explanation={{
+                domain: "excellence",
+                label: "Excellence",
+                score: assessment.excellence_mean || 0,
+                description: "Your commitment to high standards, continuous improvement, and delivering quality performance consistently.",
+                sampleQuestions: [
+                  "I consistently strive to improve my skills",
+                  "I hold myself to high standards in everything I do",
+                  "I seek feedback to enhance my performance"
+                ],
+                interpretation: assessment.excellence_mean >= 4.0
+                  ? "You maintain exceptional standards and continuously push for improvement. Your commitment to excellence is evident."
+                  : assessment.excellence_mean >= 3.0
+                  ? "You demonstrate good commitment to quality and growth. Continue seeking ways to elevate your performance."
+                  : "Develop more consistent standards and seek regular feedback. Excellence requires daily commitment to improvement.",
+                coachingTips: [
+                  "Set specific, measurable performance goals together",
+                  "Create a feedback loop with regular check-ins",
+                  "Celebrate small wins while maintaining high expectations"
+                ],
+                riskFlag: assessment.excellence_mean < 3.0,
+              }}
+              showCoachingTips={userRole === "coach" || userRole === "admin"}
+            />
+            
+            <DomainExplanationCard
+              explanation={{
+                domain: "accountability",
+                label: "Accountability",
+                score: assessment.accountability_mean || 0,
+                description: "Taking ownership of commitments, being reliable, and holding yourself and others to agreed-upon standards.",
+                sampleQuestions: [
+                  "I follow through on my commitments consistently",
+                  "I take responsibility for my mistakes",
+                  "I hold teammates accountable in constructive ways"
+                ],
+                interpretation: assessment.accountability_mean >= 4.0
+                  ? "You excel at taking ownership and following through. Teammates can depend on you to deliver on your promises."
+                  : assessment.accountability_mean >= 3.0
+                  ? "You generally follow through on commitments. Work on consistency and proactively addressing shortfalls."
+                  : "Focus on reliability and ownership. Start with small commitments and build a track record of follow-through.",
+                coachingTips: [
+                  "Use specific examples of when they did/didn't follow through",
+                  "Create accountability partnerships with teammates",
+                  "Teach them to anticipate obstacles and communicate proactively"
+                ],
+                riskFlag: assessment.accountability_mean < 3.0,
+              }}
+              showCoachingTips={userRole === "coach" || userRole === "admin"}
+            />
+            
+            <DomainExplanationCard
+              explanation={{
+                domain: "discipline",
+                label: "Discipline",
+                score: assessment.discipline_mean || 0,
+                description: "Consistent routines, self-control, and the ability to delay gratification for long-term goals.",
+                sampleQuestions: [
+                  "I maintain consistent daily routines",
+                  "I resist distractions to stay focused on goals",
+                  "I manage my time effectively"
+                ],
+                interpretation: assessment.discipline_mean >= 4.0
+                  ? "You demonstrate exceptional self-control and consistency. Your routines and focus drive sustained performance."
+                  : assessment.discipline_mean >= 3.0
+                  ? "You have good foundational discipline. Continue building consistent habits and managing distractions."
+                  : "Work on establishing basic routines and time management. Discipline is built through small daily choices.",
+                coachingTips: [
+                  "Help them design a sustainable daily routine",
+                  "Identify and address specific sources of distraction",
+                  "Track progress on discipline-related behaviors weekly"
+                ],
+                riskFlag: assessment.discipline_mean < 3.0,
+              }}
+              showCoachingTips={userRole === "coach" || userRole === "admin"}
+            />
+            
+            <DomainExplanationCard
+              explanation={{
+                domain: "belonging",
+                label: "Belonging & Impact",
+                score: assessment.belonging_mean || 0,
+                description: "Creating inclusive environments, building strong relationships, and making others feel valued and connected.",
+                sampleQuestions: [
+                  "I actively include others and make them feel valued",
+                  "I build strong relationships across the team",
+                  "I create a positive team culture"
+                ],
+                interpretation: assessment.belonging_mean >= 4.0
+                  ? "You excel at creating inclusive environments and building connections. Your presence strengthens team cohesion."
+                  : assessment.belonging_mean >= 3.0
+                  ? "You contribute to team culture positively. Continue being intentional about inclusion and relationship-building."
+                  : "Focus on actively including others and strengthening connections. Small gestures of recognition go a long way.",
+                coachingTips: [
+                  "Assign them as a buddy/mentor for new team members",
+                  "Highlight specific moments when they made others feel included",
+                  "Encourage them to initiate team-building activities"
+                ],
+                riskFlag: assessment.belonging_mean < 3.0,
+              }}
+              showCoachingTips={userRole === "coach" || userRole === "admin"}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Trend Analysis */}
+        {previousAssessment && (
+          <div className="mb-8">
+            <TrendAnalysisCard
+              current={{
+                timepoint: assessment.timepoint,
+                composite: assessment.final_composite_mean || assessment.composite_mean,
+                leadership_dna: assessment.leadership_dna_mean,
+                excellence: assessment.excellence_mean,
+                accountability: assessment.accountability_mean,
+                discipline: assessment.discipline_mean,
+                belonging: assessment.belonging_mean,
+                classification: assessment.classification,
+              }}
+              previous={{
+                timepoint: previousAssessment.timepoint,
+                composite: previousAssessment.final_composite_mean || previousAssessment.composite_mean,
+                leadership_dna: previousAssessment.leadership_dna_mean,
+                excellence: previousAssessment.excellence_mean,
+                accountability: previousAssessment.accountability_mean,
+                discipline: previousAssessment.discipline_mean,
+                belonging: previousAssessment.belonging_mean,
+                classification: previousAssessment.classification,
+              }}
+            />
+          </div>
+        )}
 
         {/* Insights Section */}
         {assessment.coaching_insights && assessment.coaching_insights.length > 0 && (

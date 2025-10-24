@@ -1,1 +1,7 @@
 project_id = "ijriqmtuyofjymedtjsa"
+
+[functions.send-announcement]
+verify_jwt = false
+
+[functions.notify-assessment-completion]
+verify_jwt = false

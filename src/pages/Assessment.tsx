@@ -232,9 +232,24 @@ const Assessment = () => {
 
       if (error) throw error;
 
+      // Trigger notification edge function
+      const { error: notificationError } = await supabase.functions.invoke(
+        "notify-assessment-completion",
+        {
+          body: {
+            assessment_id: assessment.id,
+            user_id: user.id,
+          },
+        }
+      );
+
+      if (notificationError) {
+        console.error("Error sending notifications:", notificationError);
+      }
+
       toast({
         title: "Assessment Complete!",
-        description: "Your responses have been saved. Viewing your results...",
+        description: "Your responses have been saved. Notifications sent to your team.",
       });
 
       navigate(`/results?assessment_id=${assessment.id}`);

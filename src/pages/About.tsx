@@ -62,7 +62,7 @@ const About = () => {
     <div className="min-h-screen bg-background">
       {/* Navigation */}
       <nav className="sticky top-0 z-20 bg-background/80 backdrop-blur-sm border-b border-border">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 py-4 flex gap-2">
           <Button
             variant="ghost"
             onClick={() => navigate("/")}
@@ -70,6 +70,12 @@ const About = () => {
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Home
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate("/our-story")}
+          >
+            Our Story
           </Button>
         </div>
       </nav>

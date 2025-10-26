@@ -73,6 +73,14 @@ const Index = () => {
             </Button>
             <Button 
               size="lg" 
+              variant="outline"
+              className="bg-background/20 backdrop-blur-sm text-primary-foreground border border-primary-foreground/30 hover:bg-background/30 w-full sm:w-auto px-8"
+              onClick={() => navigate("/our-story")}
+            >
+              Our Story
+            </Button>
+            <Button 
+              size="lg" 
               variant="secondary"
               className="bg-background/20 backdrop-blur-sm text-primary-foreground border border-primary-foreground/30 hover:bg-background/30 w-full sm:w-auto px-10"
               onClick={() => navigate("/about")}

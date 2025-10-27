@@ -15,9 +15,8 @@ const OurStory = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative min-h-[50vh] bg-gradient-hero overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.15),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,hsl(var(--accent)/0.15),transparent_50%)]" />
+      <section className="relative min-h-[50vh] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.1),transparent_70%)]" />
         
         <div className="container relative z-10 mx-auto px-4 py-12">
           <Link to="/" className="inline-block mb-8 animate-fade-in">
@@ -25,10 +24,10 @@ const OurStory = () => {
           </Link>
           
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-primary-foreground mb-6 animate-fade-in">
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-fade-in">
               Our Story — Why Leadership Matters
             </h1>
-            <p className="text-xl md:text-2xl text-primary-foreground/90 animate-fade-in" style={{ animationDelay: '100ms' }}>
+            <p className="text-xl md:text-2xl text-white/90 animate-fade-in" style={{ animationDelay: '100ms' }}>
               Performance means little without purpose.
             </p>
           </div>
@@ -45,31 +44,30 @@ const OurStory = () => {
       </section>
 
       {/* Founding Story Section */}
-      <section className="py-20 bg-gradient-to-br from-primary/5 via-accent/5 to-success/5 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.1),transparent_50%)]" />
+      <section className="py-20 bg-slate-50 relative overflow-hidden">
         <div className="container relative mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <Badge className="mb-6 bg-accent/10 text-accent-foreground border-accent/20">
+            <Badge className="mb-6 bg-blue-100 text-blue-700 border-blue-200">
               <Target className="mr-2 h-4 w-4" />
               Where It All Began
             </Badge>
             
-            <Card className="mb-8 shadow-elegant border-l-4 border-accent">
+            <Card className="mb-8 shadow-lg border-l-4 border-blue-500 bg-white">
               <CardContent className="p-8">
-                <blockquote className="text-2xl md:text-3xl font-semibold text-foreground italic">
+                <blockquote className="text-2xl md:text-3xl font-semibold text-slate-800 italic">
                   "Talent can take you far, but leadership determines how far you'll take yourself and others."
                 </blockquote>
               </CardContent>
             </Card>
 
-            <div className="space-y-6 text-lg text-muted-foreground">
+            <div className="space-y-6 text-lg text-slate-700">
               <p>
                 I've been around sports my entire life as an athlete, a coach, and now as someone dedicated to developing athletic leaders.
               </p>
               <p>
                 There was a moment that changed everything for me:
               </p>
-              <p className="font-medium text-foreground">
+              <p className="font-medium text-slate-900">
                 I realized that talent can take you far, but leadership determines how far you'll take yourself and others.
               </p>
               <p>
@@ -77,15 +75,15 @@ const OurStory = () => {
               </p>
             </div>
 
-            <Card className="mt-8 bg-gradient-to-br from-accent/10 to-primary/10 border-2 border-accent/20 shadow-elegant">
+            <Card className="mt-8 bg-white border-2 border-blue-200 shadow-lg">
               <CardContent className="p-8">
-                <p className="text-xl font-semibold text-foreground mb-4">
+                <p className="text-xl font-semibold text-slate-900 mb-4">
                   That realization sparked the creation of the Fly.te Leadership Development Index (FLDI) — a system designed to help student-athletes see themselves clearly, grow intentionally, and lead authentically.
                 </p>
-                <p className="text-lg text-muted-foreground">
+                <p className="text-lg text-slate-700">
                   Fly.teDNA was born out of one simple but powerful belief:
                 </p>
-                <p className="text-2xl font-bold text-primary mt-4">
+                <p className="text-2xl font-bold text-blue-600 mt-4">
                   Performance means little without purpose.
                 </p>
               </CardContent>
@@ -95,21 +93,20 @@ const OurStory = () => {
       </section>
 
       {/* Founder's Background Section */}
-      <section className="py-20 bg-accent/5 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,hsl(var(--success)/0.1),transparent_50%)]" />
+      <section className="py-20 bg-white relative overflow-hidden">
         <div className="container relative mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <Badge className="mb-6 bg-primary/10 text-primary-foreground border-primary/20">
+            <Badge className="mb-6 bg-orange-100 text-orange-700 border-orange-200">
               <Award className="mr-2 h-4 w-4" />
               The Person Behind the Vision
             </Badge>
 
             <div className="grid md:grid-cols-2 gap-8 items-center mb-8">
-              <div className="space-y-6 text-lg text-muted-foreground">
-                <h2 className="text-3xl md:text-4xl font-bold text-foreground">
+              <div className="space-y-6 text-lg text-slate-700">
+                <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
                   LeRon Williams
                 </h2>
-                <p className="text-xl font-semibold text-primary">
+                <p className="text-xl font-semibold text-blue-600">
                   Founder of Fly.te Athletics and creator of the Fly.te Leadership Development Index
                 </p>
                 <p>
@@ -118,20 +115,20 @@ const OurStory = () => {
                 <p>
                   After years in athletics and higher education — coaching, mentoring, and directing multicultural and leadership programs — I saw a common thread:
                 </p>
-                <p className="font-medium text-foreground">
+                <p className="font-medium text-slate-900">
                   Young people needed more than motivation; they needed leadership.
                 </p>
               </div>
               <div className="relative">
-                <div className="aspect-square rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 border-2 border-primary/30 shadow-elegant flex items-center justify-center">
-                  <Award className="h-24 w-24 text-primary/40" />
+                <div className="aspect-square rounded-lg bg-gradient-to-br from-blue-50 to-orange-50 border-2 border-blue-200 shadow-lg flex items-center justify-center">
+                  <Award className="h-24 w-24 text-blue-300" />
                 </div>
               </div>
             </div>
 
-            <Card className="shadow-elegant border-l-4 border-primary hover:scale-105 transition-all duration-300">
+            <Card className="shadow-lg border-l-4 border-blue-500 hover:scale-105 transition-all duration-300 bg-white">
               <CardContent className="p-8">
-                <p className="text-xl font-semibold text-foreground">
+                <p className="text-xl font-semibold text-slate-900">
                   I built Fly.teDNA to merge my two worlds — athletic performance and leadership psychology — giving student-athletes the tools to understand who they are beyond the scoreboard.
                 </p>
               </CardContent>
@@ -141,20 +138,19 @@ const OurStory = () => {
       </section>
 
       {/* Mission Evolution Section */}
-      <section className="py-20 bg-gradient-to-br from-success/10 via-background to-primary/10 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--accent)/0.1),transparent_50%)]" />
+      <section className="py-20 bg-slate-50 relative overflow-hidden">
         <div className="container relative mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <Badge className="mb-6 bg-success/10 text-success-foreground border-success/20">
+            <Badge className="mb-6 bg-green-100 text-green-700 border-green-200">
               <TrendingUp className="mr-2 h-4 w-4" />
               From Vision to Framework
             </Badge>
 
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-8">
               Mission Evolution
             </h2>
 
-            <div className="space-y-6 text-lg text-muted-foreground mb-8">
+            <div className="space-y-6 text-lg text-slate-700 mb-8">
               <p>
                 What started as a simple leadership conversation with athletes and professors, grew into a structured, research-informed system of development.
               </p>
@@ -163,18 +159,18 @@ const OurStory = () => {
               </p>
             </div>
 
-            <Card className="mb-6 bg-gradient-to-br from-primary/10 to-accent/10 border-2 border-primary/20 shadow-elegant">
+            <Card className="mb-6 bg-white border-2 border-blue-200 shadow-lg">
               <CardContent className="p-8">
-                <p className="text-2xl font-bold text-primary mb-4">
+                <p className="text-2xl font-bold text-blue-600 mb-4">
                   The mission has stayed the same:
                 </p>
-                <p className="text-xl font-semibold text-foreground">
+                <p className="text-xl font-semibold text-slate-900">
                   to bridge the gap between performance and personal growth.
                 </p>
               </CardContent>
             </Card>
 
-            <p className="text-lg text-muted-foreground">
+            <p className="text-lg text-slate-700">
               But the tools have evolved — from coaching sessions and camp workshops to a full digital platform with leadership assessments, growth profiles, and 360° feedback options for student-athletes and teams.
             </p>
           </div>
@@ -182,27 +178,26 @@ const OurStory = () => {
       </section>
 
       {/* Key Milestones Timeline Section */}
-      <section className="py-20 bg-primary/5 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,hsl(var(--accent)/0.1),transparent_50%)]" />
+      <section className="py-20 bg-white relative overflow-hidden">
         <div className="container relative mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <Badge className="mb-6 bg-accent/10 text-accent-foreground border-accent/20">
+            <Badge className="mb-6 bg-purple-100 text-purple-700 border-purple-200">
               <Calendar className="mr-2 h-4 w-4" />
               Our Journey
             </Badge>
 
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-12">
               Key Milestones
             </h2>
 
             <div className="space-y-8">
-              <Card className="shadow-card border-l-4 border-primary hover:shadow-elegant transition-all duration-300 animate-fade-in">
+              <Card className="shadow-md border-l-4 border-blue-500 hover:shadow-lg transition-all duration-300 animate-fade-in bg-white">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
-                    <Badge className="bg-primary text-primary-foreground shrink-0">2023</Badge>
+                    <Badge className="bg-blue-600 text-white shrink-0">2023</Badge>
                     <div>
-                      <p className="text-lg font-semibold text-foreground mb-2">The Beginning</p>
-                      <p className="text-muted-foreground">
+                      <p className="text-lg font-semibold text-slate-900 mb-2">The Beginning</p>
+                      <p className="text-slate-700">
                         The idea for Fly.teDNA was born during leadership sessions with WIU student-athletes.
                       </p>
                     </div>
@@ -210,13 +205,13 @@ const OurStory = () => {
                 </CardContent>
               </Card>
 
-              <Card className="shadow-card border-l-4 border-accent hover:shadow-elegant transition-all duration-300 animate-fade-in" style={{ animationDelay: '100ms' }}>
+              <Card className="shadow-md border-l-4 border-orange-500 hover:shadow-lg transition-all duration-300 animate-fade-in bg-white" style={{ animationDelay: '100ms' }}>
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
-                    <Badge className="bg-accent text-accent-foreground shrink-0">2024</Badge>
+                    <Badge className="bg-orange-600 text-white shrink-0">2024</Badge>
                     <div>
-                      <p className="text-lg font-semibold text-foreground mb-2">Framework Development</p>
-                      <p className="text-muted-foreground">
+                      <p className="text-lg font-semibold text-slate-900 mb-2">Framework Development</p>
+                      <p className="text-slate-700">
                         Development of the Fly.te Leadership Development Index (FLDI) — a 30-question assessment designed to measure leadership traits like accountability, awareness, and growth mindset.
                       </p>
                     </div>
@@ -224,13 +219,13 @@ const OurStory = () => {
                 </CardContent>
               </Card>
 
-              <Card className="shadow-card border-l-4 border-success hover:shadow-elegant transition-all duration-300 animate-fade-in" style={{ animationDelay: '200ms' }}>
+              <Card className="shadow-md border-l-4 border-green-500 hover:shadow-lg transition-all duration-300 animate-fade-in bg-white" style={{ animationDelay: '200ms' }}>
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
-                    <Badge className="bg-success text-success-foreground shrink-0">2025</Badge>
+                    <Badge className="bg-green-600 text-white shrink-0">2025</Badge>
                     <div>
-                      <p className="text-lg font-semibold text-foreground mb-2">Pilot Programs</p>
-                      <p className="text-muted-foreground">
+                      <p className="text-lg font-semibold text-slate-900 mb-2">Pilot Programs</p>
+                      <p className="text-slate-700">
                         Pilot programs launched with Western Illinois University athletic teams to measure athlete leadership DNA in real team environments.
                       </p>
                     </div>
@@ -238,13 +233,13 @@ const OurStory = () => {
                 </CardContent>
               </Card>
 
-              <Card className="shadow-card border-l-4 border-primary hover:shadow-elegant transition-all duration-300 animate-fade-in" style={{ animationDelay: '300ms' }}>
+              <Card className="shadow-md border-l-4 border-blue-500 hover:shadow-lg transition-all duration-300 animate-fade-in bg-white" style={{ animationDelay: '300ms' }}>
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
-                    <Badge className="bg-primary text-primary-foreground shrink-0">2026</Badge>
+                    <Badge className="bg-blue-600 text-white shrink-0">2026</Badge>
                     <div>
-                      <p className="text-lg font-semibold text-foreground mb-2">Academy Expansion</p>
-                      <p className="text-muted-foreground">
+                      <p className="text-lg font-semibold text-slate-900 mb-2">Academy Expansion</p>
+                      <p className="text-slate-700">
                         Expansion through Fly.te Academy, integrating academic, athletic, and leadership development into one holistic model for youth athletes.
                       </p>
                     </div>
@@ -252,13 +247,13 @@ const OurStory = () => {
                 </CardContent>
               </Card>
 
-              <Card className="shadow-card border-l-4 border-accent hover:shadow-elegant transition-all duration-300 animate-fade-in" style={{ animationDelay: '400ms' }}>
+              <Card className="shadow-md border-l-4 border-purple-500 hover:shadow-lg transition-all duration-300 animate-fade-in bg-white" style={{ animationDelay: '400ms' }}>
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
-                    <Badge className="bg-accent text-accent-foreground shrink-0">Next</Badge>
+                    <Badge className="bg-purple-600 text-white shrink-0">Next</Badge>
                     <div>
-                      <p className="text-lg font-semibold text-foreground mb-2">Digital Platform</p>
-                      <p className="text-muted-foreground">
+                      <p className="text-lg font-semibold text-slate-900 mb-2">Digital Platform</p>
+                      <p className="text-slate-700">
                         Full integration into a mobile-friendly portal where athletes, coaches, and parents can track leadership growth in real time.
                       </p>
                     </div>
@@ -271,58 +266,57 @@ const OurStory = () => {
       </section>
 
       {/* Personal Anecdotes Section */}
-      <section className="py-20 bg-gradient-to-br from-accent/5 via-success/5 to-primary/5 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.1),transparent_50%)]" />
+      <section className="py-20 bg-slate-50 relative overflow-hidden">
         <div className="container relative mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <Badge className="mb-6 bg-success/10 text-success-foreground border-success/20">
+            <Badge className="mb-6 bg-red-100 text-red-700 border-red-200">
               <Heart className="mr-2 h-4 w-4" />
               Why This Work Matters
             </Badge>
 
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-8">
               I've watched athletes transform...
             </h2>
 
-            <p className="text-lg text-muted-foreground mb-8">
+            <p className="text-lg text-slate-700 mb-8">
               ...not because they became more talented, but because they became more aware.
             </p>
 
             <div className="grid md:grid-cols-3 gap-6 mb-8">
-              <Card className="shadow-elegant bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-primary/20 hover:scale-105 transition-all duration-300">
+              <Card className="shadow-lg bg-white border-2 border-blue-200 hover:scale-105 transition-all duration-300">
                 <CardContent className="p-6">
-                  <div className="text-6xl text-primary/20 mb-4">"</div>
-                  <p className="text-lg font-semibold text-foreground">
+                  <div className="text-6xl text-blue-200 mb-4">"</div>
+                  <p className="text-lg font-semibold text-slate-900">
                     I've seen the quiet athlete find her voice.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="shadow-elegant bg-gradient-to-br from-accent/10 to-accent/5 border-2 border-accent/20 hover:scale-105 transition-all duration-300">
+              <Card className="shadow-lg bg-white border-2 border-orange-200 hover:scale-105 transition-all duration-300">
                 <CardContent className="p-6">
-                  <div className="text-6xl text-accent/20 mb-4">"</div>
-                  <p className="text-lg font-semibold text-foreground">
+                  <div className="text-6xl text-orange-200 mb-4">"</div>
+                  <p className="text-lg font-semibold text-slate-900">
                     The frustrated player turn feedback into fuel.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="shadow-elegant bg-gradient-to-br from-success/10 to-success/5 border-2 border-success/20 hover:scale-105 transition-all duration-300">
+              <Card className="shadow-lg bg-white border-2 border-green-200 hover:scale-105 transition-all duration-300">
                 <CardContent className="p-6">
-                  <div className="text-6xl text-success/20 mb-4">"</div>
-                  <p className="text-lg font-semibold text-foreground">
+                  <div className="text-6xl text-green-200 mb-4">"</div>
+                  <p className="text-lg font-semibold text-slate-900">
                     The confident captain learn humility and grow even stronger.
                   </p>
                 </CardContent>
               </Card>
             </div>
 
-            <Card className="shadow-elegant bg-gradient-to-br from-primary/10 to-accent/10 border-2 border-primary/20">
+            <Card className="shadow-lg bg-white border-2 border-blue-200">
               <CardContent className="p-8">
-                <p className="text-xl md:text-2xl font-bold text-foreground mb-4">
+                <p className="text-xl md:text-2xl font-bold text-slate-900 mb-4">
                   Those are the moments that remind me why Fly.teDNA matters.
                 </p>
-                <p className="text-lg text-muted-foreground italic">
+                <p className="text-lg text-slate-700 italic">
                   Because leadership isn't built in the spotlight — it's forged in reflection, accountability, and action.
                 </p>
               </CardContent>
@@ -332,70 +326,69 @@ const OurStory = () => {
       </section>
 
       {/* Research Foundation Section */}
-      <section className="py-20 bg-primary/10 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,hsl(var(--success)/0.1),transparent_50%)]" />
+      <section className="py-20 bg-white relative overflow-hidden">
         <div className="container relative mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <Badge className="mb-6 bg-primary/10 text-primary-foreground border-primary/20">
+            <Badge className="mb-6 bg-indigo-100 text-indigo-700 border-indigo-200">
               <BookOpen className="mr-2 h-4 w-4" />
               Research-Backed Framework
             </Badge>
 
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-8">
               Research Foundation
             </h2>
 
-            <p className="text-lg text-muted-foreground mb-8">
+            <p className="text-lg text-slate-700 mb-8">
               Fly.teDNA is grounded in the principles of leadership development, feedback theory, and student-athlete identity research.
             </p>
 
             <div className="grid md:grid-cols-3 gap-6 mb-8">
-              <Card className="shadow-card border-2 border-primary/20 hover:shadow-elegant transition-all duration-300">
+              <Card className="shadow-md border-2 border-blue-200 hover:shadow-lg transition-all duration-300 bg-white">
                 <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <BookOpen className="h-6 w-6 text-primary" />
+                  <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center mb-4">
+                    <BookOpen className="h-6 w-6 text-blue-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-3">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-3">
                     Kegan's Constructive Developmental Theory
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-slate-700">
                     Focusing on how people grow through reflection and meaning-making.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="shadow-card border-2 border-accent/20 hover:shadow-elegant transition-all duration-300">
+              <Card className="shadow-md border-2 border-orange-200 hover:shadow-lg transition-all duration-300 bg-white">
                 <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center mb-4">
-                    <TrendingUp className="h-6 w-6 text-accent" />
+                  <div className="h-12 w-12 rounded-full bg-orange-100 flex items-center justify-center mb-4">
+                    <TrendingUp className="h-6 w-6 text-orange-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-3">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-3">
                     Astin's Input-Environment-Output Model
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-slate-700">
                     Emphasizing how experiences shape student outcomes.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="shadow-card border-2 border-success/20 hover:shadow-elegant transition-all duration-300">
+              <Card className="shadow-md border-2 border-green-200 hover:shadow-lg transition-all duration-300 bg-white">
                 <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-full bg-success/10 flex items-center justify-center mb-4">
-                    <Award className="h-6 w-6 text-success" />
+                  <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center mb-4">
+                    <Award className="h-6 w-6 text-green-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-3">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-3">
                     Abes, Jones & McEwen's Model
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-slate-700">
                     Supporting holistic growth beyond athletic identity.
                   </p>
                 </CardContent>
               </Card>
             </div>
 
-            <Card className="shadow-elegant bg-gradient-to-br from-primary/10 to-accent/10 border-2 border-primary/20">
+            <Card className="shadow-lg bg-white border-2 border-blue-200">
               <CardContent className="p-8">
-                <p className="text-xl font-semibold text-foreground">
+                <p className="text-xl font-semibold text-slate-900">
                   The FLDI blends these academic frameworks with the real-world insights of coaching and performance training, offering a balanced approach to leadership development that is both personal and measurable.
                 </p>
               </CardContent>
@@ -405,27 +398,26 @@ const OurStory = () => {
       </section>
 
       {/* Call-to-Action Section */}
-      <section className="py-20 bg-gradient-hero relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.2),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,hsl(var(--accent)/0.2),transparent_50%)]" />
+      <section className="py-20 bg-gradient-to-br from-blue-700 via-blue-600 to-blue-700 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.1),transparent_70%)]" />
         
         <div className="container relative mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
               Join the Movement
             </h2>
-            <p className="text-xl md:text-2xl text-primary-foreground/90 mb-8">
+            <p className="text-xl md:text-2xl text-white/95 mb-8">
               Leadership isn't just a destination — it becomes who you are. A Leader
             </p>
             
-            <div className="space-y-6 text-lg text-primary-foreground/80 mb-8">
+            <div className="space-y-6 text-lg text-white/90 mb-8">
               <p>
                 Fly.teDNA exists to help student-athletes, coaches, and teams grow through feedback, reflection, and accountability.
               </p>
               <p>
                 We're building a culture where leadership is developed with the same precision as performance — through consistent, intentional action.
               </p>
-              <p className="font-medium text-primary-foreground">
+              <p className="font-medium text-white">
                 Whether you're a coach looking to strengthen team culture or a student-athlete ready to discover your leadership potential — this is your invitation to grow with us.
               </p>
               <p className="italic">
@@ -433,19 +425,19 @@ const OurStory = () => {
               </p>
             </div>
 
-            <p className="text-2xl md:text-3xl font-bold text-primary-foreground mb-8">
+            <p className="text-2xl md:text-3xl font-bold text-white mb-8">
               Come take Fly.te with us.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/auth">
-                <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-elegant">
+                <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white shadow-lg">
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/about">
-                <Button size="lg" variant="secondary">
+                <Button size="lg" variant="secondary" className="bg-white hover:bg-slate-100 text-blue-700">
                   Learn More
                 </Button>
               </Link>
@@ -455,9 +447,9 @@ const OurStory = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-background border-t border-border py-8">
+      <footer className="bg-slate-100 border-t border-slate-200 py-8">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-muted-foreground">
+          <p className="text-slate-600">
             © 2025 FLY.TE Academy. All rights reserved.
           </p>
         </div>

@@ -21,7 +21,7 @@ const OurStory = () => {
         
         <div className="container relative z-10 mx-auto px-4 py-12">
           <Link to="/" className="inline-block mb-8 animate-fade-in">
-            <img src={logo} alt="FLY.TE Academy Logo" className="h-16 w-auto" />
+            <img src={logo} alt="FLY.TE Academy Logo" className="h-48 w-auto" />
           </Link>
           
           <div className="max-w-4xl mx-auto text-center">

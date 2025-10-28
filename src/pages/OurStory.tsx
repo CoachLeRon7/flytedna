@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, ArrowLeft, Target, TrendingUp, Heart, Calendar, BookOpen, Award } from "lucide-react";
 import logo from "@/assets/flyte-academy-logo.png";
+import founderPhoto from "@/assets/founder-photo.jpg";
 
 const OurStory = () => {
   useEffect(() => {
@@ -120,9 +121,11 @@ const OurStory = () => {
                 </p>
               </div>
               <div className="relative">
-                <div className="aspect-square rounded-lg bg-gradient-to-br from-blue-50 to-orange-50 border-2 border-blue-200 shadow-lg flex items-center justify-center">
-                  <Award className="h-24 w-24 text-blue-300" />
-                </div>
+                <img 
+                  src={founderPhoto} 
+                  alt="LeRon Williams - Founder of Fly.te Athletics" 
+                  className="aspect-square rounded-lg border-2 border-blue-200 shadow-lg object-cover w-full"
+                />
               </div>
             </div>
 

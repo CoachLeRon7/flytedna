@@ -9,8 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Users, Palette, Save, Trash2 } from "lucide-react";
+import { Plus, Edit, Users, Palette, Save, Trash2, Archive, AlertTriangle } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Switch } from "@/components/ui/switch";
 
 interface Team {
   id: string;
@@ -29,6 +31,7 @@ interface Profile {
   email: string;
   sport: string | null;
   team_id: string | null;
+  is_active: boolean;
 }
 
 export const TeamManagementDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
@@ -36,6 +39,10 @@ export const TeamManagementDialog = ({ open, onOpenChange }: { open: boolean; on
   const [coaches, setCoaches] = useState<Profile[]>([]);
   const [students, setStudents] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [studentToDelete, setStudentToDelete] = useState<Profile | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const { toast } = useToast();
 
   // New team form state
@@ -82,7 +89,7 @@ export const TeamManagementDialog = ({ open, onOpenChange }: { open: boolean; on
       setCoaches(coachProfiles || []);
     }
 
-    // Load students
+    // Load students (both active and archived)
     const { data: studentRoles } = await supabase
       .from("user_roles")
       .select("user_id")
@@ -94,7 +101,9 @@ export const TeamManagementDialog = ({ open, onOpenChange }: { open: boolean; on
       const { data: studentProfiles } = await supabase
         .from("profiles")
         .select("*")
-        .in("id", studentIds);
+        .in("id", studentIds)
+        .order("is_active", { ascending: false })
+        .order("first_name");
       setStudents(studentProfiles || []);
     }
 
@@ -261,6 +270,95 @@ export const TeamManagementDialog = ({ open, onOpenChange }: { open: boolean; on
 
     setEditingTeam({ ...editingTeam, coach_ids: updatedCoachIds });
   };
+
+  const handleArchiveStudent = async (studentId: string, studentName: string) => {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ is_active: false, team_id: null })
+      .eq("id", studentId);
+
+    if (error) {
+      toast({
+        title: "Error archiving student",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Student archived",
+      description: `${studentName} has been archived and removed from their team`,
+    });
+
+    loadData();
+  };
+
+  const handleRestoreStudent = async (studentId: string, studentName: string) => {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ is_active: true })
+      .eq("id", studentId);
+
+    if (error) {
+      toast({
+        title: "Error restoring student",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Student restored",
+      description: `${studentName} has been restored to active status`,
+    });
+
+    loadData();
+  };
+
+  const handleDeleteStudent = async () => {
+    if (!studentToDelete || deleteConfirmText !== "DELETE") {
+      toast({
+        title: "Confirmation required",
+        description: 'Please type "DELETE" to confirm permanent deletion',
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error } = await supabase
+      .from("profiles")
+      .delete()
+      .eq("id", studentToDelete.id);
+
+    if (error) {
+      toast({
+        title: "Error deleting student",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Student permanently deleted",
+      description: `${studentToDelete.first_name} ${studentToDelete.last_name}'s account and all associated data has been permanently deleted`,
+    });
+
+    setDeleteDialogOpen(false);
+    setStudentToDelete(null);
+    setDeleteConfirmText("");
+    loadData();
+  };
+
+  const openDeleteDialog = (student: Profile) => {
+    setStudentToDelete(student);
+    setDeleteConfirmText("");
+    setDeleteDialogOpen(true);
+  };
+
+  const filteredStudents = showArchived ? students : students.filter(s => s.is_active);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -487,8 +585,20 @@ export const TeamManagementDialog = ({ open, onOpenChange }: { open: boolean; on
           <TabsContent value="students" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Student Team Assignments</CardTitle>
-                <CardDescription>Assign student-athletes to their teams</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Student Team Assignments</CardTitle>
+                    <CardDescription>Assign student-athletes to their teams</CardDescription>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="show-archived">Show Archived</Label>
+                    <Switch
+                      id="show-archived"
+                      checked={showArchived}
+                      onCheckedChange={setShowArchived}
+                    />
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -496,17 +606,24 @@ export const TeamManagementDialog = ({ open, onOpenChange }: { open: boolean; on
                     <TableRow>
                       <TableHead>Student Name</TableHead>
                       <TableHead>Sport</TableHead>
+                      <TableHead>Status</TableHead>
                       <TableHead>Current Team</TableHead>
                       <TableHead>Assign to Team</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {students.map((student) => (
-                      <TableRow key={student.id}>
+                    {filteredStudents.map((student) => (
+                      <TableRow key={student.id} className={!student.is_active ? "opacity-60" : ""}>
                         <TableCell className="font-medium">
                           {student.first_name} {student.last_name}
                         </TableCell>
                         <TableCell>{student.sport || "Not set"}</TableCell>
+                        <TableCell>
+                          <Badge variant={student.is_active ? "default" : "secondary"}>
+                            {student.is_active ? "Active" : "Archived"}
+                          </Badge>
+                        </TableCell>
                         <TableCell>
                           {student.team_id ? (
                             <Badge>{teams.find(t => t.id === student.team_id)?.name}</Badge>
@@ -515,22 +632,67 @@ export const TeamManagementDialog = ({ open, onOpenChange }: { open: boolean; on
                           )}
                         </TableCell>
                         <TableCell>
-                          <Select
-                            value={student.team_id || "none"}
-                            onValueChange={(value) => handleAssignStudentToTeam(student.id, value === "none" ? null : value)}
-                          >
-                            <SelectTrigger className="w-[200px]">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">No team</SelectItem>
-                              {teams.map((team) => (
-                                <SelectItem key={team.id} value={team.id}>
-                                  {team.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          {student.is_active ? (
+                            <Select
+                              value={student.team_id || "none"}
+                              onValueChange={(value) => handleAssignStudentToTeam(student.id, value === "none" ? null : value)}
+                            >
+                              <SelectTrigger className="w-[200px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">No team</SelectItem>
+                                {teams.map((team) => (
+                                  <SelectItem key={team.id} value={team.id}>
+                                    {team.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">Archived</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            {student.is_active ? (
+                              <>
+                                <Button
+                                  onClick={() => handleArchiveStudent(student.id, `${student.first_name} ${student.last_name}`)}
+                                  variant="outline"
+                                  size="sm"
+                                >
+                                  <Archive className="h-4 w-4 mr-1" />
+                                  Archive
+                                </Button>
+                                <Button
+                                  onClick={() => openDeleteDialog(student)}
+                                  variant="destructive"
+                                  size="sm"
+                                >
+                                  <Trash2 className="h-4 w-4 mr-1" />
+                                  Delete
+                                </Button>
+                              </>
+                            ) : (
+                              <>
+                                <Button
+                                  onClick={() => handleRestoreStudent(student.id, `${student.first_name} ${student.last_name}`)}
+                                  variant="outline"
+                                  size="sm"
+                                >
+                                  Restore
+                                </Button>
+                                <Button
+                                  onClick={() => openDeleteDialog(student)}
+                                  variant="destructive"
+                                  size="sm"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -541,6 +703,71 @@ export const TeamManagementDialog = ({ open, onOpenChange }: { open: boolean; on
           </TabsContent>
         </Tabs>
       </DialogContent>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              Permanently Delete Student?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <div className="text-foreground font-semibold">
+                WARNING: This action cannot be undone!
+              </div>
+              
+              <div className="text-sm space-y-2">
+                <p>This will permanently delete:</p>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                  <li>All assessments and scores</li>
+                  <li>All growth plans</li>
+                  <li>All peer feedback given and received</li>
+                  <li>All coach assessments</li>
+                  <li>All reflections and notes</li>
+                  <li>Account access</li>
+                </ul>
+              </div>
+
+              {studentToDelete && (
+                <div className="bg-destructive/10 p-3 rounded-md">
+                  <p className="font-semibold">
+                    Student: {studentToDelete.first_name} {studentToDelete.last_name}
+                  </p>
+                  <p className="text-sm text-muted-foreground">{studentToDelete.email}</p>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="delete-confirm">Type "DELETE" to confirm:</Label>
+                <Input
+                  id="delete-confirm"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  placeholder="DELETE"
+                  className="font-mono"
+                />
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setDeleteDialogOpen(false);
+              setStudentToDelete(null);
+              setDeleteConfirmText("");
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteStudent}
+              disabled={deleteConfirmText !== "DELETE"}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete Permanently
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 };

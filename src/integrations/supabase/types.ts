@@ -237,6 +237,13 @@ export type Database = {
             referencedRelation: "profiles_secure"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "assessments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_activity_summary"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       coach_assessments: {
@@ -389,6 +396,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles_secure"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "growth_plans_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_activity_summary"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -608,7 +622,9 @@ export type Database = {
           first_name: string
           id: string
           is_active: boolean | null
+          last_login_at: string | null
           last_name: string
+          login_count: number | null
           sport: string | null
           team_id: string | null
           updated_at: string
@@ -619,7 +635,9 @@ export type Database = {
           first_name: string
           id: string
           is_active?: boolean | null
+          last_login_at?: string | null
           last_name: string
+          login_count?: number | null
           sport?: string | null
           team_id?: string | null
           updated_at?: string
@@ -630,7 +648,9 @@ export type Database = {
           first_name?: string
           id?: string
           is_active?: boolean | null
+          last_login_at?: string | null
           last_name?: string
+          login_count?: number | null
           sport?: string | null
           team_id?: string | null
           updated_at?: string
@@ -677,6 +697,52 @@ export type Database = {
           sport?: string
         }
         Relationships: []
+      }
+      user_activity_log: {
+        Row: {
+          activity_details: Json | null
+          activity_type: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          activity_details?: Json | null
+          activity_type: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          activity_details?: Json | null
+          activity_type?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_activity_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_activity_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_secure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_activity_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_activity_summary"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -758,6 +824,40 @@ export type Database = {
           },
         ]
       }
+      user_activity_summary: {
+        Row: {
+          account_created_at: string | null
+          coach_assessments_given: number | null
+          email: string | null
+          first_name: string | null
+          growth_plans_count: number | null
+          is_active: boolean | null
+          last_assessment_date: string | null
+          last_coach_assessment_date: string | null
+          last_growth_plan_update: string | null
+          last_login_at: string | null
+          last_name: string | null
+          last_peer_assessment_given: string | null
+          login_count: number | null
+          peer_assessments_given: number | null
+          peer_assessments_received: number | null
+          role: Database["public"]["Enums"]["user_role"] | null
+          sport: string | null
+          team_id: string | null
+          team_name: string | null
+          total_assessments: number | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_profiles_team"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       are_teammates: {
@@ -811,6 +911,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      refresh_user_activity_summary: { Args: never; Returns: undefined }
     }
     Enums: {
       assessment_edition: "standard" | "transformational"

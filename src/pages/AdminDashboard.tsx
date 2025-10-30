@@ -14,6 +14,7 @@ import { RoleRequestsManager } from "@/components/admin/RoleRequestsManager";
 import { TeamManagementDialog } from "@/components/admin/TeamManagementDialog";
 import { AnnouncementDialog } from "@/components/admin/AnnouncementDialog";
 import { NotificationBell } from "@/components/NotificationBell";
+import { UserManagementDashboard } from "@/components/admin/UserManagementDashboard";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -201,6 +202,7 @@ export default function AdminDashboard() {
         <Tabs defaultValue="analytics" className="space-y-6">
           <TabsList>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="users">User Management</TabsTrigger>
             <TabsTrigger value="management">System Management</TabsTrigger>
             <TabsTrigger value="export">Export Center</TabsTrigger>
           </TabsList>
@@ -237,6 +239,10 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="users" className="space-y-6">
+            <UserManagementDashboard />
           </TabsContent>
 
           <TabsContent value="management" className="space-y-6">

@@ -912,6 +912,38 @@ export type Database = {
         Returns: undefined
       }
       refresh_user_activity_summary: { Args: never; Returns: undefined }
+      user_activity_summary_rls: {
+        Args: never
+        Returns: {
+          account_created_at: string | null
+          coach_assessments_given: number | null
+          email: string | null
+          first_name: string | null
+          growth_plans_count: number | null
+          is_active: boolean | null
+          last_assessment_date: string | null
+          last_coach_assessment_date: string | null
+          last_growth_plan_update: string | null
+          last_login_at: string | null
+          last_name: string | null
+          last_peer_assessment_given: string | null
+          login_count: number | null
+          peer_assessments_given: number | null
+          peer_assessments_received: number | null
+          role: Database["public"]["Enums"]["user_role"] | null
+          sport: string | null
+          team_id: string | null
+          team_name: string | null
+          total_assessments: number | null
+          user_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "user_activity_summary"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
     }
     Enums: {
       assessment_edition: "standard" | "transformational"

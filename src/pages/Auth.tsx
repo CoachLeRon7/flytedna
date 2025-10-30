@@ -22,6 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useActivityLogger } from "@/hooks/useActivityLogger";
 
 // Validation schemas
 const signInSchema = z.object({
@@ -45,6 +46,7 @@ const signUpSchema = z.object({
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { logActivity } = useActivityLogger();
   const [loading, setLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
@@ -142,6 +144,25 @@ const Auth = () => {
       });
 
       if (error) throw error;
+
+      // Track login activity and update login stats
+      if (data.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('login_count')
+          .eq('id', data.user.id)
+          .single();
+
+        await supabase
+          .from('profiles')
+          .update({ 
+            last_login_at: new Date().toISOString(),
+            login_count: (profile?.login_count || 0) + 1
+          })
+          .eq('id', data.user.id);
+
+        await logActivity('login');
+      }
 
       toast({
         title: "Welcome back!",

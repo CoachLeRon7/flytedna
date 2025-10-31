@@ -99,9 +99,17 @@ const Auth = () => {
 
       if (error) throw error;
 
-      const roleMessage = signUpData.role === 'student' 
-        ? "Welcome to FLDI. Redirecting to your dashboard..."
-        : `Account created! Your ${signUpData.role} role request is pending administrator approval. You'll have student access until approved.`;
+      const roleMessage = (() => {
+        if (signUpData.role === 'student') {
+          return "Welcome to FLDI. Redirecting to your dashboard...";
+        }
+        
+        if (signUpData.role === 'admin') {
+          return "Account created! If this is the first administrator account, you'll have immediate access. Otherwise, your request is pending approval.";
+        }
+        
+        return `Account created! Your ${signUpData.role} role request is pending administrator approval. You'll have student access until approved.`;
+      })();
       
       toast({
         title: "Account created!",

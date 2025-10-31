@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Select,
   SelectContent,
@@ -19,7 +20,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Search, Eye, RefreshCw } from "lucide-react";
+import { Search, Eye, RefreshCw, Trophy } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { UserDetailDrawer } from "./UserDetailDrawer";
@@ -54,6 +55,7 @@ export function UserManagementDashboard() {
   const [statusFilter, setStatusFilter] = useState<string>("active");
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [firstAdminIds, setFirstAdminIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadUsers();
@@ -70,6 +72,16 @@ export function UserManagementDashboard() {
 
       if (error) throw error;
       setUsers(data || []);
+
+      // Load first admin IDs
+      const { data: firstAdmins } = await supabase
+        .from('user_activity_log')
+        .select('user_id')
+        .eq('activity_type', 'first_admin_auto_approved');
+
+      if (firstAdmins) {
+        setFirstAdminIds(new Set(firstAdmins.map(fa => fa.user_id)));
+      }
     } catch (error) {
       console.error('Error loading users:', error);
       toast.error('Failed to load user data');
@@ -265,9 +277,26 @@ export function UserManagementDashboard() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={getRoleBadgeVariant(user.role)}>
-                      {user.role || 'student'}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={getRoleBadgeVariant(user.role)}>
+                        {user.role || 'student'}
+                      </Badge>
+                      {firstAdminIds.has(user.user_id) && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Badge variant="outline" className="bg-purple-50 dark:bg-purple-950 border-purple-200 dark:border-purple-800 gap-1">
+                                <Trophy className="h-3 w-3" />
+                                Founding
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>First Administrator - Auto-approved</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>
                     {user.team_name ? (

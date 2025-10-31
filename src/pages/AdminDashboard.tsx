@@ -8,13 +8,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 import { useToast } from "@/hooks/use-toast";
-import { Compass, Users, TrendingUp, Download, Settings, Shield, MessageSquare, LogOut } from "lucide-react";
+import { Compass, Users, TrendingUp, Download, Settings, Shield, MessageSquare, LogOut, Info } from "lucide-react";
 import logo from "@/assets/flyte-academy-logo.png";
 import { RoleRequestsManager } from "@/components/admin/RoleRequestsManager";
 import { TeamManagementDialog } from "@/components/admin/TeamManagementDialog";
 import { AnnouncementDialog } from "@/components/admin/AnnouncementDialog";
 import { NotificationBell } from "@/components/NotificationBell";
 import { UserManagementDashboard } from "@/components/admin/UserManagementDashboard";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { FirstAdminWelcome } from "@/components/admin/FirstAdminWelcome";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -22,6 +24,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [teamManagementOpen, setTeamManagementOpen] = useState(false);
   const [announcementOpen, setAnnouncementOpen] = useState(false);
+  const [isFirstAdmin, setIsFirstAdmin] = useState(false);
   const [stats, setStats] = useState({
     totalAthletes: 0,
     totalCoaches: 0,
@@ -57,6 +60,18 @@ export default function AdminDashboard() {
       navigate("/");
       return;
     }
+
+      // Check if this user is the first admin
+      const { data: activityLog } = await supabase
+        .from('user_activity_log')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('activity_type', 'first_admin_auto_approved')
+        .single();
+
+      if (activityLog) {
+        setIsFirstAdmin(true);
+      }
 
       await loadDashboardData();
     } catch (error) {
@@ -128,6 +143,8 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-muted/30">
+      <FirstAdminWelcome />
+      
       {/* Header with Admin Branding */}
       <header className="bg-[hsl(var(--admin-accent))] border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -159,6 +176,17 @@ export default function AdminDashboard() {
           <h1 className="text-4xl font-bold mb-2">Global Analytics Dashboard</h1>
           <p className="text-muted-foreground">Monitor program health and leadership development across all teams</p>
         </div>
+
+        {isFirstAdmin && (
+          <Alert className="mb-6 border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
+            <Info className="h-4 w-4" />
+            <AlertTitle>System Administrator</AlertTitle>
+            <AlertDescription>
+              You are the first administrator of this system. Future admin requests will appear in the 
+              System Management tab for your approval.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Program Health Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">

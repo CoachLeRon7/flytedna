@@ -25,6 +25,7 @@ interface RoleRequest {
   requested_role: string;
   status: string;
   created_at: string;
+  reason?: string;
   profiles: {
     first_name: string;
     last_name: string;
@@ -50,12 +51,13 @@ export function RoleRequestsManager() {
     try {
       setLoading(true);
       
-      // Fetch pending requests
+      // Fetch pending and auto-approved requests (to show recent auto-approvals)
       const { data: requestsData, error: requestsError } = await supabase
         .from("pending_role_requests")
         .select("*")
-        .eq("status", "pending")
-        .order("created_at", { ascending: true });
+        .or("status.eq.pending,and(status.eq.approved,reason.ilike.%Auto-approved%)")
+        .order("created_at", { ascending: false })
+        .limit(50);
 
       if (requestsError) throw requestsError;
 
@@ -207,7 +209,7 @@ export function RoleRequestsManager() {
           {requests.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No pending role requests at this time.</p>
+              <p>No role requests at this time.</p>
             </div>
           ) : (
             <Table>
@@ -230,34 +232,47 @@ export function RoleRequestsManager() {
                     <TableCell>{request.profiles.email}</TableCell>
                     <TableCell>{request.profiles.sport || "—"}</TableCell>
                     <TableCell>
-                      <Badge variant={getRoleBadgeVariant(request.requested_role)}>
-                        {request.requested_role}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={getRoleBadgeVariant(request.requested_role)}>
+                          {request.requested_role}
+                        </Badge>
+                        {request.status === 'approved' && request.reason?.includes('Auto-approved') && (
+                          <Badge variant="secondary" className="bg-purple-50 dark:bg-purple-950 border-purple-200 dark:border-purple-800">
+                            Auto-approved (First Admin)
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       {new Date(request.created_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-right space-x-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleApprove(request.id)}
-                        disabled={processing === request.id}
-                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                      >
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Approve
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleRejectClick(request)}
-                        disabled={processing === request.id}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <XCircle className="h-4 w-4 mr-1" />
-                        Reject
-                      </Button>
+                      {request.status === 'pending' ? (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleApprove(request.id)}
+                            disabled={processing === request.id}
+                            className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleRejectClick(request)}
+                            disabled={processing === request.id}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <XCircle className="h-4 w-4 mr-1" />
+                            Reject
+                          </Button>
+                        </>
+                      ) : (
+                        <Badge variant="secondary">Processed</Badge>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

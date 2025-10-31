@@ -7,7 +7,9 @@ export type ActivityType =
   | 'coach_assessment_completed'
   | 'growth_plan_updated'
   | 'profile_updated'
-  | 'team_changed';
+  | 'team_changed'
+  | 'first_admin_auto_approved'
+  | 'first_admin_setup_complete';
 
 export const useActivityLogger = () => {
   const logActivity = async (

@@ -351,22 +351,22 @@ export default function CoachDashboard() {
       <header className="bg-[hsl(var(--coach-accent))] border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           {/* Logo - Always visible */}
-          <div className="flex items-center gap-2 md:gap-4">
+          <div className="flex items-center gap-2 lg:gap-4">
             <img 
               src={logo} 
               alt="FLY.TE Academy Logo" 
-              className="h-16 md:h-24 w-auto cursor-pointer hover:opacity-80 transition-opacity" 
+              className="h-16 lg:h-24 w-auto cursor-pointer hover:opacity-80 transition-opacity" 
               onClick={() => navigate("/")}
             />
-            <div className="hidden md:flex items-center gap-2 text-[hsl(var(--coach-accent-foreground))]">
+            <div className="hidden lg:flex items-center gap-2 text-[hsl(var(--coach-accent-foreground))]">
               <Target className="h-5 w-5" />
               <span className="text-lg font-semibold">Coach</span>
               <Badge variant="secondary" className="ml-2">Build Better Leaders</Badge>
             </div>
           </div>
 
-          {/* Desktop Navigation - Hidden on mobile */}
-          <div className="hidden md:flex items-center gap-2">
+          {/* Desktop Navigation - Hidden on mobile and tablet */}
+          <div className="hidden lg:flex items-center gap-2">
             <NotificationBell />
             <RoleRequestButton />
             {isCoachAndAdmin && (
@@ -385,9 +385,9 @@ export default function CoachDashboard() {
             </Button>
           </div>
 
-          {/* Mobile Menu Button - Visible only on mobile */}
+          {/* Mobile Menu Button - Visible on mobile and tablet */}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild className="md:hidden">
+            <SheetTrigger asChild className="lg:hidden">
               <Button 
                 variant="ghost" 
                 size="icon"

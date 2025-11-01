@@ -142,10 +142,12 @@ const About = () => {
                 return (
                   <Card key={index} className={`shadow-card hover:shadow-elegant transition-all duration-300 hover:scale-105 border-2 ${colors[index % colors.length]}`}>
                     <CardHeader className="pb-3">
-                      <div className={`w-12 h-12 rounded-xl ${colors[index % colors.length]} flex items-center justify-center mb-3 shadow-md`}>
-                        <Icon className={`h-6 w-6 ${iconColors[index % iconColors.length]}`} />
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className={`w-10 h-10 rounded-xl ${colors[index % colors.length]} flex items-center justify-center shadow-md flex-shrink-0`}>
+                          <Icon className={`h-5 w-5 ${iconColors[index % iconColors.length]}`} />
+                        </div>
+                        <CardTitle className="text-base text-foreground">{pillar.title}</CardTitle>
                       </div>
-                      <CardTitle className="text-base text-foreground">{pillar.title}</CardTitle>
                     </CardHeader>
                     <CardContent className="pt-0">
                       <p className="text-sm text-muted-foreground">{pillar.description}</p>

@@ -106,14 +106,14 @@ const About = () => {
       </section>
 
       {/* What Is Section */}
-      <section className="py-20 bg-gradient-to-br from-background via-accent/5 to-background">
+      <section className="py-12 bg-gradient-to-br from-background via-accent/5 to-background">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <div className="inline-block bg-accent/10 px-6 py-2 rounded-full mb-4">
+            <div className="text-center mb-8">
+              <div className="inline-block bg-accent/10 px-6 py-2 rounded-full mb-3">
                 <span className="text-accent font-semibold text-sm uppercase tracking-wide">The Framework</span>
               </div>
-              <h2 className="text-4xl font-bold text-foreground mb-6">
+              <h2 className="text-4xl font-bold text-foreground mb-4">
                 What Is Fly.te Leadership DNA?
               </h2>
               <p className="text-lg text-muted-foreground">
@@ -122,7 +122,7 @@ const About = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
               {pillars.map((pillar, index) => {
                 const Icon = pillar.icon;
                 const colors = [
@@ -141,14 +141,14 @@ const About = () => {
                 ];
                 return (
                   <Card key={index} className={`shadow-card hover:shadow-elegant transition-all duration-300 hover:scale-105 border-2 ${colors[index % colors.length]}`}>
-                    <CardHeader>
-                      <div className={`w-14 h-14 rounded-xl ${colors[index % colors.length]} flex items-center justify-center mb-4 shadow-md`}>
-                        <Icon className={`h-7 w-7 ${iconColors[index % iconColors.length]}`} />
+                    <CardHeader className="pb-3">
+                      <div className={`w-12 h-12 rounded-xl ${colors[index % colors.length]} flex items-center justify-center mb-3 shadow-md`}>
+                        <Icon className={`h-6 w-6 ${iconColors[index % iconColors.length]}`} />
                       </div>
-                      <CardTitle className="text-lg text-foreground">{pillar.title}</CardTitle>
+                      <CardTitle className="text-base text-foreground">{pillar.title}</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground">{pillar.description}</p>
+                    <CardContent className="pt-0">
+                      <p className="text-sm text-muted-foreground">{pillar.description}</p>
                     </CardContent>
                   </Card>
                 );
@@ -156,8 +156,8 @@ const About = () => {
             </div>
 
             <Card className="bg-gradient-accent border-0 shadow-elegant">
-              <CardContent className="py-6 text-center">
-                <p className="text-lg text-accent-foreground font-semibold italic">
+              <CardContent className="py-4 text-center">
+                <p className="text-base text-accent-foreground font-semibold italic">
                   Together, these pillars form the Fly.te Index — a developmental model that transforms leadership from a buzzword into measurable growth.
                 </p>
               </CardContent>

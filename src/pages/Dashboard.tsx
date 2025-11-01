@@ -13,6 +13,8 @@ import { NudgesList } from "@/components/student/NudgesList";
 import { PeerAssessmentPrompt } from "@/components/student/PeerAssessmentPrompt";
 import { TeamSelector } from "@/components/student/TeamSelector";
 import { NotificationBell } from "@/components/NotificationBell";
+import { OrganizationJoinRequest } from "@/components/OrganizationJoinRequest";
+import { useUserOrganization } from "@/hooks/useUserOrganization";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -23,6 +25,7 @@ const Dashboard = () => {
   const [latestAssessment, setLatestAssessment] = useState<any>(null);
   const [assessmentHistory, setAssessmentHistory] = useState<any[]>([]);
   const [stats, setStats] = useState({ assessmentsCompleted: 0, activeGoals: 0 });
+  const { organizations } = useUserOrganization();
 
   useEffect(() => {
     // Check for existing session
@@ -213,6 +216,13 @@ const Dashboard = () => {
             onTeamSelected={() => loadStudentData(user!.id)}
           />
         </div>
+
+        {/* Organization Join Request - Show if not part of any organization */}
+        {organizations.length === 0 && (
+          <div className="mb-8">
+            <OrganizationJoinRequest />
+          </div>
+        )}
 
         {/* Leadership Snapshot */}
         <div className="mb-8">

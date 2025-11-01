@@ -29,6 +29,8 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useUserOrganization } from "@/hooks/useUserOrganization";
 import { ArrowRight } from "lucide-react";
 import { OrganizationManagement } from "@/components/admin/OrganizationManagement";
+import { InvitationManager } from "@/components/admin/InvitationManager";
+import { JoinRequestsManager } from "@/components/admin/JoinRequestsManager";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -424,34 +426,55 @@ export default function AdminDashboard() {
           )}
 
           <TabsContent value="management" className="space-y-6">
-            <RoleRequestsManager />
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  System Management
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button 
-                  className="w-full justify-start" 
-                  variant="outline"
-                  onClick={() => setTeamManagementOpen(true)}
-                >
-                  <Settings className="mr-2 h-4 w-4" />
-                  Configure Teams & Assignments
-                </Button>
-                <Button 
-                  className="w-full justify-start" 
-                  variant="outline"
-                  onClick={() => setAnnouncementOpen(true)}
-                >
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  Send Program Announcements
-                </Button>
-              </CardContent>
-            </Card>
+            <Tabs defaultValue="role-requests" className="space-y-6">
+              <TabsList>
+                <TabsTrigger value="role-requests">Role Requests</TabsTrigger>
+                <TabsTrigger value="invitations">Invite Users</TabsTrigger>
+                <TabsTrigger value="join-requests">Join Requests</TabsTrigger>
+                <TabsTrigger value="system">System</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="role-requests">
+                <RoleRequestsManager />
+              </TabsContent>
+
+              <TabsContent value="invitations">
+                <InvitationManager />
+              </TabsContent>
+
+              <TabsContent value="join-requests">
+                <JoinRequestsManager />
+              </TabsContent>
+
+              <TabsContent value="system">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Shield className="h-5 w-5" />
+                      System Management
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <Button 
+                      className="w-full justify-start" 
+                      variant="outline"
+                      onClick={() => setTeamManagementOpen(true)}
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      Configure Teams & Assignments
+                    </Button>
+                    <Button 
+                      className="w-full justify-start" 
+                      variant="outline"
+                      onClick={() => setAnnouncementOpen(true)}
+                    >
+                      <MessageSquare className="mr-2 h-4 w-4" />
+                      Send Program Announcements
+                    </Button>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
           <TabsContent value="export" className="space-y-6">

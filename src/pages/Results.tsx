@@ -611,6 +611,53 @@ const Results = () => {
           </div>
         )}
 
+        {/* Student Reflections & Journal */}
+        {assessment.reflections && Object.keys(assessment.reflections).length > 0 && (
+          <Card className="mb-8 shadow-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-primary" />
+                Your Reflections & Journal
+              </CardTitle>
+              <CardDescription>Your personal reflections on your leadership journey</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {assessment.reflections.habits_gap && (
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-foreground">Leadership Habits & Behaviors</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                    {assessment.reflections.habits_gap}
+                  </p>
+                </div>
+              )}
+              {assessment.reflections.excellence_support && (
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-foreground">Excellence & Support Systems</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                    {assessment.reflections.excellence_support}
+                  </p>
+                </div>
+              )}
+              {assessment.reflections.growth_commitment && (
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-foreground">Growth & Commitment</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                    {assessment.reflections.growth_commitment}
+                  </p>
+                </div>
+              )}
+              {assessment.reflections.team_impact && (
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-foreground">Team Impact & Contribution</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                    {assessment.reflections.team_impact}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Insights Section */}
         {assessment.coaching_insights && assessment.coaching_insights.length > 0 && (
           <Card className="mb-8 shadow-card">

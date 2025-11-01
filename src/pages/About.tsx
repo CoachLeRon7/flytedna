@@ -266,8 +266,8 @@ const About = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-20 bg-gradient-to-br from-success/10 via-background to-primary/10">
+      {/* Testimonials - HIDDEN until actual client reviews are available */}
+      {/* <section className="py-20 bg-gradient-to-br from-success/10 via-background to-primary/10">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -307,7 +307,7 @@ const About = () => {
             </Card>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Philosophy */}
       <section className="py-20 bg-primary/5 relative overflow-hidden">

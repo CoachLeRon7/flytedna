@@ -45,7 +45,7 @@ const OurStory = () => {
       </section>
 
       {/* Founding Story Section */}
-      <section className="py-20 bg-slate-50 relative overflow-hidden">
+      <section className="py-12 bg-slate-50 relative overflow-hidden">
         <div className="container relative mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <Badge className="mb-6 bg-red-100 text-red-800 border-red-200">
@@ -94,7 +94,7 @@ const OurStory = () => {
       </section>
 
       {/* Founder's Background Section */}
-      <section className="py-20 bg-white relative overflow-hidden">
+      <section className="py-12 bg-white relative overflow-hidden">
         <div className="container relative mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <Badge className="mb-6 bg-orange-100 text-orange-700 border-orange-200">
@@ -141,7 +141,7 @@ const OurStory = () => {
       </section>
 
       {/* Mission Evolution Section */}
-      <section className="py-20 bg-slate-50 relative overflow-hidden">
+      <section className="py-12 bg-slate-50 relative overflow-hidden">
         <div className="container relative mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <Badge className="mb-6 bg-green-100 text-green-700 border-green-200">
@@ -181,7 +181,7 @@ const OurStory = () => {
       </section>
 
       {/* Key Milestones Timeline Section */}
-      <section className="py-20 bg-white relative overflow-hidden">
+      <section className="py-12 bg-white relative overflow-hidden">
         <div className="container relative mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <Badge className="mb-6 bg-purple-100 text-purple-700 border-purple-200">
@@ -329,7 +329,7 @@ const OurStory = () => {
       </section> */}
 
       {/* Research Foundation Section */}
-      <section className="py-20 bg-white relative overflow-hidden">
+      <section className="py-12 bg-white relative overflow-hidden">
         <div className="container relative mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <Badge className="mb-6 bg-indigo-100 text-indigo-700 border-indigo-200">
@@ -401,7 +401,7 @@ const OurStory = () => {
       </section>
 
       {/* Call-to-Action Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-700 via-blue-600 to-blue-700 relative overflow-hidden">
+      <section className="py-12 bg-gradient-to-br from-blue-700 via-blue-600 to-blue-700 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.1),transparent_70%)]" />
         
         <div className="container relative mx-auto px-4">

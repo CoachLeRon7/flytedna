@@ -18,16 +18,36 @@ export const PeerAssessmentPrompt = () => {
   const navigate = useNavigate();
   const [teammates, setTeammates] = useState<TeammateToAssess[]>([]);
   const [loading, setLoading] = useState(true);
-  const currentSemester = "Fall 2024"; // TODO: Get from context
-  const currentTimepoint = "pre"; // TODO: Get from assessment state
+  const [currentSemester, setCurrentSemester] = useState("Fall 2024");
+  const [currentTimepoint, setCurrentTimepoint] = useState<"pre" | "mid" | "end">("pre");
+  const [myCompletedDate, setMyCompletedDate] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchTeammates = async () => {
+    const fetchMyAssessmentAndTeammates = async () => {
       setLoading(true);
       try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Fetch user's most recent assessment to determine timepoint
+        const { data: myAssessment } = await supabase
+          .from("assessments")
+          .select("timepoint, semester_label, created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (myAssessment) {
+          setCurrentTimepoint(myAssessment.timepoint);
+          setCurrentSemester(myAssessment.semester_label);
+          setMyCompletedDate(new Date(myAssessment.created_at).toLocaleDateString());
+        }
+
+        // Now fetch teammates for peer assessment
         const { data, error } = await supabase.rpc("get_teammates_for_peer_assessment", {
-          _timepoint: currentTimepoint,
-          _semester_label: currentSemester,
+          _timepoint: myAssessment?.timepoint || "pre",
+          _semester_label: myAssessment?.semester_label || "Fall 2024",
         });
 
         if (error) throw error;
@@ -39,8 +59,8 @@ export const PeerAssessmentPrompt = () => {
       }
     };
 
-    fetchTeammates();
-  }, [currentTimepoint, currentSemester]);
+    fetchMyAssessmentAndTeammates();
+  }, []);
 
   if (loading || teammates.length === 0) {
     return null;
@@ -54,7 +74,7 @@ export const PeerAssessmentPrompt = () => {
             <div className="w-10 h-10 rounded-lg bg-[hsl(var(--student-accent))]/10 flex items-center justify-center">
               <Users className="h-5 w-5 text-[hsl(var(--student-accent))]" />
             </div>
-            Peer Assessments Available
+            Peer Assessments - {currentTimepoint === "pre" ? "Pre-Season" : currentTimepoint === "mid" ? "Mid-Season" : "Post-Season"}
             <Badge className="bg-[hsl(var(--student-accent))] text-white animate-pulse">
               <Bell className="h-3 w-3 mr-1" />
               Action Required
@@ -62,7 +82,9 @@ export const PeerAssessmentPrompt = () => {
           </CardTitle>
         </div>
         <CardDescription className="text-base mt-2">
-          🤝 Help your teammates grow by providing anonymous feedback
+          🤝 You completed your {currentTimepoint === "pre" ? "Pre-Season" : currentTimepoint === "mid" ? "Mid-Season" : "Post-Season"} assessment{myCompletedDate ? ` on ${myCompletedDate}` : ""}.
+          <br />
+          Now help your teammates by completing their peer assessments.
         </CardDescription>
       </CardHeader>
       <CardContent>

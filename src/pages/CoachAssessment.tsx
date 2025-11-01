@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { CoachAssessmentDomainSection } from "@/components/coach/CoachAssessmentDomainSection";
 import { Textarea } from "@/components/ui/textarea";
@@ -49,6 +50,8 @@ export default function CoachAssessment() {
   const { toast } = useToast();
   const [athleteName, setAthleteName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [athleteTimepoints, setAthleteTimepoints] = useState<any[]>([]);
+  const [suggestedTimepoint, setSuggestedTimepoint] = useState<"pre" | "mid" | "end">("pre");
 
   const form = useForm<CoachAssessmentFormData>({
     resolver: zodResolver(coachAssessmentSchema),
@@ -69,7 +72,7 @@ export default function CoachAssessment() {
       return;
     }
 
-    // Fetch athlete details
+    // Fetch athlete details and completed assessments
     const fetchAthlete = async () => {
       const { data, error } = await supabase
         .from("profiles")
@@ -88,6 +91,23 @@ export default function CoachAssessment() {
 
       if (data) {
         setAthleteName(`${data.first_name} ${data.last_name}`);
+      }
+
+      // Fetch athlete's completed assessments to suggest timepoint
+      const { data: assessments } = await supabase
+        .from("assessments")
+        .select("timepoint, created_at")
+        .eq("user_id", athleteId)
+        .eq("semester_label", form.watch("semester_label") || "Fall 2024")
+        .order("created_at", { ascending: false });
+
+      if (assessments && assessments.length > 0) {
+        setAthleteTimepoints(assessments);
+        const completed = assessments.map((a) => a.timepoint);
+        const order: ("pre" | "mid" | "end")[] = ["pre", "mid", "end"];
+        const next = order.find((tp) => !completed.includes(tp)) || "end";
+        setSuggestedTimepoint(next);
+        form.setValue("timepoint", next);
       }
     };
 
@@ -127,17 +147,36 @@ export default function CoachAssessment() {
         reflection_growth_area: data.reflection_growth_area,
       };
 
-      const { error } = await supabase
+      const { data: insertedData, error } = await supabase
         .from("coach_assessments")
         .upsert([assessmentData], {
           onConflict: "coach_id,athlete_id,timepoint,semester_label",
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
+      // Generate AI insights
+      toast({
+        title: "Generating Insights...",
+        description: "AI is analyzing the assessment to provide actionable feedback.",
+      });
+
+      const { data: insightsData, error: insightsError } = await supabase.functions.invoke(
+        'generate-coach-insights',
+        { body: { assessmentId: insertedData.id } }
+      );
+
+      if (insightsError) {
+        console.error('Error generating insights:', insightsError);
+      }
+
       toast({
         title: "Assessment Saved",
-        description: `Coach assessment for ${athleteName} has been saved successfully.`,
+        description: insightsData?.insights 
+          ? `Coach assessment and AI insights for ${athleteName} saved successfully.`
+          : `Coach assessment for ${athleteName} saved successfully.`,
       });
 
       navigate("/coach");
@@ -176,6 +215,35 @@ export default function CoachAssessment() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            {/* Athlete Progress Indicator */}
+            {athleteTimepoints.length > 0 && (
+              <Card className="p-6 border-2 border-primary/20 bg-primary/5">
+                <h3 className="font-semibold text-lg mb-3">📊 Athlete's Assessment Progress</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {athleteName} has completed assessments for the following timepoints:
+                </p>
+                <div className="flex gap-3 mb-4">
+                  {["pre", "mid", "end"].map((tp) => {
+                    const completed = athleteTimepoints.some((a) => a.timepoint === tp);
+                    return (
+                      <Badge
+                        key={tp}
+                        variant={completed ? "default" : "outline"}
+                        className={completed ? "bg-green-600" : ""}
+                      >
+                        {completed ? "✓" : "✗"} {tp === "pre" ? "Pre" : tp === "mid" ? "Mid" : "Post"}
+                      </Badge>
+                    );
+                  })}
+                </div>
+                <p className="text-sm font-medium">
+                  💡 Suggested: Complete your <span className="text-primary font-bold">
+                    {suggestedTimepoint === "pre" ? "Pre-Season" : suggestedTimepoint === "mid" ? "Mid-Season" : "Post-Season"}
+                  </span> coach assessment to match their progress.
+                </p>
+              </Card>
+            )}
+
             {/* Assessment Metadata */}
             <Card className="p-6">
               <div className="space-y-4">

@@ -252,6 +252,7 @@ export type Database = {
           a2: number | null
           a3: number | null
           accountability_mean: number | null
+          ai_insights: Json | null
           athlete_id: string
           b1: number | null
           b2: number | null
@@ -288,6 +289,7 @@ export type Database = {
           a2?: number | null
           a3?: number | null
           accountability_mean?: number | null
+          ai_insights?: Json | null
           athlete_id: string
           b1?: number | null
           b2?: number | null
@@ -324,6 +326,7 @@ export type Database = {
           a2?: number | null
           a3?: number | null
           accountability_mean?: number | null
+          ai_insights?: Json | null
           athlete_id?: string
           b1?: number | null
           b2?: number | null

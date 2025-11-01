@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.notify-assessment-completion]
 verify_jwt = false
+
+[functions.generate-coach-insights]
+verify_jwt = true

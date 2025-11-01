@@ -652,6 +652,7 @@ export default function CoachDashboard() {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Sport</TableHead>
+                <TableHead>Timepoints</TableHead>
                 <TableHead>Composite</TableHead>
                 <TableHead>Leadership DNA</TableHead>
                 <TableHead>Excellence</TableHead>
@@ -663,64 +664,88 @@ export default function CoachDashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {athleteRows.map((row) => (
-                <TableRow
-                  key={row.userId}
-                  className="hover:bg-muted/50"
-                >
-                  <TableCell 
-                    className="font-medium cursor-pointer"
-                    onClick={() => setSelectedAthlete(row.userId)}
+              {athleteRows.map((row) => {
+                // Get athlete's completed timepoints for this semester
+                const athleteAssessments = assessments.filter(
+                  (a) => a.user_id === row.userId && a.semester_label === selectedSemester
+                );
+                const completedTimepoints = athleteAssessments.map((a) => a.timepoint);
+                
+                return (
+                  <TableRow
+                    key={row.userId}
+                    className="hover:bg-muted/50"
                   >
-                    {row.name}
-                  </TableCell>
-                  <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
-                    {row.sport}
-                  </TableCell>
-                  <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
-                    {row.status === "Not Completed" ? "-" : (
-                      <div>
-                        <div className="font-semibold">{row.finalComposite.toFixed(2)}</div>
-                        {(row.peerModifier !== 0 || row.coachModifier !== 0) && (
-                          <div className="text-xs text-muted-foreground">
-                            Self: {row.composite.toFixed(2)}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
-                    {row.classification === "Not Completed" ? "-" : row.leadershipDna.toFixed(2)}
-                  </TableCell>
-                  <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
-                    {row.classification === "Not Completed" ? "-" : row.excellence.toFixed(2)}
-                  </TableCell>
-                  <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
-                    {row.classification === "Not Completed" ? "-" : row.accountability.toFixed(2)}
-                  </TableCell>
-                  <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
-                    {row.classification === "Not Completed" ? "-" : row.discipline.toFixed(2)}
-                  </TableCell>
-                  <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
-                    {row.classification === "Not Completed" ? "-" : row.belonging.toFixed(2)}
-                  </TableCell>
-                  <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
-                    <Badge className={getClassificationColor(row.classification)}>{row.classification}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/coach/assess?athleteId=${row.userId}`);
-                      }}
+                    <TableCell 
+                      className="font-medium cursor-pointer"
+                      onClick={() => setSelectedAthlete(row.userId)}
                     >
-                      Assess
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+                      {row.name}
+                    </TableCell>
+                    <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
+                      {row.sport}
+                    </TableCell>
+                    <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
+                      <div className="flex gap-1">
+                        {["pre", "mid", "end"].map((tp) => {
+                          const completed = completedTimepoints.includes(tp as any);
+                          return (
+                            <Badge
+                              key={tp}
+                              variant={completed ? "default" : "outline"}
+                              className={`text-xs ${completed ? "bg-green-600" : "bg-gray-200"}`}
+                            >
+                              {tp === "pre" ? "P" : tp === "mid" ? "M" : "E"}
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    </TableCell>
+                    <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
+                      {row.status === "Not Completed" ? "-" : (
+                        <div>
+                          <div className="font-semibold">{row.finalComposite.toFixed(2)}</div>
+                          {(row.peerModifier !== 0 || row.coachModifier !== 0) && (
+                            <div className="text-xs text-muted-foreground">
+                              Self: {row.composite.toFixed(2)}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
+                      {row.classification === "Not Completed" ? "-" : row.leadershipDna.toFixed(2)}
+                    </TableCell>
+                    <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
+                      {row.classification === "Not Completed" ? "-" : row.excellence.toFixed(2)}
+                    </TableCell>
+                    <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
+                      {row.classification === "Not Completed" ? "-" : row.accountability.toFixed(2)}
+                    </TableCell>
+                    <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
+                      {row.classification === "Not Completed" ? "-" : row.discipline.toFixed(2)}
+                    </TableCell>
+                    <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
+                      {row.classification === "Not Completed" ? "-" : row.belonging.toFixed(2)}
+                    </TableCell>
+                    <TableCell onClick={() => setSelectedAthlete(row.userId)} className="cursor-pointer">
+                      <Badge className={getClassificationColor(row.classification)}>{row.classification}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/coach/assess?athleteId=${row.userId}`);
+                        }}
+                      >
+                        Assess
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>

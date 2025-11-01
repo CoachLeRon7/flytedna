@@ -698,6 +698,137 @@ const Results = () => {
           />
         </div>
 
+        {/* Coach Assessment & AI Insights */}
+        {coachFeedback && shareReflections && (
+          <Card className="mb-8 shadow-card border-2 border-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-primary" />
+                Coach's Assessment & Recommendations
+              </CardTitle>
+              <CardDescription>
+                Your coach's evaluation and AI-powered development insights
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Coach's Score */}
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-semibold">Coach's Composite Score</span>
+                  <span className="text-2xl font-bold text-primary">{coachFeedback.composite_mean.toFixed(2)}</span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Based on observed behaviors during {assessment.timepoint === "pre" ? "Pre-Season" : assessment.timepoint === "mid" ? "Mid-Season" : "Post-Season"}
+                </p>
+              </div>
+
+              {/* Coach's Reflections */}
+              {(coachFeedback.reflection_voluntary_followership || 
+                coachFeedback.reflection_greatest_impact || 
+                coachFeedback.reflection_growth_area) && (
+                <div className="space-y-3">
+                  <h4 className="font-semibold">Coach's Observations</h4>
+                  {coachFeedback.reflection_voluntary_followership && (
+                    <div className="p-3 border rounded-lg">
+                      <p className="text-sm font-medium text-muted-foreground mb-1">
+                        Voluntary Followership
+                      </p>
+                      <p className="text-sm">{coachFeedback.reflection_voluntary_followership}</p>
+                    </div>
+                  )}
+                  {coachFeedback.reflection_greatest_impact && (
+                    <div className="p-3 border rounded-lg">
+                      <p className="text-sm font-medium text-muted-foreground mb-1">
+                        Greatest Impact Moment
+                      </p>
+                      <p className="text-sm">{coachFeedback.reflection_greatest_impact}</p>
+                    </div>
+                  )}
+                  {coachFeedback.reflection_growth_area && (
+                    <div className="p-3 border rounded-lg">
+                      <p className="text-sm font-medium text-muted-foreground mb-1">
+                        Key Growth Area
+                      </p>
+                      <p className="text-sm">{coachFeedback.reflection_growth_area}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* AI-Generated Insights */}
+              {coachFeedback.ai_insights && (
+                <div className="space-y-4 pt-4 border-t">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-lg font-semibold">🤖 AI Leadership Analysis</span>
+                    <Badge variant="secondary" className="text-xs">Powered by AI</Badge>
+                  </div>
+
+                  <div className="p-4 bg-primary/5 rounded-lg">
+                    <h4 className="font-semibold mb-2">Overall Leadership Profile</h4>
+                    <p className="text-sm">{coachFeedback.ai_insights.summary}</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-3 text-green-600 flex items-center gap-2">
+                      <span>✓</span> Your Leadership Strengths
+                    </h4>
+                    {coachFeedback.ai_insights.strengths?.map((strength: any, idx: number) => (
+                      <div key={idx} className="mb-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <p className="font-medium text-sm mb-1">
+                          {strength.domain} <span className="text-green-700">({strength.score.toFixed(2)}/5.0)</span>
+                        </p>
+                        <p className="text-sm text-muted-foreground">{strength.analysis}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-3 text-orange-600 flex items-center gap-2">
+                      <span>⚠️</span> Areas for Growth
+                    </h4>
+                    {coachFeedback.ai_insights.weaknesses?.map((weakness: any, idx: number) => (
+                      <div key={idx} className="mb-3 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                        <p className="font-medium text-sm mb-1">
+                          {weakness.domain} <span className="text-orange-700">({weakness.score.toFixed(2)}/5.0)</span>
+                        </p>
+                        <p className="text-sm text-muted-foreground">{weakness.analysis}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <span>🎯</span> Your Action Plan
+                    </h4>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Start with these specific steps to accelerate your development:
+                    </p>
+                    {coachFeedback.ai_insights.actionable_steps?.map((step: any, idx: number) => (
+                      <div key={idx} className="mb-3 p-4 border-2 rounded-lg hover:border-primary/50 transition-colors">
+                        <div className="flex items-start justify-between mb-2">
+                          <p className="font-medium text-sm flex-1">{step.title}</p>
+                          <Badge 
+                            variant={step.priority === 'high' ? 'destructive' : step.priority === 'medium' ? 'default' : 'secondary'} 
+                            className="text-xs ml-2"
+                          >
+                            {step.priority}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-2">{step.description}</p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Badge variant="outline" className="text-xs">
+                            Target: {step.domain}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Footer CTAs */}
         <div className="flex flex-col sm:flex-row justify-center gap-4">
           <Button 

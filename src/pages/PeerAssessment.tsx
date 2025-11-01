@@ -107,12 +107,26 @@ export default function PeerAssessment() {
 
   return (
     <div className="container max-w-4xl py-8">
+      {/* Context Banner */}
+      <Card className="mb-6 border-2 border-primary bg-primary/5">
+        <CardHeader>
+          <CardTitle className="text-lg">
+            📋 {timepoint === "pre" ? "Pre-Season" : timepoint === "mid" ? "Mid-Season" : "Post-Season"} Peer Assessment
+          </CardTitle>
+          <CardDescription className="text-base">
+            <strong>Semester:</strong> {semesterLabel} • <strong>Teammate:</strong> {assessedUser.first_name} {assessedUser.last_name}
+            <br />
+            <span className="text-muted-foreground mt-2 block">
+              💡 Base your responses on behaviors observed during {timepoint === "pre" ? "Pre-Season" : timepoint === "mid" ? "Mid-Season" : "Post-Season"} training and competition.
+            </span>
+          </CardDescription>
+        </CardHeader>
+      </Card>
+
       <Card>
         <CardHeader>
-          <CardTitle>Peer Assessment</CardTitle>
+          <CardTitle>Anonymous Peer Assessment</CardTitle>
           <CardDescription>
-            You are anonymously evaluating: <strong>{assessedUser.first_name} {assessedUser.last_name}</strong>
-            <br />
             Your responses are completely anonymous and will only be shown as aggregated data (minimum 3 responses required).
           </CardDescription>
         </CardHeader>

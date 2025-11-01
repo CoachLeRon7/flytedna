@@ -29,6 +29,24 @@ interface Assessment {
   reflections: any;
 }
 
+interface CoachAssessmentData {
+  id: string;
+  coach_id: string;
+  timepoint: "pre" | "mid" | "end";
+  composite_mean: number;
+  leadership_dna_mean: number;
+  excellence_mean: number;
+  accountability_mean: number;
+  discipline_mean: number;
+  belonging_mean: number;
+  classification: string;
+  reflection_voluntary_followership: string | null;
+  reflection_greatest_impact: string | null;
+  reflection_growth_area: string | null;
+  ai_insights: any | null;
+  created_at: string;
+}
+
 interface Profile {
   first_name: string;
   last_name: string;
@@ -46,6 +64,7 @@ export function AthleteDetailDrawer({ athleteId, semester, open, onClose }: Athl
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [assessments, setAssessments] = useState<Record<string, Assessment>>({});
+  const [coachAssessments, setCoachAssessments] = useState<Record<string, CoachAssessmentData>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -68,7 +87,7 @@ export function AthleteDetailDrawer({ athleteId, semester, open, onClose }: Athl
       if (profileError) throw profileError;
       setProfile(profileData);
 
-      // Load assessments for all timepoints
+      // Load student assessments for all timepoints
       const { data: assessmentsData, error: assessmentsError } = await supabase
         .from("assessments")
         .select("*")
@@ -82,6 +101,21 @@ export function AthleteDetailDrawer({ athleteId, semester, open, onClose }: Athl
         assessmentsByTimepoint[assessment.timepoint] = assessment as Assessment;
       });
       setAssessments(assessmentsByTimepoint);
+
+      // Load coach assessments for all timepoints
+      const { data: coachData, error: coachError } = await supabase
+        .from("coach_assessments")
+        .select("*")
+        .eq("athlete_id", athleteId)
+        .eq("semester_label", semester);
+
+      if (coachError) throw coachError;
+
+      const coachAssessmentsByTimepoint: Record<string, CoachAssessmentData> = {};
+      coachData?.forEach((ca) => {
+        coachAssessmentsByTimepoint[ca.timepoint] = ca as CoachAssessmentData;
+      });
+      setCoachAssessments(coachAssessmentsByTimepoint);
     } catch (error) {
       console.error("Error loading athlete data:", error);
     } finally {
@@ -167,6 +201,8 @@ export function AthleteDetailDrawer({ athleteId, semester, open, onClose }: Athl
 
           {["pre", "mid", "end"].map((timepoint) => {
             const assessment = assessments[timepoint];
+            const coachAssessment = coachAssessments[timepoint];
+            
             if (!assessment) {
               return (
                 <TabsContent key={timepoint} value={timepoint} className="space-y-4">
@@ -194,6 +230,59 @@ export function AthleteDetailDrawer({ athleteId, semester, open, onClose }: Athl
                     <p className="text-center text-muted-foreground">Composite Score</p>
                   </CardContent>
                 </Card>
+
+                {/* AI Insights from Coach Assessment */}
+                {coachAssessment?.ai_insights && (
+                  <Card className="border-2 border-primary/20 bg-primary/5">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <span className="text-lg">🤖 AI Leadership Insights</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <h4 className="font-semibold mb-2">Overall Summary</h4>
+                        <p className="text-sm">{coachAssessment.ai_insights.summary}</p>
+                      </div>
+                      
+                      <div>
+                        <h4 className="font-semibold mb-2 text-green-600">✓ Strengths</h4>
+                        {coachAssessment.ai_insights.strengths?.map((strength: any, idx: number) => (
+                          <div key={idx} className="mb-3 p-3 bg-green-50 rounded-lg">
+                            <p className="font-medium text-sm">{strength.domain} ({strength.score.toFixed(2)}/5.0)</p>
+                            <p className="text-sm text-muted-foreground mt-1">{strength.analysis}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold mb-2 text-orange-600">⚠️ Growth Areas</h4>
+                        {coachAssessment.ai_insights.weaknesses?.map((weakness: any, idx: number) => (
+                          <div key={idx} className="mb-3 p-3 bg-orange-50 rounded-lg">
+                            <p className="font-medium text-sm">{weakness.domain} ({weakness.score.toFixed(2)}/5.0)</p>
+                            <p className="text-sm text-muted-foreground mt-1">{weakness.analysis}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold mb-2">🎯 Action Steps</h4>
+                        {coachAssessment.ai_insights.actionable_steps?.map((step: any, idx: number) => (
+                          <div key={idx} className="mb-2 p-3 border rounded-lg">
+                            <div className="flex items-center justify-between mb-1">
+                              <p className="font-medium text-sm">{step.title}</p>
+                              <Badge variant={step.priority === 'high' ? 'destructive' : 'secondary'} className="text-xs">
+                                {step.priority}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{step.description}</p>
+                            <p className="text-xs text-muted-foreground mt-1">Target: {step.domain}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Domain Scores */}
                 <Card>

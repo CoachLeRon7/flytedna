@@ -325,6 +325,7 @@ const About = () => {
                 <p className="text-lg text-muted-foreground mb-6">
                   At Fly.te, we believe leadership is learned through repetition, reflection, and responsibility.
                   Every assessment, workshop, and conversation is designed to empower students to evolve and excel — on the field and in life.
+                  Our theory is that the more transformational leaders you have on the field the more success your team will have.
                 </p>
               </CardContent>
             </Card>

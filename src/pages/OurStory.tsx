@@ -17,7 +17,7 @@ const OurStory = () => {
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="relative min-h-[50vh] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.1),transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(185,28,28,0.1),transparent_70%)]" />
         
         <div className="container relative z-10 mx-auto px-4 py-12">
           <Link to="/" className="inline-block mb-8 animate-fade-in">
@@ -48,12 +48,12 @@ const OurStory = () => {
       <section className="py-20 bg-slate-50 relative overflow-hidden">
         <div className="container relative mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <Badge className="mb-6 bg-blue-100 text-blue-700 border-blue-200">
+            <Badge className="mb-6 bg-red-100 text-red-800 border-red-200">
               <Target className="mr-2 h-4 w-4" />
               Where It All Began
             </Badge>
             
-            <Card className="mb-8 shadow-lg border-l-4 border-blue-500 bg-white">
+            <Card className="mb-8 shadow-lg border-l-4 border-red-700 bg-white">
               <CardContent className="p-8">
                 <blockquote className="text-2xl md:text-3xl font-semibold text-slate-800 italic">
                   "Talent can take you far, but leadership determines how far you'll take yourself and others."
@@ -76,7 +76,7 @@ const OurStory = () => {
               </p>
             </div>
 
-            <Card className="mt-8 bg-white border-2 border-blue-200 shadow-lg">
+            <Card className="mt-8 bg-white border-2 border-red-200 shadow-lg">
               <CardContent className="p-8">
                 <p className="text-xl font-semibold text-slate-900 mb-4">
                   That realization sparked the creation of the Fly.te Leadership Development Index (FLDI) — a system designed to help student-athletes see themselves clearly, grow intentionally, and lead authentically.
@@ -84,7 +84,7 @@ const OurStory = () => {
                 <p className="text-lg text-slate-700">
                   Fly.teDNA was born out of one simple but powerful belief:
                 </p>
-                <p className="text-2xl font-bold text-blue-600 mt-4">
+                <p className="text-2xl font-bold text-red-800 mt-4">
                   Performance means little without purpose.
                 </p>
               </CardContent>
@@ -107,7 +107,7 @@ const OurStory = () => {
                 <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
                   LeRon Williams
                 </h2>
-                <p className="text-xl font-semibold text-blue-600">
+                <p className="text-xl font-semibold text-red-800">
                   Founder of Fly.te Athletics and creator of the Fly.te Leadership Development Index
                 </p>
                 <p>
@@ -124,12 +124,12 @@ const OurStory = () => {
                 <img 
                   src={founderPhoto} 
                   alt="LeRon Williams - Founder of Fly.te Athletics" 
-                  className="aspect-square rounded-lg border-2 border-blue-200 shadow-lg object-cover w-full"
+                  className="aspect-square rounded-lg border-2 border-red-200 shadow-lg object-cover w-full"
                 />
               </div>
             </div>
 
-            <Card className="shadow-lg border-l-4 border-blue-500 hover:scale-105 transition-all duration-300 bg-white">
+            <Card className="shadow-lg border-l-4 border-red-700 hover:scale-105 transition-all duration-300 bg-white">
               <CardContent className="p-8">
                 <p className="text-xl font-semibold text-slate-900">
                   I built Fly.teDNA to merge my two worlds — athletic performance and leadership psychology — giving student-athletes the tools to understand who they are beyond the scoreboard.
@@ -162,9 +162,9 @@ const OurStory = () => {
               </p>
             </div>
 
-            <Card className="mb-6 bg-white border-2 border-blue-200 shadow-lg">
+            <Card className="mb-6 bg-white border-2 border-red-200 shadow-lg">
               <CardContent className="p-8">
-                <p className="text-2xl font-bold text-blue-600 mb-4">
+                <p className="text-2xl font-bold text-red-800 mb-4">
                   The mission has stayed the same:
                 </p>
                 <p className="text-xl font-semibold text-slate-900">
@@ -194,10 +194,10 @@ const OurStory = () => {
             </h2>
 
             <div className="space-y-8">
-              <Card className="shadow-md border-l-4 border-blue-500 hover:shadow-lg transition-all duration-300 animate-fade-in bg-white">
+              <Card className="shadow-md border-l-4 border-red-700 hover:shadow-lg transition-all duration-300 animate-fade-in bg-white">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
-                    <Badge className="bg-blue-600 text-white shrink-0">2023</Badge>
+                    <Badge className="bg-red-800 text-white shrink-0">2023</Badge>
                     <div>
                       <p className="text-lg font-semibold text-slate-900 mb-2">The Beginning</p>
                       <p className="text-slate-700">
@@ -236,10 +236,10 @@ const OurStory = () => {
                 </CardContent>
               </Card>
 
-              <Card className="shadow-md border-l-4 border-blue-500 hover:shadow-lg transition-all duration-300 animate-fade-in bg-white" style={{ animationDelay: '300ms' }}>
+              <Card className="shadow-md border-l-4 border-red-700 hover:shadow-lg transition-all duration-300 animate-fade-in bg-white" style={{ animationDelay: '300ms' }}>
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
-                    <Badge className="bg-blue-600 text-white shrink-0">2026</Badge>
+                    <Badge className="bg-red-800 text-white shrink-0">2026</Badge>
                     <div>
                       <p className="text-lg font-semibold text-slate-900 mb-2">Academy Expansion</p>
                       <p className="text-slate-700">
@@ -286,9 +286,9 @@ const OurStory = () => {
             </p>
 
             <div className="grid md:grid-cols-3 gap-6 mb-8">
-              <Card className="shadow-lg bg-white border-2 border-blue-200 hover:scale-105 transition-all duration-300">
+              <Card className="shadow-lg bg-white border-2 border-red-200 hover:scale-105 transition-all duration-300">
                 <CardContent className="p-6">
-                  <div className="text-6xl text-blue-200 mb-4">"</div>
+                  <div className="text-6xl text-red-200 mb-4">"</div>
                   <p className="text-lg font-semibold text-slate-900">
                     I've seen the quiet athlete find her voice.
                   </p>
@@ -314,7 +314,7 @@ const OurStory = () => {
               </Card>
             </div>
 
-            <Card className="shadow-lg bg-white border-2 border-blue-200">
+            <Card className="shadow-lg bg-white border-2 border-red-200">
               <CardContent className="p-8">
                 <p className="text-xl md:text-2xl font-bold text-slate-900 mb-4">
                   Those are the moments that remind me why Fly.teDNA matters.
@@ -346,10 +346,10 @@ const OurStory = () => {
             </p>
 
             <div className="grid md:grid-cols-3 gap-6 mb-8">
-              <Card className="shadow-md border-2 border-blue-200 hover:shadow-lg transition-all duration-300 bg-white">
+              <Card className="shadow-md border-2 border-red-200 hover:shadow-lg transition-all duration-300 bg-white">
                 <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center mb-4">
-                    <BookOpen className="h-6 w-6 text-blue-600" />
+                  <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                    <BookOpen className="h-6 w-6 text-red-800" />
                   </div>
                   <h3 className="text-lg font-semibold text-slate-900 mb-3">
                     Kegan's Constructive Developmental Theory

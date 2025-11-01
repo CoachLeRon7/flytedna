@@ -8,8 +8,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 import { useToast } from "@/hooks/use-toast";
-import { Compass, Users, TrendingUp, Download, Settings, Shield, MessageSquare, LogOut, Info, Target } from "lucide-react";
+import { Compass, Users, TrendingUp, Download, Settings, Shield, MessageSquare, LogOut, Info, Target, Menu } from "lucide-react";
 import logo from "@/assets/flyte-academy-logo.png";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { RoleRequestsManager } from "@/components/admin/RoleRequestsManager";
 import { TeamManagementDialog } from "@/components/admin/TeamManagementDialog";
 import { AnnouncementDialog } from "@/components/admin/AnnouncementDialog";
@@ -28,6 +35,7 @@ export default function AdminDashboard() {
   const [teamManagementOpen, setTeamManagementOpen] = useState(false);
   const [announcementOpen, setAnnouncementOpen] = useState(false);
   const [isFirstAdmin, setIsFirstAdmin] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isCoachAndAdmin } = useUserRole();
   const [stats, setStats] = useState({
     totalAthletes: 0,
@@ -152,20 +160,23 @@ export default function AdminDashboard() {
       {/* Header with Admin Branding */}
       <header className="bg-[hsl(var(--admin-accent))] border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
+          {/* Logo - Always visible */}
+          <div className="flex items-center gap-2 md:gap-4">
             <img 
               src={logo} 
               alt="FLY.TE Academy Logo" 
-              className="h-24 w-auto cursor-pointer hover:opacity-80 transition-opacity" 
+              className="h-16 md:h-24 w-auto cursor-pointer hover:opacity-80 transition-opacity" 
               onClick={() => navigate("/")}
             />
-            <div className="flex items-center gap-2 text-[hsl(var(--admin-accent-foreground))]">
+            <div className="hidden md:flex items-center gap-2 text-[hsl(var(--admin-accent-foreground))]">
               <Compass className="h-5 w-5" />
               <span className="text-lg font-semibold">Administrator</span>
               <Badge variant="secondary" className="ml-2">Empower the Mission</Badge>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+
+          {/* Desktop Navigation - Hidden on mobile */}
+          <div className="hidden md:flex items-center gap-2">
             <NotificationBell />
             <RoleRequestButton />
             {isCoachAndAdmin && (
@@ -184,6 +195,63 @@ export default function AdminDashboard() {
               Sign Out
             </Button>
           </div>
+
+          {/* Mobile Menu Button - Visible only on mobile */}
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild className="md:hidden">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="text-[hsl(var(--admin-accent-foreground))] hover:bg-white/10"
+              >
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[300px] bg-background z-50">
+              <SheetHeader>
+                <SheetTitle className="flex items-center gap-2">
+                  <Compass className="h-5 w-5" />
+                  Administrator
+                </SheetTitle>
+              </SheetHeader>
+              <div className="flex flex-col gap-4 mt-6">
+                <div className="flex items-center justify-center pb-4 border-b">
+                  <NotificationBell />
+                </div>
+                
+                <div className="flex flex-col items-center pb-4 border-b">
+                  <RoleRequestButton />
+                </div>
+
+                {isCoachAndAdmin && (
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      navigate("/coach");
+                    }}
+                    className="w-full justify-start"
+                  >
+                    <Target className="mr-2 h-4 w-4" />
+                    Coach View
+                    <ArrowRight className="ml-auto h-4 w-4" />
+                  </Button>
+                )}
+
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleSignOut();
+                  }}
+                  className="w-full justify-start"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </header>
 

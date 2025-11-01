@@ -26,7 +26,9 @@ import { UserManagementDashboard } from "@/components/admin/UserManagementDashbo
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { FirstAdminWelcome } from "@/components/admin/FirstAdminWelcome";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useUserOrganization } from "@/hooks/useUserOrganization";
 import { ArrowRight } from "lucide-react";
+import { OrganizationManagement } from "@/components/admin/OrganizationManagement";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -37,6 +39,7 @@ export default function AdminDashboard() {
   const [isFirstAdmin, setIsFirstAdmin] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isCoachAndAdmin } = useUserRole();
+  const { isSuperAdmin, primaryOrg, loading: orgLoading } = useUserOrganization();
   const [stats, setStats] = useState({
     totalAthletes: 0,
     totalCoaches: 0,
@@ -52,26 +55,34 @@ export default function AdminDashboard() {
 
   const checkAccessAndLoadData = async () => {
     try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      navigate("/auth");
-      return;
-    }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate("/auth");
+        return;
+      }
 
-    const { data: isAdmin, error: roleError } = await supabase.rpc('has_role', {
-      _user_id: user.id,
-      _role: 'admin'
-    });
-
-    if (roleError || !isAdmin) {
-      toast({
-        title: "Access Denied",
-        description: "This page is only accessible to administrators",
-        variant: "destructive",
+      // Check if user is org_admin or super_admin
+      const { data: isSuperAdmin } = await supabase.rpc('is_super_admin', {
+        _user_id: user.id
       });
-      navigate("/");
-      return;
-    }
+
+      // Check if user has any org_admin role
+      const { data: orgMemberships } = await supabase
+        .from('organization_members')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('status', 'approved')
+        .in('role', ['super_admin', 'org_admin']);
+
+      if (!isSuperAdmin && (!orgMemberships || orgMemberships.length === 0)) {
+        toast({
+          title: "Access Denied",
+          description: "This page is only accessible to administrators",
+          variant: "destructive",
+        });
+        navigate("/");
+        return;
+      }
 
       // Check if this user is the first admin
       const { data: activityLog } = await supabase
@@ -99,20 +110,62 @@ export default function AdminDashboard() {
   };
 
   const loadDashboardData = async () => {
-    const { data: profiles } = await supabase.from("profiles").select("*");
-    const { data: teams } = await supabase.from("teams").select("*");
-    const { data: assessments } = await supabase.from("assessments").select("*");
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
-    // Count roles using user_roles table
-    const { data: studentRoles } = await supabase
-      .from("user_roles")
+    // Get user's organizations
+    const { data: userOrgs } = await supabase
+      .from('organization_members')
+      .select('organization_id, role')
+      .eq('user_id', user.id)
+      .eq('status', 'approved');
+
+    const userOrgIds = userOrgs?.map(o => o.organization_id) || [];
+    const isSuperAdmin = userOrgs?.some(o => o.role === 'super_admin');
+
+    // Filter teams by organization
+    let teamsQuery = supabase.from("teams").select("*");
+    if (!isSuperAdmin) {
+      teamsQuery = teamsQuery.in('organization_id', userOrgIds);
+    }
+    const { data: teams } = await teamsQuery;
+
+    // Get profiles for teams in user's organizations
+    const teamIds = teams?.map(t => t.id) || [];
+    let profilesQuery = supabase.from("profiles").select("*");
+    if (teamIds.length > 0) {
+      profilesQuery = profilesQuery.in('team_id', teamIds);
+    }
+    const { data: profiles } = await profilesQuery;
+
+    // Get assessments for profiles in user's organizations
+    const profileIds = profiles?.map(p => p.id) || [];
+    let assessmentsQuery = supabase.from("assessments").select("*");
+    if (profileIds.length > 0) {
+      assessmentsQuery = assessmentsQuery.in('user_id', profileIds);
+    }
+    const { data: assessments } = await assessmentsQuery;
+
+    // Count roles using organization_members table
+    let studentQuery = supabase
+      .from("organization_members")
       .select("user_id", { count: "exact" })
-      .eq("role", "student");
+      .eq("role", "student")
+      .eq("status", "approved");
     
-    const { data: coachRoles } = await supabase
-      .from("user_roles")
+    let coachQuery = supabase
+      .from("organization_members")
       .select("user_id", { count: "exact" })
-      .eq("role", "coach");
+      .eq("role", "coach")
+      .eq("status", "approved");
+    
+    if (!isSuperAdmin) {
+      studentQuery = studentQuery.in('organization_id', userOrgIds);
+      coachQuery = coachQuery.in('organization_id', userOrgIds);
+    }
+
+    const { data: studentRoles } = await studentQuery;
+    const { data: coachRoles } = await coachQuery;
 
     const totalAthletes = studentRoles?.length || 0;
     const totalCoaches = coachRoles?.length || 0;
@@ -145,7 +198,7 @@ export default function AdminDashboard() {
     navigate("/");
   };
 
-  if (loading) {
+  if (loading || orgLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <p className="text-muted-foreground">Loading...</p>
@@ -257,8 +310,14 @@ export default function AdminDashboard() {
 
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Global Analytics Dashboard</h1>
-          <p className="text-muted-foreground">Monitor program health and leadership development across all teams</p>
+          <h1 className="text-4xl font-bold mb-2">
+            {isSuperAdmin ? 'Global Analytics Dashboard' : `${primaryOrg?.organization.name || 'Organization'} Dashboard`}
+          </h1>
+          <p className="text-muted-foreground">
+            {isSuperAdmin 
+              ? 'Monitor program health and leadership development across all organizations'
+              : 'Monitor program health and leadership development for your organization'}
+          </p>
         </div>
 
         {isFirstAdmin && (
@@ -315,6 +374,7 @@ export default function AdminDashboard() {
           <TabsList>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="users">User Management</TabsTrigger>
+            {isSuperAdmin && <TabsTrigger value="organizations">Organizations</TabsTrigger>}
             <TabsTrigger value="management">System Management</TabsTrigger>
             <TabsTrigger value="export">Export Center</TabsTrigger>
           </TabsList>
@@ -356,6 +416,12 @@ export default function AdminDashboard() {
           <TabsContent value="users" className="space-y-6">
             <UserManagementDashboard />
           </TabsContent>
+
+          {isSuperAdmin && (
+            <TabsContent value="organizations" className="space-y-6">
+              <OrganizationManagement />
+            </TabsContent>
+          )}
 
           <TabsContent value="management" className="space-y-6">
             <RoleRequestsManager />

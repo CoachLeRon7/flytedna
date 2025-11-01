@@ -480,6 +480,74 @@ export type Database = {
         }
         Relationships: []
       }
+      organization_members: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          id: string
+          organization_id: string
+          role: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          organization_id: string
+          role: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          organization_id?: string
+          role?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          email_domain: string | null
+          id: string
+          institution: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email_domain?: string | null
+          id?: string
+          institution?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email_domain?: string | null
+          id?: string
+          institution?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       peer_assessments: {
         Row: {
           a1: number | null
@@ -675,6 +743,7 @@ export type Database = {
           id: string
           institution: string | null
           name: string
+          organization_id: string | null
           primary_color: string | null
           secondary_color: string | null
           sport: string
@@ -685,6 +754,7 @@ export type Database = {
           id?: string
           institution?: string | null
           name: string
+          organization_id?: string | null
           primary_color?: string | null
           secondary_color?: string | null
           sport: string
@@ -695,11 +765,20 @@ export type Database = {
           id?: string
           institution?: string | null
           name?: string
+          organization_id?: string | null
           primary_color?: string | null
           secondary_color?: string | null
           sport?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "teams_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_activity_log: {
         Row: {
@@ -883,6 +962,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_user_organizations: { Args: { _user_id: string }; Returns: string[] }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
@@ -902,6 +982,11 @@ export type Database = {
         Args: { _coach_id: string; _team_id: string }
         Returns: boolean
       }
+      is_org_admin: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       mask_email: {
         Args: {
           profile_email: string

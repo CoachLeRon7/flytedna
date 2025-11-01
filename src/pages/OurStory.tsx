@@ -450,9 +450,9 @@ const OurStory = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-100 border-t border-slate-200 py-8">
+      <footer className="bg-gradient-to-br from-red-950 via-red-900 to-red-950 border-t border-red-800 py-8">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-slate-600">
+          <p className="text-white/80">
             © 2025 FLY.TE Academy. All rights reserved.
           </p>
         </div>

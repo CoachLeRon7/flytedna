@@ -129,15 +129,15 @@ const About = () => {
                   'bg-primary/10 border-primary/20',
                   'bg-accent/10 border-accent/20',
                   'bg-success/10 border-success/20',
-                  'bg-student-accent/10 border-student-accent/20',
-                  'bg-coach-accent/10 border-coach-accent/20',
+                  'bg-blue-500/10 border-blue-500/20',
+                  'bg-light-red/10 border-light-red/20',
                 ];
                 const iconColors = [
                   'text-primary',
                   'text-accent',
                   'text-success',
-                  'text-student-accent',
-                  'text-coach-accent',
+                  'text-blue-500',
+                  'text-light-red',
                 ];
                 return (
                   <Card key={index} className={`shadow-card hover:shadow-elegant transition-all duration-300 hover:scale-105 border-2 ${colors[index % colors.length]}`}>

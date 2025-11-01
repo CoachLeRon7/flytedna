@@ -72,7 +72,7 @@ const OurStory = () => {
                 I realized that talent can take you far, but leadership determines how far you'll take yourself and others.
               </p>
               <p>
-                Over the years, I've watched gifted athletes fade under pressure and quiet ones rise to lead when it mattered most. The difference wasn't skill alone — it was self-awareness, accountability, and the relentless drive to grow.
+                Over the years, I've watched gifted athletes fade under pressure and quiet ones rise to lead when it mattered most. The difference wasn't skill alone, it was the consistent and relentless pursuit of excellence.
               </p>
             </div>
 

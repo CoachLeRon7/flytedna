@@ -14,6 +14,7 @@ import { RoleRequestsManager } from "@/components/admin/RoleRequestsManager";
 import { TeamManagementDialog } from "@/components/admin/TeamManagementDialog";
 import { AnnouncementDialog } from "@/components/admin/AnnouncementDialog";
 import { NotificationBell } from "@/components/NotificationBell";
+import { RoleRequestButton } from "@/components/RoleRequestButton";
 import { UserManagementDashboard } from "@/components/admin/UserManagementDashboard";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { FirstAdminWelcome } from "@/components/admin/FirstAdminWelcome";
@@ -166,6 +167,7 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <NotificationBell />
+            <RoleRequestButton />
             {isCoachAndAdmin && (
               <Button 
                 variant="outline" 

@@ -916,6 +916,10 @@ export type Database = {
         Returns: undefined
       }
       refresh_user_activity_summary: { Args: never; Returns: undefined }
+      request_additional_role: {
+        Args: { _requested_role: Database["public"]["Enums"]["user_role"] }
+        Returns: Json
+      }
       user_activity_summary_rls: {
         Args: never
         Returns: {

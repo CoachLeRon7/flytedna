@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AthleteDetailDrawer } from "@/components/coach/AthleteDetailDrawer";
 import { TeamColorCustomizer } from "@/components/coach/TeamColorCustomizer";
 import { NotificationBell } from "@/components/NotificationBell";
+import { RoleRequestButton } from "@/components/RoleRequestButton";
 import { Target, LogOut, AlertTriangle, ClipboardCheck, Bell, Compass, ArrowRight } from "lucide-react";
 import logo from "@/assets/flyte-academy-logo.png";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -356,6 +357,7 @@ export default function CoachDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <NotificationBell />
+            <RoleRequestButton />
             {isCoachAndAdmin && (
               <Button 
                 variant="outline" 

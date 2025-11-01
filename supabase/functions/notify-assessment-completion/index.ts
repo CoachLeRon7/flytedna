@@ -25,7 +25,60 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Verify authentication (JWT already verified by Supabase gateway)
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { 
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
     const { assessment_id, user_id }: AssessmentCompletedPayload = await req.json();
+
+    // Verify authorization: the authenticated user must be the assessment owner
+    if (user.id !== user_id) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden: You can only trigger notifications for your own assessments" }),
+        { 
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
+    // Verify the assessment exists and belongs to the user
+    const { data: assessmentCheck, error: assessmentCheckError } = await supabase
+      .from("assessments")
+      .select("user_id")
+      .eq("id", assessment_id)
+      .single();
+
+    if (assessmentCheckError || !assessmentCheck || assessmentCheck.user_id !== user.id) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden: Assessment not found or access denied" }),
+        { 
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
 
     console.log("Processing assessment completion notification:", { assessment_id, user_id });
 

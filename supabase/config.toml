@@ -4,7 +4,7 @@ project_id = "ijriqmtuyofjymedtjsa"
 verify_jwt = true
 
 [functions.notify-assessment-completion]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-coach-insights]
 verify_jwt = true

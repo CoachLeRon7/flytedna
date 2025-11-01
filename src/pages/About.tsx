@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Target, TrendingUp, Users, Award, Heart, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/flyte-academy-logo.png";
+import studentsBg from "@/assets/students-hero-bg.jpg";
 
 const About = () => {
   const navigate = useNavigate();
@@ -82,6 +83,10 @@ const About = () => {
 
       {/* Hero Section */}
       <section className="py-20 bg-gradient-hero relative overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center opacity-20"
+          style={{ backgroundImage: `url(${studentsBg})` }}
+        />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1),transparent_50%)]" />
         <div className="container mx-auto px-4 text-center relative z-10">
           <img 

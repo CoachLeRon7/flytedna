@@ -355,7 +355,7 @@ export default function CoachDashboard() {
             <img 
               src={logo} 
               alt="FLY.TE Academy Logo" 
-              className="h-16 lg:h-24 w-auto cursor-pointer hover:opacity-80 transition-opacity" 
+              className="h-24 w-auto cursor-pointer hover:opacity-80 transition-opacity" 
               onClick={() => navigate("/")}
             />
             <div className="hidden lg:flex items-center gap-2 text-[hsl(var(--coach-accent-foreground))]">

@@ -17,13 +17,13 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 15%;
 
-    /* Athletic deep red */
-    --primary: 0 75% 45%;
+    /* Athletic navy blue */
+    --primary: 215 85% 25%;
     --primary-foreground: 0 0% 100%;
 
-    /* Light red-gray for secondary actions */
-    --secondary: 0 15% 92%;
-    --secondary-foreground: 0 75% 45%;
+    /* Light blue-gray for secondary actions */
+    --secondary: 215 20% 92%;
+    --secondary-foreground: 215 85% 25%;
 
     --muted: 215 20% 95%;
     --muted-foreground: 215 15% 45%;
@@ -61,20 +61,20 @@ All colors MUST be HSL.
     --admin-accent: 215 85% 25%;
     --admin-accent-foreground: 0 0% 100%;
 
-    --border: 0 15% 88%;
-    --input: 0 15% 88%;
-    --ring: 0 75% 45%;
+    --border: 215 20% 88%;
+    --input: 215 20% 88%;
+    --ring: 215 85% 25%;
 
     --radius: 0.75rem;
 
     /* Custom gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(0 75% 45%), hsl(0 70% 55%));
+    --gradient-hero: linear-gradient(135deg, hsl(215 85% 25%), hsl(215 75% 35%));
     --gradient-accent: linear-gradient(135deg, hsl(35 95% 55%), hsl(25 95% 60%));
     --gradient-success: linear-gradient(135deg, hsl(145 65% 45%), hsl(155 65% 50%));
     
     /* Shadows */
-    --shadow-elegant: 0 10px 30px -10px hsl(0 75% 45% / 0.2);
-    --shadow-card: 0 4px 12px -2px hsl(0 20% 20% / 0.08);
+    --shadow-elegant: 0 10px 30px -10px hsl(215 85% 25% / 0.2);
+    --shadow-card: 0 4px 12px -2px hsl(215 20% 20% / 0.08);
 
     --radius: 0.75rem;
 
@@ -105,11 +105,11 @@ All colors MUST be HSL.
     --popover: 215 25% 12%;
     --popover-foreground: 215 15% 95%;
 
-    --primary: 0 70% 55%;
+    --primary: 215 75% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 20% 18%;
-    --secondary-foreground: 0 15% 95%;
+    --secondary: 215 25% 18%;
+    --secondary-foreground: 215 15% 95%;
 
     --muted: 215 25% 18%;
     --muted-foreground: 215 15% 65%;
@@ -126,11 +126,11 @@ All colors MUST be HSL.
     --light-red: 0 70% 88%;
     --light-red-foreground: 0 70% 30%;
 
-    --border: 0 20% 20%;
-    --input: 0 20% 20%;
-    --ring: 0 70% 55%;
+    --border: 215 25% 20%;
+    --input: 215 25% 20%;
+    --ring: 215 75% 55%;
     
-    --gradient-hero: linear-gradient(135deg, hsl(0 70% 40%), hsl(0 65% 50%));
+    --gradient-hero: linear-gradient(135deg, hsl(215 75% 35%), hsl(215 65% 45%));
     --gradient-accent: linear-gradient(135deg, hsl(35 95% 55%), hsl(25 95% 60%));
     --gradient-success: linear-gradient(135deg, hsl(145 65% 45%), hsl(155 65% 50%));
     --sidebar-background: 240 5.9% 10%;

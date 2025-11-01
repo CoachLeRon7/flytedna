@@ -268,8 +268,8 @@ const OurStory = () => {
         </div>
       </section>
 
-      {/* Personal Anecdotes Section */}
-      <section className="py-20 bg-slate-50 relative overflow-hidden">
+      {/* Personal Anecdotes Section - HIDDEN until actual quotes are available */}
+      {/* <section className="py-20 bg-slate-50 relative overflow-hidden">
         <div className="container relative mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <Badge className="mb-6 bg-red-100 text-red-700 border-red-200">
@@ -326,7 +326,7 @@ const OurStory = () => {
             </Card>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Research Foundation Section */}
       <section className="py-20 bg-white relative overflow-hidden">

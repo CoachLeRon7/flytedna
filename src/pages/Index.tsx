@@ -56,11 +56,11 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-hero opacity-90" />
         
         <div className="relative z-10 container mx-auto px-4 text-center">
-          <img src={logo} alt="FLY.TE Academy Logo" width="288" height="288" className="h-56 md:h-72 w-auto mx-auto mb-6 mt-8 md:mt-0 animate-fade-in" />
-          <h1 className="text-4xl md:text-6xl font-bold text-primary-foreground mb-4 md:mb-6 animate-fade-in">
+          <img src={logo} alt="FLY.TE Academy Logo" width="288" height="288" className="h-48 md:h-72 w-auto mx-auto mb-3 mt-4 md:mt-0 animate-fade-in" />
+          <h1 className="text-3xl md:text-6xl font-bold text-primary-foreground mb-3 md:mb-6 animate-fade-in">
             Five Leadership Domains
           </h1>
-          <p className="text-lg md:text-2xl text-primary-foreground/90 mb-6 md:mb-8 max-w-3xl mx-auto">
+          <p className="text-base md:text-2xl text-primary-foreground/90 mb-4 md:mb-8 max-w-3xl mx-auto">
             Empowering student-athletes to develop transformational leadership through evidence-based assessment and growth planning
           </p>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center">

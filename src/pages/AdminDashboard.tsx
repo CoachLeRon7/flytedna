@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 import { useToast } from "@/hooks/use-toast";
-import { Compass, Users, TrendingUp, Download, Settings, Shield, MessageSquare, LogOut, Info } from "lucide-react";
+import { Compass, Users, TrendingUp, Download, Settings, Shield, MessageSquare, LogOut, Info, Target } from "lucide-react";
 import logo from "@/assets/flyte-academy-logo.png";
 import { RoleRequestsManager } from "@/components/admin/RoleRequestsManager";
 import { TeamManagementDialog } from "@/components/admin/TeamManagementDialog";
@@ -17,6 +17,8 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { UserManagementDashboard } from "@/components/admin/UserManagementDashboard";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { FirstAdminWelcome } from "@/components/admin/FirstAdminWelcome";
+import { useUserRole } from "@/hooks/useUserRole";
+import { ArrowRight } from "lucide-react";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -25,6 +27,7 @@ export default function AdminDashboard() {
   const [teamManagementOpen, setTeamManagementOpen] = useState(false);
   const [announcementOpen, setAnnouncementOpen] = useState(false);
   const [isFirstAdmin, setIsFirstAdmin] = useState(false);
+  const { isCoachAndAdmin } = useUserRole();
   const [stats, setStats] = useState({
     totalAthletes: 0,
     totalCoaches: 0,
@@ -163,6 +166,17 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <NotificationBell />
+            {isCoachAndAdmin && (
+              <Button 
+                variant="outline" 
+                onClick={() => navigate("/coach-dashboard")}
+                className="bg-white/10 text-white border-white/20 hover:bg-white/20"
+              >
+                <Target className="mr-2 h-4 w-4" />
+                Coach View
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            )}
             <Button variant="outline" onClick={handleSignOut} className="bg-white/10 text-white border-white/20 hover:bg-white/20">
               <LogOut className="mr-2 h-4 w-4" />
               Sign Out

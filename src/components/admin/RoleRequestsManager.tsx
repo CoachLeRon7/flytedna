@@ -32,6 +32,7 @@ interface RoleRequest {
     email: string;
     sport: string;
   };
+  current_roles?: string[];
 }
 
 export function RoleRequestsManager() {
@@ -71,6 +72,21 @@ export function RoleRequestsManager() {
 
         if (profilesError) throw profilesError;
 
+        // Fetch current roles for these users
+        const { data: rolesData, error: rolesError } = await supabase
+          .from("user_roles")
+          .select("user_id, role")
+          .in("user_id", userIds);
+
+        if (rolesError) throw rolesError;
+
+        // Group roles by user_id
+        const rolesByUser = rolesData?.reduce((acc, { user_id, role }) => {
+          if (!acc[user_id]) acc[user_id] = [];
+          acc[user_id].push(role);
+          return acc;
+        }, {} as Record<string, string[]>);
+
         // Combine the data
         const combinedData = requestsData.map(request => ({
           ...request,
@@ -79,7 +95,8 @@ export function RoleRequestsManager() {
             last_name: "",
             email: "",
             sport: ""
-          }
+          },
+          current_roles: rolesByUser?.[request.user_id] || []
         }));
 
         setRequests(combinedData);
@@ -217,7 +234,7 @@ export function RoleRequestsManager() {
                 <TableRow>
                   <TableHead>User</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Sport</TableHead>
+                  <TableHead>Current Roles</TableHead>
                   <TableHead>Requested Role</TableHead>
                   <TableHead>Requested</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -230,7 +247,19 @@ export function RoleRequestsManager() {
                       {request.profiles.first_name} {request.profiles.last_name}
                     </TableCell>
                     <TableCell>{request.profiles.email}</TableCell>
-                    <TableCell>{request.profiles.sport || "—"}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-1 flex-wrap">
+                        {request.current_roles && request.current_roles.length > 0 ? (
+                          request.current_roles.map(role => (
+                            <Badge key={role} variant={getRoleBadgeVariant(role)}>
+                              {role}
+                            </Badge>
+                          ))
+                        ) : (
+                          <span className="text-muted-foreground text-sm">—</span>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Badge variant={getRoleBadgeVariant(request.requested_role)}>

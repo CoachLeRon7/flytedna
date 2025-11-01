@@ -11,8 +11,9 @@ import { useToast } from "@/hooks/use-toast";
 import { AthleteDetailDrawer } from "@/components/coach/AthleteDetailDrawer";
 import { TeamColorCustomizer } from "@/components/coach/TeamColorCustomizer";
 import { NotificationBell } from "@/components/NotificationBell";
-import { Target, LogOut, AlertTriangle, ClipboardCheck, Bell } from "lucide-react";
+import { Target, LogOut, AlertTriangle, ClipboardCheck, Bell, Compass, ArrowRight } from "lucide-react";
 import logo from "@/assets/flyte-academy-logo.png";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface Assessment {
   id: string;
@@ -79,6 +80,7 @@ export default function CoachDashboard() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [athleteRows, setAthleteRows] = useState<AthleteRow[]>([]);
   const [selectedAthlete, setSelectedAthlete] = useState<string | null>(null);
+  const { isCoachAndAdmin } = useUserRole();
 
   // Check user role and load data
   useEffect(() => {
@@ -354,6 +356,16 @@ export default function CoachDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <NotificationBell />
+            {isCoachAndAdmin && (
+              <Button 
+                variant="outline" 
+                onClick={() => navigate("/admin-dashboard")}
+              >
+                <Compass className="mr-2 h-4 w-4" />
+                Admin View
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            )}
             <Button variant="outline" onClick={handleSignOut}>
               <LogOut className="mr-2 h-4 w-4" />
               Sign Out

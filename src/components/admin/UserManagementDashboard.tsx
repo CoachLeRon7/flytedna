@@ -35,6 +35,7 @@ interface UserSummary {
   team_id: string | null;
   team_name: string | null;
   role: string | null;
+  roles?: string[]; // All roles for this user
   is_active: boolean;
   last_login_at: string | null;
   login_count: number;
@@ -71,7 +72,34 @@ export function UserManagementDashboard() {
       const { data, error } = await supabase.rpc('user_activity_summary_rls');
 
       if (error) throw error;
-      setUsers(data || []);
+      
+      // Fetch all roles for each user
+      if (data && data.length > 0) {
+        const userIds = data.map(u => u.user_id);
+        const { data: rolesData, error: rolesError } = await supabase
+          .from('user_roles')
+          .select('user_id, role')
+          .in('user_id', userIds);
+
+        if (rolesError) throw rolesError;
+
+        // Group roles by user_id
+        const rolesByUser = rolesData?.reduce((acc, { user_id, role }) => {
+          if (!acc[user_id]) acc[user_id] = [];
+          acc[user_id].push(role);
+          return acc;
+        }, {} as Record<string, string[]>);
+
+        // Add roles array to each user
+        const usersWithRoles = data.map(user => ({
+          ...user,
+          roles: rolesByUser?.[user.user_id] || [user.role || 'student']
+        }));
+
+        setUsers(usersWithRoles);
+      } else {
+        setUsers(data || []);
+      }
 
       // Load first admin IDs
       const { data: firstAdmins } = await supabase
@@ -277,10 +305,18 @@ export function UserManagementDashboard() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={getRoleBadgeVariant(user.role)}>
-                        {user.role || 'student'}
-                      </Badge>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {user.roles && user.roles.length > 0 ? (
+                        user.roles.map(role => (
+                          <Badge key={role} variant={getRoleBadgeVariant(role)}>
+                            {role}
+                          </Badge>
+                        ))
+                      ) : (
+                        <Badge variant={getRoleBadgeVariant(user.role)}>
+                          {user.role || 'student'}
+                        </Badge>
+                      )}
                       {firstAdminIds.has(user.user_id) && (
                         <TooltipProvider>
                           <Tooltip>

@@ -63,18 +63,18 @@ const Index = () => {
           <p className="text-lg md:text-2xl text-primary-foreground/90 mb-6 md:mb-8 max-w-3xl mx-auto">
             Empowering student-athletes to develop transformational leadership through evidence-based assessment and growth planning
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center">
             <Button 
               size="lg" 
-              className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-elegant w-full sm:w-auto px-8"
+              className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-elegant w-full sm:w-auto px-4 sm:px-8 text-sm sm:text-base tracking-tight"
               onClick={() => navigate("/auth")}
             >
-              Get Started <ArrowRight className="ml-2 h-5 w-5" />
+              Get Started <ArrowRight className="ml-1 sm:ml-2 h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
             <Button 
               size="lg" 
               variant="outline"
-              className="bg-background/20 backdrop-blur-sm text-primary-foreground border border-primary-foreground/30 hover:bg-background/30 w-full sm:w-auto px-8"
+              className="bg-background/20 backdrop-blur-sm text-primary-foreground border border-primary-foreground/30 hover:bg-background/30 w-full sm:w-auto px-4 sm:px-8 text-sm sm:text-base tracking-tight"
               onClick={() => navigate("/our-story")}
             >
               Our Story
@@ -82,7 +82,7 @@ const Index = () => {
             <Button 
               size="lg" 
               variant="secondary"
-              className="bg-background/20 backdrop-blur-sm text-primary-foreground border border-primary-foreground/30 hover:bg-background/30 w-full sm:w-auto px-10"
+              className="bg-background/20 backdrop-blur-sm text-primary-foreground border border-primary-foreground/30 hover:bg-background/30 w-full sm:w-auto px-4 sm:px-10 text-sm sm:text-base tracking-tight"
               onClick={() => navigate("/about")}
             >
               Learn More

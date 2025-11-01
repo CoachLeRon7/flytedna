@@ -16,7 +16,7 @@ const OurStory = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative min-h-[50vh] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden">
+      <section className="relative min-h-[50vh] bg-gradient-to-br from-red-950 via-red-900 to-red-950 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(185,28,28,0.1),transparent_70%)]" />
         
         <div className="container relative z-10 mx-auto px-4 py-12">

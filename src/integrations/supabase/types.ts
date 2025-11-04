@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcement_rate_limits: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       announcements: {
         Row: {
           created_by: string
@@ -1048,6 +1066,10 @@ export type Database = {
         Args: { _assessment_id: string }
         Returns: undefined
       }
+      check_announcement_rate_limit: {
+        Args: { _max_per_hour?: number; _user_id: string }
+        Returns: Json
+      }
       get_teammates_for_peer_assessment: {
         Args: {
           _semester_label: string
@@ -1103,6 +1125,10 @@ export type Database = {
           rejection_reason?: string
           request_id: string
         }
+        Returns: undefined
+      }
+      record_announcement_send: {
+        Args: { _user_id: string }
         Returns: undefined
       }
       refresh_user_activity_summary: { Args: never; Returns: undefined }

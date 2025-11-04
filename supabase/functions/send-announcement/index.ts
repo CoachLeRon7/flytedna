@@ -69,6 +69,35 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
+    // Check rate limit (10 announcements per hour)
+    const { data: rateLimitCheck, error: rateLimitError } = await supabase.rpc(
+      'check_announcement_rate_limit',
+      { _user_id: user.id, _max_per_hour: 10 }
+    );
+
+    if (rateLimitError) {
+      console.error('Rate limit check error:', rateLimitError);
+      return new Response(
+        JSON.stringify({ error: "An error occurred processing your request. Please try again." }),
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    if (!rateLimitCheck.allowed) {
+      console.log(`Rate limit exceeded for user ${user.id}:`, rateLimitCheck);
+      return new Response(
+        JSON.stringify({ 
+          error: rateLimitCheck.message,
+          rateLimitExceeded: true,
+          count: rateLimitCheck.count,
+          limit: rateLimitCheck.limit
+        }),
+        { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    console.log(`Rate limit check passed. Remaining: ${rateLimitCheck.remaining}/${rateLimitCheck.limit}`);
+
     const { title, message, targetAudience, sendEmail }: AnnouncementRequest = await req.json();
 
     // Validate input lengths
@@ -195,6 +224,17 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (notifError) {
       console.error("Error creating notifications:", notifError);
+    }
+
+    // Record the announcement send for rate limiting
+    const { error: recordError } = await supabase.rpc(
+      'record_announcement_send',
+      { _user_id: user.id }
+    );
+
+    if (recordError) {
+      console.error('Failed to record rate limit:', recordError);
+      // Continue anyway - don't block announcement
     }
 
     // Send emails if requested

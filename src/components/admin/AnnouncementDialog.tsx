@@ -88,10 +88,17 @@ export const AnnouncementDialog = ({ open, onOpenChange }: { open: boolean; onOp
       onOpenChange(false);
     } catch (error: any) {
       console.error("Error sending announcement:", error);
+      
+      // Check if it's a rate limit error
+      const isRateLimit = error.message?.includes('Rate limit exceeded') || 
+                          error.message?.includes('Maximum') ||
+                          error.message?.includes('per hour');
+      
       toast({
-        title: "Error sending announcement",
-        description: error.message,
+        title: isRateLimit ? "Rate Limit Exceeded" : "Error sending announcement",
+        description: error.message || "An error occurred while sending the announcement",
         variant: "destructive",
+        duration: isRateLimit ? 8000 : 5000,
       });
     } finally {
       setLoading(false);

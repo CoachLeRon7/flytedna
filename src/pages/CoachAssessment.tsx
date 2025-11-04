@@ -179,7 +179,7 @@ export default function CoachAssessment() {
           : `Coach assessment for ${athleteName} saved successfully.`,
       });
 
-      navigate("/coach");
+      navigate(`/coach-assessment-confirmation?assessmentId=${insertedData.id}`);
     } catch (error: any) {
       toast({
         title: "Error",

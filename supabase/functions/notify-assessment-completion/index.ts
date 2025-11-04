@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { Resend } from "https://esm.sh/resend@4.0.0";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -9,6 +10,12 @@ const corsHeaders = {
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation schema
+const assessmentPayloadSchema = z.object({
+  assessment_id: z.string().uuid("Invalid assessment ID format"),
+  user_id: z.string().uuid("Invalid user ID format"),
+});
 
 interface AssessmentCompletedPayload {
   assessment_id: string;
@@ -50,7 +57,22 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const { assessment_id, user_id }: AssessmentCompletedPayload = await req.json();
+    // Validate input
+    const requestBody = await req.json();
+    const validationResult = assessmentPayloadSchema.safeParse(requestBody);
+    
+    if (!validationResult.success) {
+      const errorMessage = validationResult.error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+      return new Response(
+        JSON.stringify({ error: `Validation failed: ${errorMessage}` }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
+    const { assessment_id, user_id }: AssessmentCompletedPayload = validationResult.data;
 
     // Verify authorization: the authenticated user must be the assessment owner
     if (user.id !== user_id) {

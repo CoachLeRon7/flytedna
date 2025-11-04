@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { Resend } from "https://esm.sh/resend@4.0.0";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -9,12 +11,23 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// Input validation schema
+const invitationSchema = z.object({
+  email: z.string().email("Invalid email format").max(255, "Email must be less than 255 characters"),
+  organizationName: z.string().min(1, "Organization name is required").max(200, "Organization name must be less than 200 characters"),
+  roleName: z.enum(['org_admin', 'coach', 'student'], { errorMap: () => ({ message: "Invalid role" }) }),
+  teamName: z.string().max(200, "Team name must be less than 200 characters").optional(),
+  inviterName: z.string().min(1, "Inviter name is required").max(200, "Inviter name must be less than 200 characters"),
+  organizationId: z.string().uuid("Invalid organization ID format"),
+});
+
 interface InvitationEmailRequest {
   email: string;
   organizationName: string;
   roleName: string;
   teamName?: string;
   inviterName: string;
+  organizationId: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -23,7 +36,93 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, organizationName, roleName, teamName, inviterName }: InvitationEmailRequest = await req.json();
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // 1. Verify authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { 
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
+    // 2. Parse and validate input
+    const requestBody = await req.json();
+    const validationResult = invitationSchema.safeParse(requestBody);
+    
+    if (!validationResult.success) {
+      const errorMessage = validationResult.error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+      return new Response(
+        JSON.stringify({ error: `Validation failed: ${errorMessage}` }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
+    const { email, organizationName, roleName, teamName, inviterName, organizationId }: InvitationEmailRequest = validationResult.data;
+
+    // 3. Check authorization - user must be org admin or super admin
+    const { data: isSuperAdmin } = await supabase.rpc('is_super_admin', { _user_id: user.id });
+    const { data: isOrgAdmin } = await supabase.rpc('is_org_admin', { 
+      _user_id: user.id, 
+      _org_id: organizationId 
+    });
+
+    if (!isSuperAdmin && !isOrgAdmin) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden: You must be an organization admin to send invitations" }),
+        { 
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
+    // 4. Check rate limiting (10 invitations per hour per user)
+    const { data: rateLimitCheck, error: rateLimitError } = await supabase.rpc('check_announcement_rate_limit', {
+      _user_id: user.id,
+      _max_per_hour: 10
+    });
+
+    if (rateLimitError) {
+      console.error("Error checking rate limit:", rateLimitError);
+    } else if (rateLimitCheck && !rateLimitCheck.allowed) {
+      return new Response(
+        JSON.stringify({ 
+          error: `Rate limit exceeded: You can only send ${rateLimitCheck.limit} invitations per hour. Please try again later.`,
+          remaining: 0,
+          limit: rateLimitCheck.limit
+        }),
+        { 
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
+    console.log("Sending invitation email:", { email, organizationName, roleName, userId: user.id });
 
     const teamInfo = teamName ? ` to join the <strong>${teamName}</strong> team` : '';
     
@@ -55,6 +154,18 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Invitation email sent successfully:", emailResponse);
 
+    // 5. Record the send for rate limiting
+    try {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      
+      await supabase.rpc('record_announcement_send', { _user_id: user.id });
+    } catch (recordError) {
+      console.error("Error recording invitation send:", recordError);
+      // Don't fail the request if rate limit recording fails
+    }
+
     return new Response(JSON.stringify(emailResponse), {
       status: 200,
       headers: {
@@ -64,10 +175,13 @@ const handler = async (req: Request): Promise<Response> => {
     });
   } catch (error: any) {
     console.error("Error sending invitation:", error);
+    
+    // Return generic error message to prevent information leakage
+    const statusCode = error.status || 500;
     return new Response(
       JSON.stringify({ error: "An error occurred sending the invitation. Please try again." }),
       {
-        status: 500,
+        status: statusCode,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       }
     );

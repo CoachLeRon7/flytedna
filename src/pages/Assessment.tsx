@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -79,6 +79,8 @@ const STEPS = [
 const Assessment = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userAge, setUserAge] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const form = useForm<AssessmentFormData>({
@@ -131,21 +133,69 @@ const Assessment = () => {
     mode: "onChange",
   });
 
+  // Fetch user age on component mount
+  useEffect(() => {
+    const fetchUserAge = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          navigate("/auth");
+          return;
+        }
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('date_of_birth')
+          .eq('id', user.id)
+          .single();
+
+        if (profile?.date_of_birth) {
+          const birthDate = new Date(profile.date_of_birth);
+          const today = new Date();
+          const age = today.getFullYear() - birthDate.getFullYear();
+          setUserAge(age);
+        }
+      } catch (error) {
+        console.error('Error fetching user age:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserAge();
+  }, [navigate]);
+
   const validateCurrentStep = async () => {
     const values = form.getValues();
+    const questionsPerDomain = (userAge !== null && userAge < 17) ? 4 : 6;
 
     switch (currentStep) {
       case 0: // Intro
         return values.semester_label && values.timepoint;
       case 1: // Leadership DNA
+        if (questionsPerDomain === 4) {
+          return values.L1 && values.L2 && values.L3 && values.L4;
+        }
         return values.L1 && values.L2 && values.L3 && values.L4 && values.L5 && values.L6;
       case 2: // Excellence
+        if (questionsPerDomain === 4) {
+          return values.E1 && values.E2 && values.E3 && values.E4;
+        }
         return values.E1 && values.E2 && values.E3 && values.E4 && values.E5 && values.E6;
       case 3: // Accountability
+        if (questionsPerDomain === 4) {
+          return values.A1 && values.A2 && values.A3 && values.A4;
+        }
         return values.A1 && values.A2 && values.A3 && values.A4 && values.A5 && values.A6;
       case 4: // Discipline
+        if (questionsPerDomain === 4) {
+          return values.D1 && values.D2 && values.D3 && values.D4;
+        }
         return values.D1 && values.D2 && values.D3 && values.D4 && values.D5 && values.D6;
       case 5: // Belonging
+        if (questionsPerDomain === 4) {
+          return values.B1 && values.B2 && values.B3 && values.B4;
+        }
         return values.B1 && values.B2 && values.B3 && values.B4 && values.B5 && values.B6;
       case 6: // Reflections (optional, no validation)
         return true;
@@ -270,15 +320,15 @@ const Assessment = () => {
       case 0:
         return <IntroSection form={form} />;
       case 1:
-        return <DomainSection form={form} domain="L" title="Leadership DNA" />;
+        return <DomainSection form={form} domain="L" title="Leadership DNA" userAge={userAge} />;
       case 2:
-        return <DomainSection form={form} domain="E" title="Excellence" />;
+        return <DomainSection form={form} domain="E" title="Excellence" userAge={userAge} />;
       case 3:
-        return <DomainSection form={form} domain="A" title="Accountability" />;
+        return <DomainSection form={form} domain="A" title="Accountability" userAge={userAge} />;
       case 4:
-        return <DomainSection form={form} domain="D" title="Discipline" />;
+        return <DomainSection form={form} domain="D" title="Discipline" userAge={userAge} />;
       case 5:
-        return <DomainSection form={form} domain="B" title="Belonging & Impact" />;
+        return <DomainSection form={form} domain="B" title="Belonging & Impact" userAge={userAge} />;
       case 6:
         return <ReflectionsSection form={form} />;
       case 7:
@@ -287,6 +337,17 @@ const Assessment = () => {
         return null;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading assessment...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-muted/30">

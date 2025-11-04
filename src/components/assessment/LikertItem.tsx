@@ -13,6 +13,7 @@ interface LikertItemProps {
   name: string;
   question: string;
   questionNumber: number;
+  reversed?: boolean;
 }
 
 const LIKERT_LABELS = [
@@ -23,7 +24,7 @@ const LIKERT_LABELS = [
   "Strongly Agree",
 ];
 
-export const LikertItem = ({ form, name, question, questionNumber }: LikertItemProps) => {
+export const LikertItem = ({ form, name, question, questionNumber, reversed = false }: LikertItemProps) => {
   return (
     <FormField
       control={form.control}
@@ -32,6 +33,11 @@ export const LikertItem = ({ form, name, question, questionNumber }: LikertItemP
         <FormItem className="border border-border rounded-lg p-4 bg-background">
           <FormLabel className="text-base font-medium">
             {questionNumber}. {question}
+            {reversed && (
+              <span className="ml-2 text-xs text-orange-600 dark:text-orange-400 font-normal italic">
+                (Reverse scored)
+              </span>
+            )}
           </FormLabel>
           <FormControl>
             <div className="space-y-3">

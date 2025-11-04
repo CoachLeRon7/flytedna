@@ -28,6 +28,8 @@ const Results = () => {
   const [loading, setLoading] = useState(true);
   const [shareReflections, setShareReflections] = useState(true);
   const [addingToGrowthPlan, setAddingToGrowthPlan] = useState<string | null>(null);
+  const [userAge, setUserAge] = useState<number | null>(null);
+  const [developmentalStage, setDevelopmentalStage] = useState<string>("");
 
   useEffect(() => {
     if (!assessmentId) {
@@ -130,6 +132,31 @@ const Results = () => {
         
         if (coachData) {
           setCoachFeedback(coachData);
+        }
+
+        // Fetch user's age and determine developmental stage
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('date_of_birth')
+          .eq('id', data.user_id)
+          .single();
+        
+        if (profile?.date_of_birth) {
+          const birthDate = new Date(profile.date_of_birth);
+          const today = new Date();
+          const age = today.getFullYear() - birthDate.getFullYear();
+          setUserAge(age);
+          
+          // Determine developmental stage
+          if (age < 15) {
+            setDevelopmentalStage("Self-Awareness & Accountability (Ages 12-15)");
+          } else if (age < 17) {
+            setDevelopmentalStage("Team Influence & Communication (Ages 15-17)");
+          } else if (age < 19) {
+            setDevelopmentalStage("Confidence & Initiative (Ages 17-19)");
+          } else {
+            setDevelopmentalStage("Culture & Trust-Building (Ages 19+)");
+          }
         }
       } catch (error) {
         console.error("Error fetching assessment:", error);
@@ -293,6 +320,34 @@ const Results = () => {
             {assessment.semester_label} - {assessment.timepoint} Assessment
           </p>
         </div>
+
+        {/* Developmental Stage Card */}
+        {userAge && (
+          <Card className="mb-8 bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-blue-900 dark:text-blue-100">
+                <Target className="h-5 w-5" />
+                Your Developmental Stage
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
+                <strong>{developmentalStage}</strong>
+              </p>
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                Leadership grows with experience. Your classification reflects where you are 
+                in your leadership journey, relative to your age and development stage. 
+                {userAge < 19 && " As you mature, higher classifications will become available."}
+              </p>
+              {assessment.composite_mean >= 4.6 && assessment.classification !== 'Transformational' && (
+                <p className="text-sm text-blue-700 dark:text-blue-300 mt-3 italic">
+                  Your scores show strong leadership potential. Continue developing these skills, 
+                  and your classification will reflect your growth as you gain more experience.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid md:grid-cols-2 gap-8 mb-8">
           {/* Left: Composite Score Card with 360° Breakdown */}

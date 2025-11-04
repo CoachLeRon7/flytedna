@@ -45,6 +45,8 @@ interface UserSummary {
   peer_assessments_received: number;
   coach_assessments_given: number;
   growth_plans_count: number;
+  date_of_birth: string | null;
+  age: number | null;
 }
 
 export function UserManagementDashboard() {
@@ -83,6 +85,14 @@ export function UserManagementDashboard() {
 
         if (rolesError) throw rolesError;
 
+        // Fetch profiles with date_of_birth
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, date_of_birth')
+          .in('id', userIds);
+
+        if (profilesError) throw profilesError;
+
         // Group roles by user_id
         const rolesByUser = rolesData?.reduce((acc, { user_id, role }) => {
           if (!acc[user_id]) acc[user_id] = [];
@@ -90,15 +100,33 @@ export function UserManagementDashboard() {
           return acc;
         }, {} as Record<string, string[]>);
 
-        // Add roles array to each user
-        const usersWithRoles = data.map(user => ({
-          ...user,
-          roles: rolesByUser?.[user.user_id] || [user.role || 'student']
-        }));
+        // Map profiles with date_of_birth
+        const profilesByUser = profilesData?.reduce((acc, profile) => {
+          acc[profile.id] = profile;
+          return acc;
+        }, {} as Record<string, any>);
+
+        // Add roles array and age to each user
+        const usersWithRoles = data.map(user => {
+          const profile = profilesByUser?.[user.user_id];
+          let age = null;
+          if (profile?.date_of_birth) {
+            const birthDate = new Date(profile.date_of_birth);
+            const today = new Date();
+            age = today.getFullYear() - birthDate.getFullYear();
+          }
+          
+          return {
+            ...user,
+            roles: rolesByUser?.[user.user_id] || [user.role || 'student'],
+            date_of_birth: profile?.date_of_birth || null,
+            age,
+          };
+        });
 
         setUsers(usersWithRoles);
       } else {
-        setUsers(data || []);
+        setUsers([]);
       }
 
       // Load first admin IDs
@@ -266,6 +294,7 @@ export function UserManagementDashboard() {
               <TableHead>User</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>Team</TableHead>
+              <TableHead>Age</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Last Login</TableHead>
               <TableHead className="text-center">Assessments</TableHead>
@@ -276,13 +305,13 @@ export function UserManagementDashboard() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8">
+                <TableCell colSpan={9} className="text-center py-8">
                   Loading users...
                 </TableCell>
               </TableRow>
             ) : filteredUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                   No users found
                 </TableCell>
               </TableRow>
@@ -339,6 +368,13 @@ export function UserManagementDashboard() {
                       <span className="text-sm">{user.team_name}</span>
                     ) : (
                       <span className="text-sm text-muted-foreground">No team</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {user.age !== null ? (
+                      <span className="text-sm">{user.age}</span>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">Not set</span>
                     )}
                   </TableCell>
                   <TableCell>

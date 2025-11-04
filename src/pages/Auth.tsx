@@ -41,6 +41,15 @@ const signUpSchema = z.object({
   lastName: z.string().trim().min(1, "Last name is required").max(100, "Last name must be less than 100 characters"),
   role: z.enum(["student", "coach", "admin"]),
   sport: z.string().trim().max(100, "Sport must be less than 100 characters").optional(),
+  dateOfBirth: z.string().min(1, "Date of birth is required").refine(
+    (date) => {
+      const birthDate = new Date(date);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      return age >= 10 && age <= 100;
+    },
+    { message: "Please enter a valid date of birth" }
+  ),
 });
 
 const Auth = () => {
@@ -61,6 +70,7 @@ const Auth = () => {
     lastName: "",
     role: "student" as "student" | "coach" | "admin",
     sport: "",
+    dateOfBirth: "",
   });
 
   const [signInData, setSignInData] = useState({
@@ -106,6 +116,7 @@ const Auth = () => {
             last_name: signUpData.lastName.trim(),
             role: signUpData.role,
             sport: signUpData.sport?.trim() || null,
+            date_of_birth: signUpData.dateOfBirth,
           },
         },
       });
@@ -491,6 +502,20 @@ const Auth = () => {
                     value={signUpData.sport}
                     onChange={(e) => setSignUpData({ ...signUpData, sport: e.target.value })}
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="date-of-birth">Date of Birth</Label>
+                  <Input
+                    id="date-of-birth"
+                    type="date"
+                    value={signUpData.dateOfBirth}
+                    onChange={(e) => setSignUpData({ ...signUpData, dateOfBirth: e.target.value })}
+                    max={new Date().toISOString().split('T')[0]}
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Used for age-appropriate leadership development tracking
+                  </p>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? (

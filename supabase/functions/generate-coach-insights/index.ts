@@ -228,7 +228,7 @@ Be specific, constructive, and actionable. Reference the scores and reflections 
   } catch (error: any) {
     console.error('Error in generate-coach-insights:', error);
     return new Response(
-      JSON.stringify({ error: error.message || 'Unknown error' }),
+      JSON.stringify({ error: 'An error occurred generating insights. Please try again.' }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

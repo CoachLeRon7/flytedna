@@ -14,6 +14,16 @@ interface AnnouncementRequest {
   sendEmail: boolean;
 }
 
+// HTML escape function to prevent XSS in email templates
+const escapeHtml = (text: string): string => {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -61,7 +71,22 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { title, message, targetAudience, sendEmail }: AnnouncementRequest = await req.json();
 
-    console.log("Processing announcement:", { title, targetAudience, sendEmail });
+    // Validate input lengths
+    if (!title || title.trim().length === 0 || title.length > 200) {
+      return new Response(
+        JSON.stringify({ error: "Invalid title: must be between 1 and 200 characters" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    if (!message || message.trim().length === 0 || message.length > 5000) {
+      return new Response(
+        JSON.stringify({ error: "Invalid message: must be between 1 and 5000 characters" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    console.log("Processing announcement:", { title: title.substring(0, 50), targetAudience, sendEmail });
 
     // Get target users based on audience
     let targetUserIds: string[] = [];
@@ -184,15 +209,15 @@ const handler = async (req: Request): Promise<Response> => {
             await resend.emails.send({
               from: "FLY.TE Academy <onboarding@resend.dev>",
               to: [recipient.email],
-              subject: `📢 ${title}`,
+              subject: `📢 ${escapeHtml(title)}`,
               html: `
                 <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
                   <h1 style="color: #1e40af;">FLY.TE Academy Announcement</h1>
-                  <h2>${title}</h2>
-                  <p style="white-space: pre-wrap;">${message}</p>
+                  <h2>${escapeHtml(title)}</h2>
+                  <p style="white-space: pre-wrap;">${escapeHtml(message)}</p>
                   <hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e7eb;">
                   <p style="color: #6b7280; font-size: 14px;">
-                    This message was sent to ${recipient.name} as part of a program announcement.
+                    This message was sent to ${escapeHtml(recipient.name)} as part of a program announcement.
                   </p>
                 </div>
               `,
@@ -224,7 +249,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-announcement function:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "An error occurred processing your request. Please try again." }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

@@ -9,6 +9,14 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Send, Loader2 } from "lucide-react";
+import { z } from "zod";
+
+const announcementSchema = z.object({
+  title: z.string().trim().min(1, "Title is required").max(200, "Title must be less than 200 characters"),
+  message: z.string().trim().min(1, "Message is required").max(5000, "Message must be less than 5000 characters"),
+  targetAudience: z.string(),
+  sendEmail: z.boolean(),
+});
 
 interface Team {
   id: string;
@@ -44,10 +52,13 @@ export const AnnouncementDialog = ({ open, onOpenChange }: { open: boolean; onOp
   };
 
   const handleSend = async () => {
-    if (!formData.title || !formData.message) {
+    // Validate input
+    const validation = announcementSchema.safeParse(formData);
+    if (!validation.success) {
+      const firstError = validation.error.issues[0];
       toast({
-        title: "Missing information",
-        description: "Please fill in title and message",
+        title: "Invalid input",
+        description: firstError.message,
         variant: "destructive",
       });
       return;
@@ -119,7 +130,7 @@ export const AnnouncementDialog = ({ open, onOpenChange }: { open: boolean; onOp
               className="resize-none"
             />
             <p className="text-sm text-muted-foreground">
-              {formData.message.length} characters
+              {formData.message.length}/5000 characters
             </p>
           </div>
 

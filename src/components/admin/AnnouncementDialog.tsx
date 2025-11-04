@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { z } from "zod";
 
 const announcementSchema = z.object({
@@ -24,9 +25,19 @@ interface Team {
   sport: string;
 }
 
+interface RateLimitStatus {
+  allowed: boolean;
+  count: number;
+  limit: number;
+  remaining?: number;
+  message?: string;
+}
+
 export const AnnouncementDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(false);
+  const [rateLimitStatus, setRateLimitStatus] = useState<RateLimitStatus | null>(null);
+  const [loadingRateLimit, setLoadingRateLimit] = useState(false);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -39,8 +50,35 @@ export const AnnouncementDialog = ({ open, onOpenChange }: { open: boolean; onOp
   useEffect(() => {
     if (open) {
       loadTeams();
+      loadRateLimitStatus();
     }
   }, [open]);
+
+  const loadRateLimitStatus = async () => {
+    setLoadingRateLimit(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase.rpc('check_announcement_rate_limit', {
+        _user_id: user.id,
+        _max_per_hour: 10
+      });
+
+      if (error) {
+        console.error('Error checking rate limit:', error);
+        return;
+      }
+
+      if (data && typeof data === 'object') {
+        setRateLimitStatus(data as unknown as RateLimitStatus);
+      }
+    } catch (error) {
+      console.error('Error loading rate limit status:', error);
+    } finally {
+      setLoadingRateLimit(false);
+    }
+  };
 
   const loadTeams = async () => {
     const { data } = await supabase
@@ -86,6 +124,9 @@ export const AnnouncementDialog = ({ open, onOpenChange }: { open: boolean; onOp
       });
 
       onOpenChange(false);
+      
+      // Refresh rate limit status after successful send
+      loadRateLimitStatus();
     } catch (error: any) {
       console.error("Error sending announcement:", error);
       
@@ -114,6 +155,42 @@ export const AnnouncementDialog = ({ open, onOpenChange }: { open: boolean; onOp
             Broadcast a message to your selected audience via in-app notifications and email
           </DialogDescription>
         </DialogHeader>
+
+        {/* Rate Limit Status Indicator */}
+        {rateLimitStatus && (
+          <Alert className={rateLimitStatus.remaining === 0 ? "border-destructive" : ""}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertCircle className={`h-4 w-4 ${rateLimitStatus.remaining === 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
+                <AlertDescription className="m-0">
+                  {loadingRateLimit ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Checking rate limit...
+                    </span>
+                  ) : rateLimitStatus.remaining === 0 ? (
+                    <span className="font-semibold text-destructive">
+                      Rate limit reached: {rateLimitStatus.count}/{rateLimitStatus.limit} announcements sent this hour
+                    </span>
+                  ) : (
+                    <span>
+                      <span className="font-semibold">{rateLimitStatus.remaining} of {rateLimitStatus.limit}</span> announcements remaining this hour
+                    </span>
+                  )}
+                </AlertDescription>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={loadRateLimitStatus}
+                disabled={loadingRateLimit}
+                className="h-8 w-8 p-0"
+              >
+                <RefreshCw className={`h-3 w-3 ${loadingRateLimit ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
+          </Alert>
+        )}
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
@@ -188,7 +265,10 @@ export const AnnouncementDialog = ({ open, onOpenChange }: { open: boolean; onOp
           >
             Cancel
           </Button>
-          <Button onClick={handleSend} disabled={loading}>
+          <Button 
+            onClick={handleSend} 
+            disabled={loading || (rateLimitStatus?.remaining === 0)}
+          >
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

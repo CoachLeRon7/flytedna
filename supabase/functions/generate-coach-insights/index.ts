@@ -12,14 +12,52 @@ serve(async (req) => {
   }
 
   try {
-    const { assessmentId } = await req.json();
-    if (!assessmentId) {
-      throw new Error("Assessment ID is required");
+    // Authentication check
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY')!;
+
+    // Create client for auth check
+    const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+    
+    // Verify user token
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
+    
+    if (authError || !user) {
+      console.error('Auth error:', authError);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Verify user is a coach or admin
+    const { data: userRoles } = await supabaseClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+    
+    const roles = userRoles?.map(r => r.role) || [];
+    if (!roles.includes('coach') && !roles.includes('admin')) {
+      return new Response(
+        JSON.stringify({ error: 'Forbidden: Only coaches and admins can generate insights' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { assessmentId } = await req.json();
+    if (!assessmentId) {
+      throw new Error("Assessment ID is required");
+    }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 

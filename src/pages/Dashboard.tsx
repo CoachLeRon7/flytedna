@@ -15,6 +15,7 @@ import { TeamSelector } from "@/components/student/TeamSelector";
 import { NotificationBell } from "@/components/NotificationBell";
 import { OrganizationJoinRequest } from "@/components/OrganizationJoinRequest";
 import { useUserOrganization } from "@/hooks/useUserOrganization";
+import { Assessment360Status } from "@/components/student/Assessment360Status";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -231,6 +232,17 @@ const Dashboard = () => {
             assessmentHistory={assessmentHistory}
           />
         </div>
+
+        {/* 360° Assessment Status */}
+        {latestAssessment && (
+          <div className="mb-8">
+            <Assessment360Status 
+              userId={user?.id}
+              timepoint={latestAssessment.timepoint as "pre" | "mid" | "end"}
+              semesterLabel={latestAssessment.semester_label}
+            />
+          </div>
+        )}
 
         {/* Peer Assessment Prompt - Prominent Placement */}
         <div className="mb-8">

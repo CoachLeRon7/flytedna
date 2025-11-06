@@ -427,6 +427,163 @@ export type Database = {
           },
         ]
       }
+      guardian_assessments: {
+        Row: {
+          a1: number | null
+          a2: number | null
+          a3: number | null
+          accountability_mean: number | null
+          athlete_id: string
+          b1: number | null
+          b2: number | null
+          b3: number | null
+          belonging_mean: number | null
+          completed_at: string | null
+          composite_mean: number | null
+          created_at: string | null
+          d1: number | null
+          d2: number | null
+          d3: number | null
+          discipline_mean: number | null
+          e1: number | null
+          e2: number | null
+          e3: number | null
+          excellence_mean: number | null
+          guardian_email: string
+          guardian_name: string
+          guardian_relationship: string
+          id: string
+          invitation_sent_at: string | null
+          invitation_token: string | null
+          invited_by: string
+          l1: number | null
+          l2: number | null
+          l3: number | null
+          leadership_dna_mean: number | null
+          optional_comment: string | null
+          semester_label: string
+          timepoint: Database["public"]["Enums"]["assessment_timepoint"]
+          updated_at: string | null
+        }
+        Insert: {
+          a1?: number | null
+          a2?: number | null
+          a3?: number | null
+          accountability_mean?: number | null
+          athlete_id: string
+          b1?: number | null
+          b2?: number | null
+          b3?: number | null
+          belonging_mean?: number | null
+          completed_at?: string | null
+          composite_mean?: number | null
+          created_at?: string | null
+          d1?: number | null
+          d2?: number | null
+          d3?: number | null
+          discipline_mean?: number | null
+          e1?: number | null
+          e2?: number | null
+          e3?: number | null
+          excellence_mean?: number | null
+          guardian_email: string
+          guardian_name: string
+          guardian_relationship: string
+          id?: string
+          invitation_sent_at?: string | null
+          invitation_token?: string | null
+          invited_by: string
+          l1?: number | null
+          l2?: number | null
+          l3?: number | null
+          leadership_dna_mean?: number | null
+          optional_comment?: string | null
+          semester_label: string
+          timepoint: Database["public"]["Enums"]["assessment_timepoint"]
+          updated_at?: string | null
+        }
+        Update: {
+          a1?: number | null
+          a2?: number | null
+          a3?: number | null
+          accountability_mean?: number | null
+          athlete_id?: string
+          b1?: number | null
+          b2?: number | null
+          b3?: number | null
+          belonging_mean?: number | null
+          completed_at?: string | null
+          composite_mean?: number | null
+          created_at?: string | null
+          d1?: number | null
+          d2?: number | null
+          d3?: number | null
+          discipline_mean?: number | null
+          e1?: number | null
+          e2?: number | null
+          e3?: number | null
+          excellence_mean?: number | null
+          guardian_email?: string
+          guardian_name?: string
+          guardian_relationship?: string
+          id?: string
+          invitation_sent_at?: string | null
+          invitation_token?: string | null
+          invited_by?: string
+          l1?: number | null
+          l2?: number | null
+          l3?: number | null
+          leadership_dna_mean?: number | null
+          optional_comment?: string | null
+          semester_label?: string
+          timepoint?: Database["public"]["Enums"]["assessment_timepoint"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardian_assessments_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guardian_assessments_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_secure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guardian_assessments_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "user_activity_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "guardian_assessments_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guardian_assessments_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_secure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guardian_assessments_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "user_activity_summary"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           announcement_id: string | null
@@ -810,6 +967,7 @@ export type Database = {
           last_login_at: string | null
           last_name: string
           login_count: number | null
+          registration_type: string | null
           sport: string | null
           team_id: string | null
           updated_at: string
@@ -824,6 +982,7 @@ export type Database = {
           last_login_at?: string | null
           last_name: string
           login_count?: number | null
+          registration_type?: string | null
           sport?: string | null
           team_id?: string | null
           updated_at?: string
@@ -838,6 +997,7 @@ export type Database = {
           last_login_at?: string | null
           last_name?: string
           login_count?: number | null
+          registration_type?: string | null
           sport?: string | null
           team_id?: string | null
           updated_at?: string
@@ -965,6 +1125,44 @@ export type Database = {
       }
     }
     Views: {
+      guardian_feedback_aggregated: {
+        Row: {
+          athlete_id: string | null
+          avg_accountability: number | null
+          avg_belonging: number | null
+          avg_composite: number | null
+          avg_discipline: number | null
+          avg_excellence: number | null
+          avg_leadership_dna: number | null
+          comments: string[] | null
+          response_count: number | null
+          semester_label: string | null
+          timepoint: Database["public"]["Enums"]["assessment_timepoint"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardian_assessments_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guardian_assessments_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_secure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guardian_assessments_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "user_activity_summary"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       peer_feedback_aggregated: {
         Row: {
           assessed_user_id: string | null

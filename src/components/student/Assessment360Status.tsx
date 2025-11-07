@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Clock, Users, UserCheck } from "lucide-react";
+import { CheckCircle2, Clock, Users, UserCheck, Heart } from "lucide-react";
 import { useAssessment360Status } from "@/hooks/useAssessment360Status";
 import { formatTimepointDisplay, AssessmentTimepoint } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -38,6 +38,7 @@ export function Assessment360Status({ userId, timepoint, semesterLabel }: Assess
   }
 
   const peerProgress = Math.min((status.peerCount / 3) * 100, 100);
+  const guardianProgress = status.guardianCount >= 1 ? 100 : 0;
   
   return (
     <Card className="shadow-card border-l-4 border-l-[hsl(var(--student-accent))]">
@@ -80,39 +81,74 @@ export function Assessment360Status({ userId, timepoint, semesterLabel }: Assess
           </div>
         </div>
 
-        {/* Peer Feedback */}
-        <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
-          {status.peerMinimumMet ? (
-            <CheckCircle2 className="h-5 w-5 text-success mt-0.5 flex-shrink-0" />
-          ) : (
-            <Users className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-          )}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <p className="font-semibold">Peer Feedback</p>
-              {status.peerMinimumMet ? (
-                <Badge variant="secondary" className="bg-success/10 text-success border-success/20">
-                  {status.peerCount} responses
-                </Badge>
-              ) : (
-                <Badge variant="secondary" className="bg-muted text-muted-foreground">
-                  {status.peerCount}/3 minimum
-                </Badge>
+        {/* Peer or Guardian Feedback Section */}
+        {status.useGuardianModel ? (
+          <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
+            {status.guardianMinimumMet ? (
+              <CheckCircle2 className="h-5 w-5 text-success mt-0.5 flex-shrink-0" />
+            ) : (
+              <Heart className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+            )}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <p className="font-semibold">Guardian Feedback</p>
+                {status.guardianMinimumMet ? (
+                  <Badge variant="secondary" className="bg-success/10 text-success border-success/20">
+                    {status.guardianCount} response{status.guardianCount !== 1 ? 's' : ''}
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary" className="bg-muted text-muted-foreground">
+                    {status.guardianCount}/1 minimum
+                  </Badge>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground mb-2">
+                {status.guardianMinimumMet 
+                  ? `Guardian feedback completed - included in your final score (20% weight)`
+                  : status.guardianCount === 0
+                    ? "No guardian assessment yet - your coach will send an invitation to your parent/guardian"
+                    : `Guardian feedback received but not yet meeting minimum requirements`
+                }
+              </p>
+              {!status.guardianMinimumMet && (
+                <Progress value={guardianProgress} className="h-2" />
               )}
             </div>
-            <p className="text-sm text-muted-foreground mb-2">
-              {status.peerMinimumMet 
-                ? `${status.peerCount} peer assessments completed - included in your final score (15% weight)`
-                : status.peerCount === 0
-                  ? "No peer assessments yet - your teammates can assess you anonymously"
-                  : `${3 - status.peerCount} more peer ${3 - status.peerCount === 1 ? 'assessment' : 'assessments'} needed for inclusion in your score`
-              }
-            </p>
-            {!status.peerMinimumMet && (
-              <Progress value={peerProgress} className="h-2" />
-            )}
           </div>
-        </div>
+        ) : (
+          <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
+            {status.peerMinimumMet ? (
+              <CheckCircle2 className="h-5 w-5 text-success mt-0.5 flex-shrink-0" />
+            ) : (
+              <Users className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+            )}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <p className="font-semibold">Peer Feedback</p>
+                {status.peerMinimumMet ? (
+                  <Badge variant="secondary" className="bg-success/10 text-success border-success/20">
+                    {status.peerCount} responses
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary" className="bg-muted text-muted-foreground">
+                    {status.peerCount}/3 minimum
+                  </Badge>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground mb-2">
+                {status.peerMinimumMet 
+                  ? `${status.peerCount} peer assessments completed - included in your final score (15% weight)`
+                  : status.peerCount === 0
+                    ? "No peer assessments yet - your teammates can assess you anonymously"
+                    : `${3 - status.peerCount} more peer ${3 - status.peerCount === 1 ? 'assessment' : 'assessments'} needed for inclusion in your score`
+                }
+              </p>
+              {!status.peerMinimumMet && (
+                <Progress value={peerProgress} className="h-2" />
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Coach Assessment */}
         <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
@@ -136,8 +172,8 @@ export function Assessment360Status({ userId, timepoint, semesterLabel }: Assess
             </div>
             <p className="text-sm text-muted-foreground">
               {status.coachCompleted 
-                ? `Completed on ${new Date(status.coachCompletedDate!).toLocaleDateString()} - adds 25% to your final score`
-                : "Your coach has not yet completed your assessment - this adds valuable perspective (25% weight)"
+                ? `Completed on ${new Date(status.coachCompletedDate!).toLocaleDateString()} - adds ${status.useGuardianModel ? '20' : '25'}% to your final score`
+                : `Your coach has not yet completed your assessment - this adds valuable perspective (${status.useGuardianModel ? '20' : '25'}% weight)`
               }
             </p>
           </div>
@@ -148,11 +184,25 @@ export function Assessment360Status({ userId, timepoint, semesterLabel }: Assess
           <p className="text-sm font-medium mb-2">💡 How Your Final Score is Calculated:</p>
           <ul className="text-sm text-muted-foreground space-y-1">
             <li>• <strong>Self-Assessment:</strong> {status.selfCompleted ? '60% weight ✓' : '60% weight (required)'}</li>
-            <li>• <strong>Peer Feedback:</strong> {status.peerMinimumMet ? '15% weight ✓' : '15% weight (needs 3+ responses)'}</li>
-            <li>• <strong>Coach Assessment:</strong> {status.coachCompleted ? '25% weight ✓' : '25% weight (optional)'}</li>
+            {status.useGuardianModel ? (
+              <>
+                <li>• <strong>Guardian Feedback:</strong> {status.guardianMinimumMet ? '20% weight ✓' : '20% weight (needs 1+ response)'}</li>
+                <li>• <strong>Coach Assessment:</strong> {status.coachCompleted ? '20% weight ✓' : '20% weight (optional)'}</li>
+              </>
+            ) : (
+              <>
+                <li>• <strong>Peer Feedback:</strong> {status.peerMinimumMet ? '15% weight ✓' : '15% weight (needs 3+ responses)'}</li>
+                <li>• <strong>Coach Assessment:</strong> {status.coachCompleted ? '25% weight ✓' : '25% weight (optional)'}</li>
+              </>
+            )}
           </ul>
-          {!status.peerMinimumMet && !status.coachCompleted && (
-            <p className="text-xs text-muted-foreground mt-3 italic">
+          {status.useGuardianModel && (
+            <p className="text-xs text-muted-foreground mt-2 italic">
+              Individual athletes age 19 and under use the guardian feedback model
+            </p>
+          )}
+          {(!status.peerMinimumMet && !status.guardianMinimumMet) && !status.coachCompleted && (
+            <p className="text-xs text-muted-foreground mt-2 italic">
               Complete components are automatically weighted to ensure you always get a final score
             </p>
           )}

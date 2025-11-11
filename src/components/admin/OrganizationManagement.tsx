@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Building2, Plus, Users } from "lucide-react";
+import { Building2, Plus, Users, Pencil } from "lucide-react";
 
 interface Organization {
   id: string;
@@ -22,6 +22,8 @@ export function OrganizationManagement() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     institution: '',
@@ -97,6 +99,43 @@ export function OrganizationManagement() {
     } catch (error) {
       console.error('Error creating organization:', error);
       toast.error('Failed to create organization');
+    }
+  };
+
+  const handleEditClick = (org: Organization) => {
+    setEditingOrg(org);
+    setFormData({
+      name: org.name,
+      institution: org.institution || '',
+      email_domain: org.email_domain || ''
+    });
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdateOrganization = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingOrg) return;
+
+    try {
+      const { error } = await supabase
+        .from('organizations')
+        .update({
+          name: formData.name,
+          institution: formData.institution || null,
+          email_domain: formData.email_domain || null
+        })
+        .eq('id', editingOrg.id);
+
+      if (error) throw error;
+
+      toast.success('Organization updated successfully');
+      setEditDialogOpen(false);
+      setEditingOrg(null);
+      setFormData({ name: '', institution: '', email_domain: '' });
+      loadOrganizations();
+    } catch (error) {
+      console.error('Error updating organization:', error);
+      toast.error('Failed to update organization');
     }
   };
 
@@ -188,6 +227,7 @@ export function OrganizationManagement() {
                 <TableHead>Institution</TableHead>
                 <TableHead>Email Domain</TableHead>
                 <TableHead>Members</TableHead>
+                <TableHead className="w-[100px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -208,12 +248,72 @@ export function OrganizationManagement() {
                       {org.member_count}
                     </div>
                   </TableCell>
+                  <TableCell>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleEditClick(org)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         )}
       </div>
+
+      {/* Edit Organization Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Organization</DialogTitle>
+            <DialogDescription>
+              Update the organization details
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleUpdateOrganization} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">Organization Name *</Label>
+              <Input
+                id="edit-name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="e.g., Western Illinois University"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-institution">Institution</Label>
+              <Input
+                id="edit-institution"
+                value={formData.institution}
+                onChange={(e) => setFormData({ ...formData, institution: e.target.value })}
+                placeholder="e.g., Western Illinois University"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-email_domain">Email Domain (for auto-matching)</Label>
+              <Input
+                id="edit-email_domain"
+                value={formData.email_domain}
+                onChange={(e) => setFormData({ ...formData, email_domain: e.target.value })}
+                placeholder="e.g., wiu.edu"
+              />
+              <p className="text-xs text-muted-foreground">
+                Users with matching email domains can request to join automatically
+              </p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">Update</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

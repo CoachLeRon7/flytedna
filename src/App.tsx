@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 // Lazy load route components for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -28,37 +29,43 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Suspense fallback={<div />}>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/our-story" element={<OurStory />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/assessment" element={<Assessment />} />
-            <Route path="/results" element={<Results />} />
-            <Route path="/growth-plan" element={<GrowthPlan />} />
-            <Route path="/coach" element={<CoachDashboard />} />
-            <Route path="/coach/assess" element={<CoachAssessment />} />
-            <Route path="/coach-assessment-confirmation" element={<CoachAssessmentConfirmation />} />
-            <Route path="/peer/assess" element={<PeerAssessment />} />
-            <Route path="/guardian/assess" element={<GuardianAssessment />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/payment/success" element={<PaymentSuccess />} />
-            <Route path="/dashboard/purchases" element={<PurchasesDashboard />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <ErrorBoundary>
+            <Suspense fallback={<div className="flex items-center justify-center min-h-screen">
+              <div className="animate-pulse text-muted-foreground">Loading...</div>
+            </div>}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/our-story" element={<OurStory />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/assessment" element={<Assessment />} />
+                <Route path="/results" element={<Results />} />
+                <Route path="/growth-plan" element={<GrowthPlan />} />
+                <Route path="/coach" element={<CoachDashboard />} />
+                <Route path="/coach/assess" element={<CoachAssessment />} />
+                <Route path="/coach-assessment-confirmation" element={<CoachAssessmentConfirmation />} />
+                <Route path="/peer/assess" element={<PeerAssessment />} />
+                <Route path="/guardian/assess" element={<GuardianAssessment />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/payment/success" element={<PaymentSuccess />} />
+                <Route path="/dashboard/purchases" element={<PurchasesDashboard />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </ErrorBoundary>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

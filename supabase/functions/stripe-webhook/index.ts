@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
-import { generateRequestId, maskAmount, maskPaymentId, logError, logInfo } from '../_shared/logging.ts';
+import { generateRequestId, maskAmount, maskPaymentId, logError, logInfo, startPerformanceTimer, checkpoint, logPerformance } from '../_shared/logging.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,6 +10,7 @@ const corsHeaders = {
 
 serve(async (req) => {
   const requestId = req.headers.get('x-request-id') || generateRequestId();
+  const perfTimer = startPerformanceTimer(requestId);
   
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: { ...corsHeaders, 'x-request-id': requestId } });
@@ -20,6 +21,7 @@ serve(async (req) => {
 
   if (!signature || !webhookSecret) {
     logError("Configuration error - missing signature or secret", undefined, requestId);
+    logPerformance(perfTimer, 'stripe-webhook:config_error');
     return new Response(JSON.stringify({ error: "Webhook configuration error" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json", 'x-request-id': requestId },
@@ -28,6 +30,8 @@ serve(async (req) => {
 
   try {
     logInfo('Webhook received', { event: 'processing' }, requestId);
+    checkpoint(perfTimer, 'init');
+    
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
     });
@@ -43,9 +47,11 @@ serve(async (req) => {
 
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+      checkpoint(perfTimer, 'event_verified');
       logInfo("Event verified", { event_type: event.type }, requestId);
     } catch (err) {
       logError("Signature verification failed", err, requestId);
+      logPerformance(perfTimer, 'stripe-webhook:signature_failed');
       return new Response(JSON.stringify({ error: "Invalid signature" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json", 'x-request-id': requestId },
@@ -337,12 +343,18 @@ serve(async (req) => {
         logInfo("Unhandled event type", { eventType: event.type }, requestId);
     }
 
+    logPerformance(perfTimer, `stripe-webhook:${event.type}`, { 
+      eventType: event.type,
+      handled: true 
+    });
+
     return new Response(JSON.stringify({ received: true }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json", 'x-request-id': requestId },
     });
   } catch (error) {
     logError('Webhook processing error', error, requestId);
+    logPerformance(perfTimer, 'stripe-webhook:error');
     return new Response(JSON.stringify({ error: 'An error occurred processing webhook. Please try again.' }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json", 'x-request-id': requestId },

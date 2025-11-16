@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
-import { generateRequestId, logError, logInfo } from '../_shared/logging.ts';
+import { generateRequestId, logError, logInfo, startPerformanceTimer, checkpoint, logPerformance, measureAsync } from '../_shared/logging.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -39,6 +39,7 @@ const insightsSchema = z.object({
 serve(async (req) => {
   // Extract or generate request ID
   const requestId = req.headers.get('x-request-id') || generateRequestId();
+  const perfTimer = startPerformanceTimer(requestId);
   
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: { ...corsHeaders, 'x-request-id': requestId } });
@@ -46,6 +47,7 @@ serve(async (req) => {
 
   try {
     logInfo('Request received', {}, requestId);
+    checkpoint(perfTimer, 'init');
     
     // Authentication check
     const authHeader = req.headers.get('Authorization');
@@ -67,8 +69,11 @@ serve(async (req) => {
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
     
+    checkpoint(perfTimer, 'auth_check');
+    
     if (authError || !user) {
       logError('Authentication failed', authError, requestId);
+      logPerformance(perfTimer, 'generate-coach-insights:unauthorized');
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'x-request-id': requestId } }
@@ -81,8 +86,11 @@ serve(async (req) => {
       .select('role')
       .eq('user_id', user.id);
     
+    checkpoint(perfTimer, 'role_check');
+    
     const roles = userRoles?.map(r => r.role) || [];
     if (!roles.includes('coach') && !roles.includes('admin')) {
+      logPerformance(perfTimer, 'generate-coach-insights:forbidden');
       return new Response(
         JSON.stringify({ error: 'Forbidden: Only coaches and admins can generate insights' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -103,8 +111,11 @@ serve(async (req) => {
       .eq('id', assessmentId)
       .single();
 
+    checkpoint(perfTimer, 'assessment_fetched');
+
     if (fetchError || !assessment) {
       logError('Assessment fetch failed', fetchError, requestId);
+      logPerformance(perfTimer, 'generate-coach-insights:fetch_failed');
       throw new Error("Could not fetch assessment");
     }
 
@@ -151,6 +162,8 @@ Analyze this athlete's leadership profile and provide:
 4. 3-5 specific, actionable starting points for immediate development
 
 Be specific, constructive, and actionable. Reference the scores and reflections where relevant.`;
+
+    checkpoint(perfTimer, 'prompt_prepared');
 
     // Call Lovable AI with tool calling for structured output
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -231,9 +244,12 @@ Be specific, constructive, and actionable. Reference the scores and reflections 
       }),
     });
 
+    checkpoint(perfTimer, 'ai_call');
+
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       logError('AI Gateway error', { status: aiResponse.status, errorText: errorText.substring(0, 100) }, requestId);
+      logPerformance(perfTimer, 'generate-coach-insights:ai_failed');
       throw new Error(`AI Gateway error: ${aiResponse.status}`);
     }
 
@@ -241,6 +257,7 @@ Be specific, constructive, and actionable. Reference the scores and reflections 
     const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
     
     if (!toolCall) {
+      logPerformance(perfTimer, 'generate-coach-insights:no_insights');
       throw new Error("No insights generated");
     }
 
@@ -249,8 +266,10 @@ Be specific, constructive, and actionable. Reference the scores and reflections 
     try {
       const rawInsights = JSON.parse(toolCall.function.arguments);
       insights = insightsSchema.parse(rawInsights);
+      checkpoint(perfTimer, 'insights_validated');
     } catch (parseError) {
       logError('Failed to parse/validate AI insights', parseError, requestId);
+      logPerformance(perfTimer, 'generate-coach-insights:validation_failed');
       if (parseError instanceof z.ZodError) {
         logError('Validation errors', { errors: parseError.errors }, requestId);
         throw new Error('AI generated invalid insights format');
@@ -264,12 +283,19 @@ Be specific, constructive, and actionable. Reference the scores and reflections 
       .update({ ai_insights: insights })
       .eq('id', assessmentId);
 
+    checkpoint(perfTimer, 'db_updated');
+
     if (updateError) {
       logError('Failed to store insights', updateError, requestId);
+      logPerformance(perfTimer, 'generate-coach-insights:update_failed');
       throw updateError;
     }
 
     logInfo('Insights generated successfully', { assessmentId }, requestId);
+    logPerformance(perfTimer, 'generate-coach-insights:success', { 
+      insightsGenerated: true,
+      actionableSteps: insights.actionable_steps.length 
+    });
     
     return new Response(
       JSON.stringify({ success: true, insights }),
@@ -277,6 +303,7 @@ Be specific, constructive, and actionable. Reference the scores and reflections 
     );
   } catch (error: any) {
     logError('Function error', error, requestId);
+    logPerformance(perfTimer, 'generate-coach-insights:error');
     return new Response(
       JSON.stringify({ error: 'An error occurred generating insights. Please try again.' }),
       { 

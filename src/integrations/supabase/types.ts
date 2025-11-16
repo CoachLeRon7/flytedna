@@ -501,6 +501,7 @@ export type Database = {
           e2: number | null
           e3: number | null
           excellence_mean: number | null
+          expires_at: string | null
           guardian_email: string
           guardian_name: string
           guardian_relationship: string
@@ -538,6 +539,7 @@ export type Database = {
           e2?: number | null
           e3?: number | null
           excellence_mean?: number | null
+          expires_at?: string | null
           guardian_email: string
           guardian_name: string
           guardian_relationship: string
@@ -575,6 +577,7 @@ export type Database = {
           e2?: number | null
           e3?: number | null
           excellence_mean?: number | null
+          expires_at?: string | null
           guardian_email?: string
           guardian_name?: string
           guardian_relationship?: string

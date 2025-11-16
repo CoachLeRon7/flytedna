@@ -8,6 +8,7 @@ import { Check, Shield, Loader2 } from "lucide-react";
 import { PaymentOptionModal } from "@/components/payments/PaymentOptionModal";
 import { CoachesContactModal } from "@/components/payments/CoachesContactModal";
 import { useToast } from "@/hooks/use-toast";
+import logo from "@/assets/flyte-academy-logo.png";
 
 interface Package {
   id: string;
@@ -109,7 +110,15 @@ export default function Pricing() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-20">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 relative">
+        {/* Watermark */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+          <img 
+            src={logo} 
+            alt="" 
+            className="w-[600px] h-auto opacity-[0.03] select-none"
+          />
+        </div>
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">

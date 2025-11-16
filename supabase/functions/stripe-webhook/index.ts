@@ -1,30 +1,11 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { generateRequestId, maskAmount, maskPaymentId, logError, logInfo } from '../_shared/logging.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
-// Request ID utility
-const generateRequestId = () => crypto.randomUUID();
-
-// Secure logging helpers - mask sensitive payment data
-const maskAmount = () => '[AMOUNT_REDACTED]';
-const maskUserId = (id: string) => id ? `${id.substring(0, 8)}***` : '[NO_ID]';
-const maskPaymentId = (id: string) => id ? `${id.substring(0, 12)}***` : '[NO_ID]';
-
-const logError = (context: string, error?: any, requestId?: string) => {
-  console.error(`[stripe-webhook] ${context}`, {
-    requestId,
-    code: error?.code,
-    type: error?.type || error?.constructor?.name
-  });
-};
-
-const logInfo = (context: string, data?: Record<string, any>, requestId?: string) => {
-  console.log(`[stripe-webhook] ${context}`, { requestId, ...(data || {}) });
 };
 
 serve(async (req) => {

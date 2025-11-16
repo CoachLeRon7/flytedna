@@ -20,6 +20,8 @@ const CoachAssessmentConfirmation = lazy(() => import("./pages/CoachAssessmentCo
 const PeerAssessment = lazy(() => import("./pages/PeerAssessment"));
 const GuardianAssessment = lazy(() => import("./pages/GuardianAssessment"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -46,6 +48,8 @@ const App = () => (
             <Route path="/peer/assess" element={<PeerAssessment />} />
             <Route path="/guardian/assess" element={<GuardianAssessment />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/payment/success" element={<PaymentSuccess />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

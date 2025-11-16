@@ -378,6 +378,79 @@ export type Database = {
         }
         Relationships: []
       }
+      coaches_inquiries: {
+        Row: {
+          assigned_to: string | null
+          coach_email: string
+          coach_name: string
+          created_at: string | null
+          estimated_value_cents: number | null
+          id: string
+          message: string | null
+          organization_name: string
+          phone_number: string | null
+          program_type: string
+          sport: string
+          status: string | null
+          team_size: number
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          coach_email: string
+          coach_name: string
+          created_at?: string | null
+          estimated_value_cents?: number | null
+          id?: string
+          message?: string | null
+          organization_name: string
+          phone_number?: string | null
+          program_type: string
+          sport: string
+          status?: string | null
+          team_size: number
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          coach_email?: string
+          coach_name?: string
+          created_at?: string | null
+          estimated_value_cents?: number | null
+          id?: string
+          message?: string | null
+          organization_name?: string
+          phone_number?: string | null
+          program_type?: string
+          sport?: string
+          status?: string | null
+          team_size?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coaches_inquiries_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coaches_inquiries_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles_secure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coaches_inquiries_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "user_activity_summary"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       growth_plans: {
         Row: {
           created_at: string
@@ -818,6 +891,179 @@ export type Database = {
         }
         Relationships: []
       }
+      package_access: {
+        Row: {
+          access_expires_at: string | null
+          access_granted_at: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          package_id: string
+          purchase_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          access_expires_at?: string | null
+          access_granted_at?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          package_id: string
+          purchase_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          access_expires_at?: string | null
+          access_granted_at?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          package_id?: string
+          purchase_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "package_access_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_access_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "purchases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_access_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_access_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_secure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_access_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_activity_summary"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      packages: {
+        Row: {
+          base_price_cents: number
+          created_at: string | null
+          description: string
+          display_order: number | null
+          features: Json | null
+          has_payment_plan: boolean | null
+          id: string
+          includes_summer_program: boolean | null
+          is_active: boolean | null
+          name: string
+          payment_plan_config: Json | null
+          slug: string
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          base_price_cents: number
+          created_at?: string | null
+          description: string
+          display_order?: number | null
+          features?: Json | null
+          has_payment_plan?: boolean | null
+          id?: string
+          includes_summer_program?: boolean | null
+          is_active?: boolean | null
+          name: string
+          payment_plan_config?: Json | null
+          slug: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          base_price_cents?: number
+          created_at?: string | null
+          description?: string
+          display_order?: number | null
+          features?: Json | null
+          has_payment_plan?: boolean | null
+          id?: string
+          includes_summer_program?: boolean | null
+          is_active?: boolean | null
+          name?: string
+          payment_plan_config?: Json | null
+          slug?: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      payment_plan_installments: {
+        Row: {
+          amount_cents: number
+          created_at: string | null
+          due_date: string
+          id: string
+          installment_number: number
+          paid_at: string | null
+          purchase_id: string
+          status: string | null
+          stripe_payment_intent_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string | null
+          due_date: string
+          id?: string
+          installment_number: number
+          paid_at?: string | null
+          purchase_id: string
+          status?: string | null
+          stripe_payment_intent_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string | null
+          due_date?: string
+          id?: string
+          installment_number?: number
+          paid_at?: string | null
+          purchase_id?: string
+          status?: string | null
+          stripe_payment_intent_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_plan_installments_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "purchases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       peer_assessments: {
         Row: {
           a1: number | null
@@ -1008,6 +1254,341 @@ export type Database = {
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchases: {
+        Row: {
+          amount_paid_cents: number | null
+          created_at: string | null
+          id: string
+          membership_end_date: string | null
+          membership_start_date: string | null
+          metadata: Json | null
+          package_id: string
+          purchase_type: string
+          purchased_at: string | null
+          refund_eligible_until: string | null
+          status: string | null
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+          total_amount_cents: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_paid_cents?: number | null
+          created_at?: string | null
+          id?: string
+          membership_end_date?: string | null
+          membership_start_date?: string | null
+          metadata?: Json | null
+          package_id: string
+          purchase_type: string
+          purchased_at?: string | null
+          refund_eligible_until?: string | null
+          status?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          total_amount_cents: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_paid_cents?: number | null
+          created_at?: string | null
+          id?: string
+          membership_end_date?: string | null
+          membership_start_date?: string | null
+          metadata?: Json | null
+          package_id?: string
+          purchase_type?: string
+          purchased_at?: string | null
+          refund_eligible_until?: string | null
+          status?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          total_amount_cents?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchases_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchases_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchases_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_secure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchases_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_activity_summary"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      refund_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string | null
+          id: string
+          purchase_id: string
+          reason: string | null
+          requested_at: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          stripe_refund_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string | null
+          id?: string
+          purchase_id: string
+          reason?: string | null
+          requested_at?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          stripe_refund_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string | null
+          id?: string
+          purchase_id?: string
+          reason?: string | null
+          requested_at?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          stripe_refund_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refund_requests_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "purchases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refund_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refund_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_secure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refund_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "user_activity_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "refund_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refund_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_secure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refund_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_activity_summary"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      renewal_reminders: {
+        Row: {
+          created_at: string | null
+          id: string
+          purchase_id: string
+          reminder_type: string
+          sent_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          purchase_id: string
+          reminder_type: string
+          sent_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          purchase_id?: string
+          reminder_type?: string
+          sent_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "renewal_reminders_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "purchases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "renewal_reminders_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "renewal_reminders_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_secure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "renewal_reminders_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_activity_summary"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      summer_program_enrollments: {
+        Row: {
+          additional_notes: string | null
+          athlete_id: string | null
+          athlete_name: string
+          created_at: string | null
+          educational_preferences: Json | null
+          educational_struggles: Json | null
+          enrolled_at: string | null
+          enrollment_status: string | null
+          grade_level: string
+          id: string
+          parent_user_id: string
+          purchase_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          additional_notes?: string | null
+          athlete_id?: string | null
+          athlete_name: string
+          created_at?: string | null
+          educational_preferences?: Json | null
+          educational_struggles?: Json | null
+          enrolled_at?: string | null
+          enrollment_status?: string | null
+          grade_level: string
+          id?: string
+          parent_user_id: string
+          purchase_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          additional_notes?: string | null
+          athlete_id?: string | null
+          athlete_name?: string
+          created_at?: string | null
+          educational_preferences?: Json | null
+          educational_struggles?: Json | null
+          enrolled_at?: string | null
+          enrollment_status?: string | null
+          grade_level?: string
+          id?: string
+          parent_user_id?: string
+          purchase_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "summer_program_enrollments_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "summer_program_enrollments_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_secure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "summer_program_enrollments_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "user_activity_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "summer_program_enrollments_parent_user_id_fkey"
+            columns: ["parent_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "summer_program_enrollments_parent_user_id_fkey"
+            columns: ["parent_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_secure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "summer_program_enrollments_parent_user_id_fkey"
+            columns: ["parent_user_id"]
+            isOneToOne: false
+            referencedRelation: "user_activity_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "summer_program_enrollments_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "purchases"
             referencedColumns: ["id"]
           },
         ]

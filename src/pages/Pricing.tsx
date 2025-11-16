@@ -155,9 +155,11 @@ export default function Pricing() {
           {packages?.map((pkg) => (
             <Card
               key={pkg.id}
-              className={`relative hover:shadow-xl transition-all duration-300 ${
+              className={`relative hover:shadow-xl transition-all duration-300 flex flex-col ${
                 pkg.slug === "elevation" ? "border-primary border-2 scale-105" : ""
-              } ${pkg.slug === "coaches" ? "lg:col-span-3 md:col-span-2" : ""}`}
+              } ${pkg.slug === "coaches" ? "lg:col-span-3 md:col-span-2" : ""} ${
+                pkg.slug === "summer-program" ? "min-h-[600px]" : ""
+              }`}
             >
               {getBadge(pkg.slug) && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -197,7 +199,7 @@ export default function Pricing() {
                 </div>
               </CardHeader>
 
-              <CardContent>
+              <CardContent className="flex-1">
                 <ul className="space-y-3">
                   {pkg.features.map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-2">

@@ -173,7 +173,7 @@ export default function Pricing() {
                 {pkg.slug === "summer-program" && (
                   <div className="mt-3 p-3 bg-accent/10 border border-accent/20 rounded-lg">
                     <p className="text-sm font-medium text-accent-foreground">
-                      💡 Use code <span className="font-bold">WORKSHOP20</span> at checkout for 20% off
+                      💡 Use code <span className="font-bold">BEYONDTHEGAME25</span> at checkout for 20% off
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       ${formatPrice(pkg.base_price_cents)} → ${formatPrice(Math.floor(pkg.base_price_cents * 0.8))} with coupon

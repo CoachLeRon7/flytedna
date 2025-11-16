@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Target, TrendingUp, Users, Award, ArrowRight } from "lucide-react";
+import { Target, TrendingUp, Users, Award, ArrowRight, DollarSign } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-leadership.webp";
 import logo from "@/assets/flyte-academy-logo.png";
@@ -92,6 +92,14 @@ const Index = () => {
               onClick={() => navigate("/about")}
             >
               Learn More
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline"
+              className="bg-background/20 backdrop-blur-sm text-primary-foreground border-2 border-primary-foreground/40 hover:bg-background/30 hover:border-primary-foreground/60 w-full sm:w-auto px-6 sm:px-8 py-3 text-base font-semibold tracking-tight"
+              onClick={() => navigate("/pricing")}
+            >
+              View Pricing <DollarSign className="ml-2 h-5 w-5" />
             </Button>
           </div>
         </div>

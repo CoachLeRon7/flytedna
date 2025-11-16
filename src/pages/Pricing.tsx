@@ -8,6 +8,7 @@ import { Check, Shield, Loader2 } from "lucide-react";
 import { PaymentOptionModal } from "@/components/payments/PaymentOptionModal";
 import { CoachesContactModal } from "@/components/payments/CoachesContactModal";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import logo from "@/assets/flyte-academy-logo.png";
 
 interface Package {
@@ -27,6 +28,7 @@ interface Package {
 }
 
 export default function Pricing() {
+  const navigate = useNavigate();
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showCoachesModal, setShowCoachesModal] = useState(false);
@@ -56,6 +58,20 @@ export default function Pricing() {
   };
 
   const handlePackageClick = async (pkg: Package) => {
+    // Check if user is authenticated first
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in or create an account to continue with your purchase",
+      });
+      // Store intended package in localStorage
+      localStorage.setItem('intended_package', pkg.id);
+      navigate('/auth');
+      return;
+    }
+
     if (pkg.slug === "coaches") {
       setShowCoachesModal(true);
     } else if (pkg.has_payment_plan) {

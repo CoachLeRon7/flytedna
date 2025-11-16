@@ -159,10 +159,12 @@ export default function CoachDashboard() {
       if (teamsError) throw teamsError;
       setTeams(teamsData || []);
 
-      // Load all profiles (will filter by team later)
+      // Load profiles for teams the coach manages
+      const coachTeamIds = teamsData?.map(t => t.id) || [];
       const { data: profilesData, error: profilesError } = await supabase
-        .from("profiles_secure")
-        .select("*");
+        .from("profiles")
+        .select("*")
+        .in("team_id", coachTeamIds);
 
       if (profilesError) throw profilesError;
       setProfiles(profilesData || []);

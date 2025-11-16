@@ -11,6 +11,34 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// Secure logging helpers
+const maskEmail = (email: string) => {
+  if (!email) return '[NO_EMAIL]';
+  const [user, domain] = email.split('@');
+  return `${user.substring(0, 2)}***@${domain}`;
+};
+
+const maskUserId = (id: string) => id ? `${id.substring(0, 8)}***` : '[NO_ID]';
+
+const logError = (context: string, error: any) => {
+  console.error(`[send-invitation] ${context}`, {
+    code: error?.code,
+    message: error?.message?.substring(0, 100),
+    type: error?.constructor?.name
+  });
+};
+
+const logInfo = (context: string, data?: Record<string, any>) => {
+  const sanitized = data ? Object.entries(data).reduce((acc, [key, val]) => {
+    if (key.includes('email')) acc[key] = maskEmail(val);
+    else if (key.includes('id') || key.includes('Id')) acc[key] = maskUserId(val);
+    else acc[key] = val;
+    return acc;
+  }, {} as Record<string, any>) : {};
+  
+  console.log(`[send-invitation] ${context}`, sanitized);
+};
+
 // Input validation schema
 const invitationSchema = z.object({
   email: z.string().email("Invalid email format").max(255, "Email must be less than 255 characters"),
@@ -107,8 +135,10 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (rateLimitError) {
-      console.error("Error checking rate limit:", rateLimitError);
+      logError('Rate limit check failed', rateLimitError);
     } else if (rateLimitCheck && !rateLimitCheck.allowed) {
+      logInfo('Rate limit exceeded', { limit: rateLimitCheck.limit, user: maskUserId(user.id) });
+      logInfo('Rate limit exceeded', { limit: rateLimitCheck.limit, user: maskUserId(user.id) });
       return new Response(
         JSON.stringify({ 
           error: `Rate limit exceeded: You can only send ${rateLimitCheck.limit} invitations per hour. Please try again later.`,
@@ -122,7 +152,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log("Sending invitation email:", { email, organizationName, roleName, userId: user.id });
+    logInfo('Sending invitation', { email: maskEmail(email), organization: organizationName, role: roleName });
 
     const teamInfo = teamName ? ` to join the <strong>${teamName}</strong> team` : '';
     
@@ -152,7 +182,7 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Invitation email sent successfully:", emailResponse);
+    logInfo('Email sent');
 
     // 5. Record the send for rate limiting
     try {
@@ -162,7 +192,7 @@ const handler = async (req: Request): Promise<Response> => {
       
       await supabase.rpc('record_announcement_send', { _user_id: user.id });
     } catch (recordError) {
-      console.error("Error recording invitation send:", recordError);
+      logError('Rate limit recording failed', recordError);
       // Don't fail the request if rate limit recording fails
     }
 
@@ -174,7 +204,7 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
   } catch (error: any) {
-    console.error("Error sending invitation:", error);
+    logError('Function error', error);
     
     // Return generic error message to prevent information leakage
     const statusCode = error.status || 500;

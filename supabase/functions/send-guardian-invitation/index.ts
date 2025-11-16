@@ -8,6 +8,36 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Secure logging helpers
+const maskEmail = (email: string) => {
+  if (!email) return '[NO_EMAIL]';
+  const [user, domain] = email.split('@');
+  return `${user.substring(0, 2)}***@${domain}`;
+};
+
+const maskUserId = (id: string) => id ? `${id.substring(0, 8)}***` : '[NO_ID]';
+const maskName = () => '[NAME_REDACTED]';
+
+const logError = (context: string, error?: any) => {
+  console.error(`[send-guardian-invitation] ${context}`, {
+    code: error?.code,
+    message: error?.message?.substring(0, 100),
+    type: error?.constructor?.name
+  });
+};
+
+const logInfo = (context: string, data?: Record<string, any>) => {
+  const sanitized = data ? Object.entries(data).reduce((acc, [key, val]) => {
+    if (key.includes('email')) acc[key] = maskEmail(val);
+    else if (key.includes('id') || key.includes('Id')) acc[key] = maskUserId(val);
+    else if (key.includes('name') || key.includes('Name')) acc[key] = maskName();
+    else acc[key] = val;
+    return acc;
+  }, {} as Record<string, any>) : {};
+  
+  console.log(`[send-guardian-invitation] ${context}`, sanitized);
+};
+
 const invitationSchema = z.object({
   athleteId: z.string().uuid(),
   guardianEmail: z.string().email(),
@@ -60,11 +90,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
-      console.error('Auth error:', userError);
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      logError('Auth failed', userError);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const body: GuardianInvitationRequest = await req.json();
@@ -118,8 +148,8 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     if (insertError) {
-      console.error('Insert error:', insertError);
-      return new Response(JSON.stringify({ error: 'Failed to create invitation', details: insertError }), {
+      logError('Database insert failed', insertError);
+      return new Response(JSON.stringify({ error: 'Failed to create invitation' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -153,26 +183,25 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log('Guardian invitation sent:', emailResponse);
+    logInfo('Email sent');
 
     return new Response(JSON.stringify({ 
       success: true, 
-      message: 'Guardian invitation sent successfully',
-      invitationToken: invitation.invitation_token 
+      message: 'Guardian invitation sent successfully'
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error: any) {
-    console.error('Error in send-guardian-invitation:', error);
+    logError('Function error', error);
     if (error instanceof z.ZodError) {
-      return new Response(JSON.stringify({ error: 'Invalid request data', details: error.errors }), {
+      return new Response(JSON.stringify({ error: 'Invalid request data' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: 'Failed to send invitation' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

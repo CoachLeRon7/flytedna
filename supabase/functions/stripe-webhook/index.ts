@@ -7,6 +7,22 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Secure logging helpers - mask sensitive payment data
+const maskAmount = () => '[AMOUNT_REDACTED]';
+const maskUserId = (id: string) => id ? `${id.substring(0, 8)}***` : '[NO_ID]';
+const maskPaymentId = (id: string) => id ? `${id.substring(0, 12)}***` : '[NO_ID]';
+
+const logError = (context: string, error?: any) => {
+  console.error(`[stripe-webhook] ${context}`, {
+    code: error?.code,
+    type: error?.type || error?.constructor?.name
+  });
+};
+
+const logInfo = (context: string, data?: Record<string, any>) => {
+  console.log(`[stripe-webhook] ${context}`, data || {});
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -16,7 +32,7 @@ serve(async (req) => {
   const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
 
   if (!signature || !webhookSecret) {
-    console.error("[stripe-webhook] Missing signature or webhook secret");
+    logError("Configuration error - missing signature or secret");
     return new Response(JSON.stringify({ error: "Webhook configuration error" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -39,9 +55,9 @@ serve(async (req) => {
 
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-      console.log("[stripe-webhook] Event verified:", event.type);
+      logInfo("Event verified", { event_type: event.type });
     } catch (err) {
-      console.error("[stripe-webhook] Webhook signature verification failed:", err);
+      logError("Signature verification failed");
       return new Response(JSON.stringify({ error: "Invalid signature" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -52,13 +68,13 @@ serve(async (req) => {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        console.log("[stripe-webhook] Checkout session completed:", session.id);
+        logInfo("Checkout completed", { session_id: maskPaymentId(session.id) });
 
         const purchaseId = session.metadata?.purchase_id;
         const paymentType = session.metadata?.payment_type;
 
         if (!purchaseId) {
-          console.error("[stripe-webhook] No purchase_id in session metadata");
+          logError("Missing metadata");
           break;
         }
 
@@ -70,7 +86,7 @@ serve(async (req) => {
           .single();
 
         if (fetchError || !purchase) {
-          console.error("[stripe-webhook] Purchase not found:", purchaseId);
+          logError("Purchase not found", fetchError);
           break;
         }
 
@@ -91,15 +107,11 @@ serve(async (req) => {
           .eq("id", purchaseId);
 
         if (updateError) {
-          console.error("[stripe-webhook] Failed to update purchase:", updateError);
+          logError("Purchase update failed", updateError);
           break;
         }
 
-        console.log("[stripe-webhook] Purchase updated:", {
-          purchaseId,
-          amountPaid: newAmountPaid,
-          status: isFullyPaid ? "completed" : "partial",
-        });
+        logInfo("Purchase updated", { status: isFullyPaid ? "completed" : "partial" });
 
         // Grant package access if fully paid
         if (isFullyPaid) {
@@ -115,9 +127,9 @@ serve(async (req) => {
             });
 
           if (accessError) {
-            console.error("[stripe-webhook] Failed to grant package access:", accessError);
+            logError("Access grant failed", accessError);
           } else {
-            console.log("[stripe-webhook] Package access granted for:", purchaseId);
+            logInfo("Access granted");
           }
         }
 
@@ -131,9 +143,9 @@ serve(async (req) => {
               isFullPayment: isFullyPaid,
             },
           });
-          console.log("[stripe-webhook] Payment confirmation email sent");
+          logInfo("Confirmation email queued");
         } catch (emailError) {
-          console.error("[stripe-webhook] Failed to send confirmation email:", emailError);
+          logError("Email send failed", emailError);
           // Don't fail the webhook if email fails
         }
 
@@ -142,7 +154,7 @@ serve(async (req) => {
 
       case "payment_intent.succeeded": {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        console.log("[stripe-webhook] Payment intent succeeded:", paymentIntent.id);
+        logInfo("Payment succeeded", { payment_intent_id: maskPaymentId(paymentIntent.id) });
 
         // Find purchase by payment_intent_id
         const { data: purchases } = await supabaseClient

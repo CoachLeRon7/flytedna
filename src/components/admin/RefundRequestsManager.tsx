@@ -180,9 +180,23 @@ export const RefundRequestsManager = () => {
 
       if (error) throw error;
 
+      // Send email notification in background
+      supabase.functions
+        .invoke("send-refund-status-email", {
+          body: {
+            refundRequestId: selectedRequest.id,
+            status: approve ? "approved" : "rejected",
+          },
+        })
+        .then(({ error: emailError }) => {
+          if (emailError) {
+            console.error("Error sending email notification:", emailError);
+          }
+        });
+
       toast({
         title: approve ? "Request approved" : "Request rejected",
-        description: `Refund request has been ${approve ? "approved" : "rejected"}.`,
+        description: `Refund request has been ${approve ? "approved" : "rejected"}. An email notification has been sent to the user.`,
       });
 
       setReviewDialogOpen(false);

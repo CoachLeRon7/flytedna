@@ -61,12 +61,12 @@ const Index = () => {
             alt="FLY.TE Academy Logo" 
             width="400" 
             height="400" 
-            className="h-56 md:h-96 w-auto mx-auto mb-1 md:mb-2 mt-4 md:mt-0 animate-fade-in drop-shadow-[0_0_25px_rgba(251,191,36,0.5)] hover:drop-shadow-[0_0_35px_rgba(251,191,36,0.7)] transition-all duration-300" 
+            className="h-40 md:h-64 w-auto mx-auto mb-1 md:mb-2 mt-2 md:mt-0 animate-fade-in drop-shadow-[0_0_25px_rgba(251,191,36,0.5)] hover:drop-shadow-[0_0_35px_rgba(251,191,36,0.7)] transition-all duration-300" 
           />
-          <h1 className="text-2xl md:text-5xl font-bold text-primary-foreground mb-3 md:mb-6 animate-fade-in leading-tight">
+          <h1 className="text-2xl md:text-4xl font-bold text-primary-foreground mb-2 md:mb-4 animate-fade-in leading-tight">
             Where Leadership Potential Transforms Into Leadership Power
           </h1>
-          <p className="text-base md:text-2xl text-primary-foreground/90 mb-4 md:mb-8 max-w-3xl mx-auto">
+          <p className="text-base md:text-xl text-primary-foreground/90 mb-3 md:mb-6 max-w-3xl mx-auto">
             Empowering student-athletes to develop transformational leadership through evidence-based assessment and growth planning
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center max-w-2xl mx-auto">

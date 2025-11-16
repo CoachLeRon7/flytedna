@@ -1743,6 +1743,10 @@ export type Database = {
         Args: { _max_per_hour?: number; _user_id: string }
         Returns: Json
       }
+      cleanup_old_performance_metrics: {
+        Args: { retention_days?: number }
+        Returns: number
+      }
       get_teammates_for_peer_assessment: {
         Args: {
           _semester_label: string

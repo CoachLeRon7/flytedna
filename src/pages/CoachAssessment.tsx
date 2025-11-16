@@ -32,10 +32,10 @@ const coachAssessmentSchema = z.object({
   B1: z.number().min(1).max(5),
   B2: z.number().min(1).max(5),
   B3: z.number().min(1).max(5),
-  // Reflection prompts
-  reflection_voluntary_followership: z.string().optional(),
-  reflection_greatest_impact: z.string().optional(),
-  reflection_growth_area: z.string().optional(),
+  // Reflection prompts (max 2000 chars each)
+  reflection_voluntary_followership: z.string().max(2000, "Response must be 2000 characters or less").optional(),
+  reflection_greatest_impact: z.string().max(2000, "Response must be 2000 characters or less").optional(),
+  reflection_growth_area: z.string().max(2000, "Response must be 2000 characters or less").optional(),
   // Assessment metadata
   semester_label: z.string().min(1, "Semester is required"),
   timepoint: z.enum(["pre", "mid", "end"]),
@@ -338,38 +338,56 @@ export default function CoachAssessment() {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="reflection_voluntary_followership">
-                    What behaviors make this athlete someone others follow voluntarily?
+                    What behaviors make this athlete someone others follow voluntarily? (max 2000 characters)
                   </Label>
                   <Textarea
                     id="reflection_voluntary_followership"
                     rows={3}
                     placeholder="Describe the specific behaviors that inspire voluntary followership..."
+                    maxLength={2000}
                     {...form.register("reflection_voluntary_followership")}
                   />
+                  {form.watch("reflection_voluntary_followership") && (
+                    <p className="text-sm text-muted-foreground text-right">
+                      {form.watch("reflection_voluntary_followership")?.length || 0}/2000 characters
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="reflection_greatest_impact">
-                    When has this athlete's leadership had the greatest positive impact on the team?
+                    When has this athlete's leadership had the greatest positive impact on the team? (max 2000 characters)
                   </Label>
                   <Textarea
                     id="reflection_greatest_impact"
                     rows={3}
                     placeholder="Share a specific example of positive team impact..."
+                    maxLength={2000}
                     {...form.register("reflection_greatest_impact")}
                   />
+                  {form.watch("reflection_greatest_impact") && (
+                    <p className="text-sm text-muted-foreground text-right">
+                      {form.watch("reflection_greatest_impact")?.length || 0}/2000 characters
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="reflection_growth_area">
-                    What area of growth would make this athlete's influence transformational?
+                    What area of growth would make this athlete's influence transformational? (max 2000 characters)
                   </Label>
                   <Textarea
                     id="reflection_growth_area"
                     rows={3}
                     placeholder="Identify the key growth area for transformational leadership..."
+                    maxLength={2000}
                     {...form.register("reflection_growth_area")}
                   />
+                  {form.watch("reflection_growth_area") && (
+                    <p className="text-sm text-muted-foreground text-right">
+                      {form.watch("reflection_growth_area")?.length || 0}/2000 characters
+                    </p>
+                  )}
                 </div>
               </div>
             </Card>

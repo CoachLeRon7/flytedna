@@ -29,7 +29,7 @@ const peerAssessmentSchema = z.object({
   b1: z.number().min(1).max(5),
   b2: z.number().min(1).max(5),
   b3: z.number().min(1).max(5),
-  optional_comment: z.string().optional(),
+  optional_comment: z.string().max(1000, "Comment must be 1000 characters or less").optional(),
 });
 
 type PeerAssessmentFormData = z.infer<typeof peerAssessmentSchema>;
@@ -165,14 +165,20 @@ export default function PeerAssessment() {
 
               <div className="space-y-2">
                 <Label htmlFor="optional_comment">
-                  Optional Anonymous Comment (2-3 sentences about team impact or leadership moment)
+                  Optional Anonymous Comment (2-3 sentences about team impact or leadership moment, max 1000 characters)
                 </Label>
                 <Textarea
                   id="optional_comment"
                   placeholder="Your comment will be anonymous..."
                   {...form.register("optional_comment")}
+                  maxLength={1000}
                   rows={3}
                 />
+                {form.watch("optional_comment") && (
+                  <p className="text-sm text-muted-foreground text-right">
+                    {form.watch("optional_comment")?.length || 0}/1000 characters
+                  </p>
+                )}
               </div>
 
               <div className="flex gap-4">

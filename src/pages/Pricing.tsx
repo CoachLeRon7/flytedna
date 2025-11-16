@@ -4,9 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Shield } from "lucide-react";
+import { Check, Shield, Loader2 } from "lucide-react";
 import { PaymentOptionModal } from "@/components/payments/PaymentOptionModal";
 import { CoachesContactModal } from "@/components/payments/CoachesContactModal";
+import { useToast } from "@/hooks/use-toast";
 
 interface Package {
   id: string;
@@ -28,6 +29,8 @@ export default function Pricing() {
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showCoachesModal, setShowCoachesModal] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const { data: packages, isLoading } = useQuery({
     queryKey: ["packages"],
@@ -51,7 +54,7 @@ export default function Pricing() {
     return `$${(cents / 100).toFixed(0)}`;
   };
 
-  const handlePackageClick = (pkg: Package) => {
+  const handlePackageClick = async (pkg: Package) => {
     if (pkg.slug === "coaches") {
       setShowCoachesModal(true);
     } else if (pkg.has_payment_plan) {
@@ -59,7 +62,34 @@ export default function Pricing() {
       setShowPaymentModal(true);
     } else {
       // Direct checkout for non-payment-plan packages
-      window.location.href = `/checkout?package=${pkg.id}&type=full`;
+      setCheckoutLoading(pkg.id);
+      
+      try {
+        const { data, error } = await supabase.functions.invoke("create-checkout", {
+          body: {
+            package_id: pkg.id,
+            payment_type: "full",
+          },
+        });
+
+        if (error) throw error;
+
+        if (data?.url) {
+          // Redirect to Stripe Checkout in new tab
+          window.open(data.url, '_blank');
+        } else {
+          throw new Error("No checkout URL returned");
+        }
+      } catch (error: any) {
+        console.error("Checkout error:", error);
+        toast({
+          title: "Checkout Error",
+          description: error.message || "Failed to create checkout session. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setCheckoutLoading(null);
+      }
     }
   };
 
@@ -145,12 +175,22 @@ export default function Pricing() {
                   size="lg"
                   onClick={() => handlePackageClick(pkg)}
                   variant={pkg.slug === "coaches" ? "outline" : "default"}
+                  disabled={checkoutLoading === pkg.id}
                 >
-                  {pkg.slug === "coaches"
-                    ? "Contact Us"
-                    : pkg.has_payment_plan
-                    ? "Choose Payment Option"
-                    : `Get Started - ${formatPrice(pkg.base_price_cents)}`}
+                  {checkoutLoading === pkg.id ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating checkout...
+                    </>
+                  ) : (
+                    <>
+                      {pkg.slug === "coaches"
+                        ? "Contact Us"
+                        : pkg.has_payment_plan
+                        ? "Choose Payment Option"
+                        : `Get Started - ${formatPrice(pkg.base_price_cents)}`}
+                    </>
+                  )}
                 </Button>
               </CardFooter>
             </Card>

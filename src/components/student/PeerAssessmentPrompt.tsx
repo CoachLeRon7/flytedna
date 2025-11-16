@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Users, CheckCircle, Bell } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface TeammateToAssess {
   user_id: string;
@@ -62,7 +63,32 @@ export const PeerAssessmentPrompt = () => {
     fetchMyAssessmentAndTeammates();
   }, []);
 
-  if (loading || teammates.length === 0) {
+  if (loading) {
+    return (
+      <Card className="border-[hsl(var(--student-accent))] border-2 shadow-elegant">
+        <CardHeader>
+          <Skeleton className="h-8 w-1/2 mb-2" />
+          <Skeleton className="h-4 w-3/4" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Skeleton className="h-16 w-full rounded-lg" />
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="border rounded-lg p-4 flex items-center justify-between">
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-5 w-1/3" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+                <Skeleton className="h-10 w-32" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (teammates.length === 0) {
     return null;
   }
 

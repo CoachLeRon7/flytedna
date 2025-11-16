@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Assessment {
   composite_mean: number;
@@ -27,8 +28,18 @@ export function LeadershipSnapshot({ latestAssessment, assessmentHistory }: Lead
             💪 Leadership Snapshot
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground text-center py-8">Complete an assessment to see your leadership profile</p>
+        <CardContent className="space-y-6">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <Skeleton className="h-6 w-1/3 mb-4" />
+              <Skeleton className="h-64 w-full rounded-lg" />
+            </div>
+            <div>
+              <Skeleton className="h-6 w-1/3 mb-4" />
+              <Skeleton className="h-64 w-full rounded-lg" />
+            </div>
+          </div>
+          <Skeleton className="h-20 w-full rounded-lg" />
         </CardContent>
       </Card>
     );

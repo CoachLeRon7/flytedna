@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Plus, Save, Download, Lightbulb, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/flyte-academy-logo.png";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Goal {
   goal: string;
@@ -190,6 +191,42 @@ const GrowthPlan = () => {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading your growth plan...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
+        <header className="border-b bg-card/50 backdrop-blur-sm">
+          <div className="container mx-auto px-4 py-4">
+            <img src={logo} alt="Flyte Academy" className="h-10" />
+          </div>
+        </header>
+        <main className="container mx-auto px-4 py-8">
+          <div className="space-y-6">
+            <Skeleton className="h-10 w-48" />
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-8 w-1/3 mb-2" />
+                <Skeleton className="h-4 w-1/2" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="border rounded-lg p-4 space-y-4">
+                    <Skeleton className="h-5 w-1/4" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-20 w-full" />
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        </main>
       </div>
     );
   }

@@ -9,6 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Building2, Plus, Users, Pencil } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TableSkeleton } from "@/components/ui/skeleton-components";
 
 interface Organization {
   id: string;
@@ -138,6 +140,28 @@ export function OrganizationManagement() {
       toast.error('Failed to update organization');
     }
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <Skeleton className="h-8 w-48 mb-2" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <Skeleton className="h-10 w-48" />
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-1/4" />
+          </CardHeader>
+          <CardContent>
+            <TableSkeleton rows={5} columns={4} />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -25,6 +25,8 @@ import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { UserDetailDrawer } from "./UserDetailDrawer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TableSkeleton, StatCardSkeleton } from "@/components/ui/skeleton-components";
 
 interface UserSummary {
   user_id: string;
@@ -213,6 +215,27 @@ export function UserManagementDashboard() {
   const totalStudents = users.filter(u => u.role === 'student').length;
   const totalCoaches = users.filter(u => u.role === 'coach').length;
   const totalAdmins = users.filter(u => u.role === 'admin').length;
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>User Management</CardTitle>
+          <CardDescription>Loading user data...</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex gap-4">
+            <Skeleton className="h-10 flex-1" />
+            <Skeleton className="h-10 w-48" />
+            <Skeleton className="h-10 w-48" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+          <StatCardSkeleton count={5} />
+          <TableSkeleton rows={10} columns={8} />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">

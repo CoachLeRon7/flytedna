@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle, XCircle, Clock, RefreshCw } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TableSkeleton } from "@/components/ui/skeleton-components";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -198,6 +200,9 @@ export function RoleRequestsManager() {
           <CardTitle>Role Requests</CardTitle>
           <CardDescription>Loading pending role requests...</CardDescription>
         </CardHeader>
+        <CardContent>
+          <TableSkeleton rows={3} columns={5} />
+        </CardContent>
       </Card>
     );
   }

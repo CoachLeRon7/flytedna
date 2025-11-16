@@ -14,10 +14,12 @@ import {
   Calendar,
   CheckCircle2,
   Clock,
-  AlertCircle
+  AlertCircle,
+  RefreshCcw
 } from "lucide-react";
 import { formatTimepointDisplay } from "@/lib/utils";
 import logo from "@/assets/flyte-academy-logo.png";
+import { RefundRequestDialog } from "@/components/payments/RefundRequestDialog";
 
 interface Purchase {
   id: string;
@@ -30,10 +32,21 @@ interface Purchase {
   membership_start_date: string;
   membership_end_date: string;
   stripe_payment_intent_id: string;
+  refund_eligible_until: string | null;
   packages: {
     name: string;
     description: string;
   };
+}
+
+interface RefundRequest {
+  id: string;
+  purchase_id: string;
+  status: string;
+  reason: string;
+  requested_at: string;
+  reviewed_at: string | null;
+  admin_notes: string | null;
 }
 
 interface PackageAccess {
@@ -65,6 +78,9 @@ const PurchasesDashboard = () => {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [packageAccess, setPackageAccess] = useState<PackageAccess[]>([]);
   const [installments, setInstallments] = useState<Installment[]>([]);
+  const [refundRequests, setRefundRequests] = useState<RefundRequest[]>([]);
+  const [refundDialogOpen, setRefundDialogOpen] = useState(false);
+  const [selectedPurchase, setSelectedPurchase] = useState<Purchase | null>(null);
 
   useEffect(() => {
     loadPurchaseData();
@@ -118,9 +134,19 @@ const PurchasesDashboard = () => {
 
       if (installmentsError) throw installmentsError;
 
+      // Fetch refund requests
+      const { data: refundRequestsData, error: refundRequestsError } = await supabase
+        .from("refund_requests")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .order("requested_at", { ascending: false });
+
+      if (refundRequestsError) throw refundRequestsError;
+
       setPurchases(purchasesData || []);
       setPackageAccess(accessData || []);
       setInstallments(installmentsData || []);
+      setRefundRequests(refundRequestsData || []);
     } catch (error: any) {
       console.error("Error loading purchase data:", error);
       toast({
@@ -173,6 +199,33 @@ const PurchasesDashboard = () => {
       description: "Receipt download functionality coming soon!",
     });
     // TODO: Implement receipt generation/download
+  };
+
+  const isRefundEligible = (purchase: Purchase) => {
+    if (!purchase.refund_eligible_until) return false;
+    return new Date(purchase.refund_eligible_until) > new Date();
+  };
+
+  const getPurchaseRefundRequest = (purchaseId: string) => {
+    return refundRequests.find(req => req.purchase_id === purchaseId);
+  };
+
+  const handleRefundRequest = (purchase: Purchase) => {
+    setSelectedPurchase(purchase);
+    setRefundDialogOpen(true);
+  };
+
+  const getRefundStatusBadge = (status: string) => {
+    switch (status) {
+      case "pending":
+        return <Badge variant="outline" className="gap-1"><Clock className="h-3 w-3" />Pending Review</Badge>;
+      case "approved":
+        return <Badge variant="default" className="gap-1 bg-green-500"><CheckCircle2 className="h-3 w-3" />Approved</Badge>;
+      case "rejected":
+        return <Badge variant="destructive" className="gap-1"><AlertCircle className="h-3 w-3" />Rejected</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
   };
 
   if (loading) {
@@ -382,16 +435,58 @@ const PurchasesDashboard = () => {
                         </>
                       )}
 
-                      {purchase.stripe_payment_intent_id && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDownloadReceipt(purchase.id, purchase.stripe_payment_intent_id)}
-                        >
-                          <Download className="w-4 h-4 mr-2" />
-                          Download Receipt
-                        </Button>
-                      )}
+                      {(() => {
+                        const refundRequest = getPurchaseRefundRequest(purchase.id);
+                        const isEligible = isRefundEligible(purchase);
+
+                        return (
+                          <>
+                            {refundRequest && (
+                              <>
+                                <Separator />
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium">Refund Status</span>
+                                    {getRefundStatusBadge(refundRequest.status)}
+                                  </div>
+                                  {refundRequest.admin_notes && (
+                                    <div className="rounded-lg bg-muted p-3">
+                                      <p className="text-sm text-muted-foreground">
+                                        <strong>Admin Notes:</strong> {refundRequest.admin_notes}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </>
+                            )}
+
+                            <div className="flex gap-2">
+                              {purchase.stripe_payment_intent_id && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDownloadReceipt(purchase.id, purchase.stripe_payment_intent_id)}
+                                >
+                                  <Download className="w-4 h-4 mr-2" />
+                                  Download Receipt
+                                </Button>
+                              )}
+
+                              {isEligible && !refundRequest && purchase.status === "completed" && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleRefundRequest(purchase)}
+                                  className="gap-2"
+                                >
+                                  <RefreshCcw className="w-4 h-4" />
+                                  Request Refund
+                                </Button>
+                              )}
+                            </div>
+                          </>
+                        );
+                      })()}
                     </CardContent>
                   </Card>
                 );
@@ -400,6 +495,17 @@ const PurchasesDashboard = () => {
           )}
         </section>
       </main>
+
+      {selectedPurchase && (
+        <RefundRequestDialog
+          open={refundDialogOpen}
+          onOpenChange={setRefundDialogOpen}
+          purchaseId={selectedPurchase.id}
+          packageName={selectedPurchase.packages.name}
+          amount={selectedPurchase.total_amount_cents}
+          onSuccess={loadPurchaseData}
+        />
+      )}
     </div>
   );
 };

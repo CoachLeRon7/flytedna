@@ -7,6 +7,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Request ID utility
+const generateRequestId = () => crypto.randomUUID();
+
 // Secure logging helpers
 const maskEmail = (email: string) => {
   if (!email) return '[NO_EMAIL]';
@@ -16,15 +19,16 @@ const maskEmail = (email: string) => {
 
 const maskUserId = (id: string) => id ? `${id.substring(0, 8)}***` : '[NO_ID]';
 
-const logError = (context: string, error: any) => {
+const logError = (context: string, error: any, requestId?: string) => {
   console.error(`[generate-coach-insights] ${context}`, {
+    requestId,
     code: error?.code,
     message: error?.message?.substring(0, 100),
     type: error?.constructor?.name
   });
 };
 
-const logInfo = (context: string, data?: Record<string, any>) => {
+const logInfo = (context: string, data?: Record<string, any>, requestId?: string) => {
   const sanitized = data ? Object.entries(data).reduce((acc, [key, val]) => {
     if (key.includes('email')) acc[key] = maskEmail(val);
     else if (key.includes('id') || key.includes('Id')) acc[key] = maskUserId(val);
@@ -32,7 +36,7 @@ const logInfo = (context: string, data?: Record<string, any>) => {
     return acc;
   }, {} as Record<string, any>) : {};
   
-  console.log(`[generate-coach-insights] ${context}`, sanitized);
+  console.log(`[generate-coach-insights] ${context}`, { requestId, ...sanitized });
 };
 
 // Define schema for AI insights validation
@@ -63,11 +67,16 @@ const insightsSchema = z.object({
 });
 
 serve(async (req) => {
+  // Extract or generate request ID
+  const requestId = req.headers.get('x-request-id') || generateRequestId();
+  
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: { ...corsHeaders, 'x-request-id': requestId } });
   }
 
   try {
+    logInfo('Request received', {}, requestId);
+    
     // Authentication check
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
@@ -89,10 +98,10 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
     
     if (authError || !user) {
-      logError('Authentication failed', authError);
+      logError('Authentication failed', authError, requestId);
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'x-request-id': requestId } }
       );
     }
 
@@ -125,7 +134,7 @@ serve(async (req) => {
       .single();
 
     if (fetchError || !assessment) {
-      logError('Assessment fetch failed', fetchError);
+      logError('Assessment fetch failed', fetchError, requestId);
       throw new Error("Could not fetch assessment");
     }
 
@@ -254,7 +263,7 @@ Be specific, constructive, and actionable. Reference the scores and reflections 
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      logError('AI Gateway error', { status: aiResponse.status, errorText: errorText.substring(0, 100) });
+      logError('AI Gateway error', { status: aiResponse.status, errorText: errorText.substring(0, 100) }, requestId);
       throw new Error(`AI Gateway error: ${aiResponse.status}`);
     }
 
@@ -271,9 +280,9 @@ Be specific, constructive, and actionable. Reference the scores and reflections 
       const rawInsights = JSON.parse(toolCall.function.arguments);
       insights = insightsSchema.parse(rawInsights);
     } catch (parseError) {
-      logError('Failed to parse/validate AI insights', parseError);
+      logError('Failed to parse/validate AI insights', parseError, requestId);
       if (parseError instanceof z.ZodError) {
-        logError('Validation errors', { errors: parseError.errors });
+        logError('Validation errors', { errors: parseError.errors }, requestId);
         throw new Error('AI generated invalid insights format');
       }
       throw new Error('Failed to parse AI response');
@@ -286,21 +295,23 @@ Be specific, constructive, and actionable. Reference the scores and reflections 
       .eq('id', assessmentId);
 
     if (updateError) {
-      logError('Failed to store insights', updateError);
+      logError('Failed to store insights', updateError, requestId);
       throw updateError;
     }
 
+    logInfo('Insights generated successfully', { assessmentId }, requestId);
+    
     return new Response(
       JSON.stringify({ success: true, insights }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json', 'x-request-id': requestId } }
     );
   } catch (error: any) {
-    logError('Function error', error);
+    logError('Function error', error, requestId);
     return new Response(
       JSON.stringify({ error: 'An error occurred generating insights. Please try again.' }),
       { 
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json', 'x-request-id': requestId } 
       }
     );
   }

@@ -11,6 +11,9 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// Request ID utility
+const generateRequestId = () => crypto.randomUUID();
+
 // Secure logging helpers
 const maskEmail = (email: string) => {
   if (!email) return '[NO_EMAIL]';
@@ -20,15 +23,16 @@ const maskEmail = (email: string) => {
 
 const maskUserId = (id: string) => id ? `${id.substring(0, 8)}***` : '[NO_ID]';
 
-const logError = (context: string, error: any) => {
+const logError = (context: string, error: any, requestId?: string) => {
   console.error(`[send-invitation] ${context}`, {
+    requestId,
     code: error?.code,
     message: error?.message?.substring(0, 100),
     type: error?.constructor?.name
   });
 };
 
-const logInfo = (context: string, data?: Record<string, any>) => {
+const logInfo = (context: string, data?: Record<string, any>, requestId?: string) => {
   const sanitized = data ? Object.entries(data).reduce((acc, [key, val]) => {
     if (key.includes('email')) acc[key] = maskEmail(val);
     else if (key.includes('id') || key.includes('Id')) acc[key] = maskUserId(val);
@@ -36,7 +40,7 @@ const logInfo = (context: string, data?: Record<string, any>) => {
     return acc;
   }, {} as Record<string, any>) : {};
   
-  console.log(`[send-invitation] ${context}`, sanitized);
+  console.log(`[send-invitation] ${context}`, { requestId, ...sanitized });
 };
 
 // Input validation schema
@@ -59,11 +63,14 @@ interface InvitationEmailRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  const requestId = req.headers.get('x-request-id') || generateRequestId();
+  
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: { ...corsHeaders, 'x-request-id': requestId } });
   }
 
   try {
+    logInfo('Request received', {}, requestId);
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -137,8 +144,8 @@ const handler = async (req: Request): Promise<Response> => {
     if (rateLimitError) {
       logError('Rate limit check failed', rateLimitError);
     } else if (rateLimitCheck && !rateLimitCheck.allowed) {
-      logInfo('Rate limit exceeded', { limit: rateLimitCheck.limit, user: maskUserId(user.id) });
-      logInfo('Rate limit exceeded', { limit: rateLimitCheck.limit, user: maskUserId(user.id) });
+      logInfo('Rate limit exceeded', { limit: rateLimitCheck.limit, user: maskUserId(user.id) }, requestId);
+      logInfo('Rate limit exceeded', { limit: rateLimitCheck.limit, user: maskUserId(user.id) }, requestId);
       return new Response(
         JSON.stringify({ 
           error: `Rate limit exceeded: You can only send ${rateLimitCheck.limit} invitations per hour. Please try again later.`,
@@ -147,12 +154,12 @@ const handler = async (req: Request): Promise<Response> => {
         }),
         { 
           status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+          headers: { ...corsHeaders, "Content-Type": "application/json", 'x-request-id': requestId } 
         }
       );
     }
 
-    logInfo('Sending invitation', { email: maskEmail(email), organization: organizationName, role: roleName });
+    logInfo('Sending invitation', { email: maskEmail(email), organization: organizationName, role: roleName }, requestId);
 
     const teamInfo = teamName ? ` to join the <strong>${teamName}</strong> team` : '';
     
@@ -182,7 +189,7 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    logInfo('Email sent');
+    logInfo('Email sent', {}, requestId);
 
     // 5. Record the send for rate limiting
     try {
@@ -192,7 +199,7 @@ const handler = async (req: Request): Promise<Response> => {
       
       await supabase.rpc('record_announcement_send', { _user_id: user.id });
     } catch (recordError) {
-      logError('Rate limit recording failed', recordError);
+      logError('Rate limit recording failed', recordError, requestId);
       // Don't fail the request if rate limit recording fails
     }
 
@@ -201,10 +208,11 @@ const handler = async (req: Request): Promise<Response> => {
       headers: {
         "Content-Type": "application/json",
         ...corsHeaders,
+        'x-request-id': requestId,
       },
     });
   } catch (error: any) {
-    logError('Function error', error);
+    logError('Function error', error, requestId);
     
     // Return generic error message to prevent information leakage
     const statusCode = error.status || 500;
@@ -212,7 +220,7 @@ const handler = async (req: Request): Promise<Response> => {
       JSON.stringify({ error: "An error occurred sending the invitation. Please try again." }),
       {
         status: statusCode,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
+        headers: { "Content-Type": "application/json", ...corsHeaders, 'x-request-id': requestId },
       }
     );
   }

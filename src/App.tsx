@@ -22,6 +22,7 @@ const GuardianAssessment = lazy(() => import("./pages/GuardianAssessment"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
+const PurchasesDashboard = lazy(() => import("./pages/PurchasesDashboard"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/payment/success" element={<PaymentSuccess />} />
+            <Route path="/dashboard/purchases" element={<PurchasesDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

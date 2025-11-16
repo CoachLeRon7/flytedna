@@ -32,7 +32,7 @@ export const InvitationManager = () => {
   const { primaryOrg } = useUserOrganization();
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<'student' | 'coach' | 'org_admin'>('student');
-  const [selectedTeam, setSelectedTeam] = useState<string>('');
+  const [selectedTeam, setSelectedTeam] = useState<string>('none');
   const [teams, setTeams] = useState<Team[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(false);
@@ -99,7 +99,7 @@ export const InvitationManager = () => {
           organization_id: primaryOrg.organization_id,
           email: email.toLowerCase(),
           role,
-          team_id: selectedTeam || null,
+          team_id: selectedTeam && selectedTeam !== 'none' ? selectedTeam : null,
           invited_by: user.id,
         })
         .select()
@@ -117,7 +117,7 @@ export const InvitationManager = () => {
       const inviterName = profile ? `${profile.first_name} ${profile.last_name}` : 'Your administrator';
 
       // Get team name if team was selected
-      const teamName = selectedTeam ? teams.find(t => t.id === selectedTeam)?.name : undefined;
+      const teamName = selectedTeam && selectedTeam !== 'none' ? teams.find(t => t.id === selectedTeam)?.name : undefined;
 
       // Send email
       const { error: emailError } = await supabase.functions.invoke('send-invitation', {
@@ -139,7 +139,7 @@ export const InvitationManager = () => {
 
       // Reset form
       setEmail('');
-      setSelectedTeam('');
+      setSelectedTeam('none');
       loadInvitations();
     } catch (error: any) {
       console.error('Error sending invitation:', error);
@@ -211,7 +211,7 @@ export const InvitationManager = () => {
                     <SelectValue placeholder="Select a team" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No team assignment</SelectItem>
+                    <SelectItem value="none">No team assignment</SelectItem>
                     {teams.map((team) => (
                       <SelectItem key={team.id} value={team.id}>
                         {team.name} - {team.sport}

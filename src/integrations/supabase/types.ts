@@ -1163,6 +1163,36 @@ export type Database = {
         }
         Relationships: []
       }
+      performance_metrics: {
+        Row: {
+          checkpoints: Json | null
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          operation: string
+          request_id: string
+          total_duration_ms: number
+        }
+        Insert: {
+          checkpoints?: Json | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          operation: string
+          request_id: string
+          total_duration_ms: number
+        }
+        Update: {
+          checkpoints?: Json | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          operation?: string
+          request_id?: string
+          total_duration_ms?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

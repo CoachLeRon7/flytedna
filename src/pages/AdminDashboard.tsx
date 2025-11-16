@@ -31,6 +31,7 @@ import { ArrowRight } from "lucide-react";
 import { OrganizationManagement } from "@/components/admin/OrganizationManagement";
 import { InvitationManager } from "@/components/admin/InvitationManager";
 import { JoinRequestsManager } from "@/components/admin/JoinRequestsManager";
+import { PerformanceDashboard } from "@/components/admin/PerformanceDashboard";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -378,6 +379,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="users">User Management</TabsTrigger>
             {isSuperAdmin && <TabsTrigger value="organizations">Organizations</TabsTrigger>}
             <TabsTrigger value="management">System Management</TabsTrigger>
+            <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="export">Export Center</TabsTrigger>
           </TabsList>
 
@@ -475,6 +477,10 @@ export default function AdminDashboard() {
                 </Card>
               </TabsContent>
             </Tabs>
+          </TabsContent>
+
+          <TabsContent value="performance" className="space-y-6">
+            <PerformanceDashboard />
           </TabsContent>
 
           <TabsContent value="export" className="space-y-6">

@@ -39,7 +39,6 @@ const insightsSchema = z.object({
 serve(async (req) => {
   // Extract or generate request ID
   const requestId = req.headers.get('x-request-id') || generateRequestId();
-  const perfTimer = startPerformanceTimer(requestId);
   
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: { ...corsHeaders, 'x-request-id': requestId } });
@@ -47,7 +46,6 @@ serve(async (req) => {
 
   try {
     logInfo('Request received', {}, requestId);
-    checkpoint(perfTimer, 'init');
     
     // Authentication check
     const authHeader = req.headers.get('Authorization');
@@ -64,6 +62,9 @@ serve(async (req) => {
 
     // Create client for auth check
     const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+    const perfTimer = startPerformanceTimer(requestId, supabaseClient);
+    
+    checkpoint(perfTimer, 'init');
     
     // Verify user token
     const token = authHeader.replace('Bearer ', '');
@@ -73,7 +74,7 @@ serve(async (req) => {
     
     if (authError || !user) {
       logError('Authentication failed', authError, requestId);
-      logPerformance(perfTimer, 'generate-coach-insights:unauthorized');
+      await logPerformance(perfTimer, 'generate-coach-insights:unauthorized');
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'x-request-id': requestId } }
@@ -90,7 +91,7 @@ serve(async (req) => {
     
     const roles = userRoles?.map(r => r.role) || [];
     if (!roles.includes('coach') && !roles.includes('admin')) {
-      logPerformance(perfTimer, 'generate-coach-insights:forbidden');
+      await logPerformance(perfTimer, 'generate-coach-insights:forbidden');
       return new Response(
         JSON.stringify({ error: 'Forbidden: Only coaches and admins can generate insights' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -115,7 +116,7 @@ serve(async (req) => {
 
     if (fetchError || !assessment) {
       logError('Assessment fetch failed', fetchError, requestId);
-      logPerformance(perfTimer, 'generate-coach-insights:fetch_failed');
+      await logPerformance(perfTimer, 'generate-coach-insights:fetch_failed');
       throw new Error("Could not fetch assessment");
     }
 
@@ -292,7 +293,7 @@ Be specific, constructive, and actionable. Reference the scores and reflections 
     }
 
     logInfo('Insights generated successfully', { assessmentId }, requestId);
-    logPerformance(perfTimer, 'generate-coach-insights:success', { 
+    await logPerformance(perfTimer, 'generate-coach-insights:success', { 
       insightsGenerated: true,
       actionableSteps: insights.actionable_steps.length 
     });
@@ -303,7 +304,6 @@ Be specific, constructive, and actionable. Reference the scores and reflections 
     );
   } catch (error: any) {
     logError('Function error', error, requestId);
-    logPerformance(perfTimer, 'generate-coach-insights:error');
     return new Response(
       JSON.stringify({ error: 'An error occurred generating insights. Please try again.' }),
       { 

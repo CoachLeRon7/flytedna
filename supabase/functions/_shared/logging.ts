@@ -52,14 +52,16 @@ export interface PerformanceTimer {
   start: number;
   checkpoints: Map<string, number>;
   requestId?: string;
+  supabaseClient?: any; // Optional Supabase client for DB storage
 }
 
 // Start a performance timer
-export const startPerformanceTimer = (requestId?: string): PerformanceTimer => {
+export const startPerformanceTimer = (requestId?: string, supabaseClient?: any): PerformanceTimer => {
   return {
     start: performance.now(),
     checkpoints: new Map(),
-    requestId
+    requestId,
+    supabaseClient
   };
 };
 
@@ -68,12 +70,12 @@ export const checkpoint = (timer: PerformanceTimer, label: string): void => {
   timer.checkpoints.set(label, performance.now());
 };
 
-// Log performance metrics with all checkpoints
-export const logPerformance = (
+// Log performance metrics with all checkpoints and optionally store in DB
+export const logPerformance = async (
   timer: PerformanceTimer,
   operation: string,
   metadata?: Record<string, any>
-): void => {
+): Promise<void> => {
   const endTime = performance.now();
   const totalDuration = Math.round(endTime - timer.start);
   
@@ -108,21 +110,40 @@ export const logPerformance = (
       threshold: 5000
     });
   }
+
+  // Store in database if Supabase client is provided
+  if (timer.supabaseClient) {
+    try {
+      await timer.supabaseClient
+        .from('performance_metrics')
+        .insert({
+          request_id: timer.requestId || 'unknown',
+          operation,
+          total_duration_ms: totalDuration,
+          checkpoints: Object.keys(checkpoints).length > 0 ? checkpoints : null,
+          metadata: metadata || null
+        });
+    } catch (dbError) {
+      // Don't throw on DB errors - just log
+      console.error('[edge-function:performance] Failed to store metrics:', dbError);
+    }
+  }
 };
 
 // Quick performance wrapper for async operations
 export const measureAsync = async <T>(
   operation: string,
   fn: () => Promise<T>,
-  requestId?: string
+  requestId?: string,
+  supabaseClient?: any
 ): Promise<T> => {
-  const timer = startPerformanceTimer(requestId);
+  const timer = startPerformanceTimer(requestId, supabaseClient);
   try {
     const result = await fn();
-    logPerformance(timer, operation);
+    await logPerformance(timer, operation);
     return result;
   } catch (error) {
-    logPerformance(timer, `${operation}:failed`);
+    await logPerformance(timer, `${operation}:failed`);
     throw error;
   }
 };

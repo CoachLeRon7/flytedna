@@ -10,7 +10,6 @@ const corsHeaders = {
 
 serve(async (req) => {
   const requestId = req.headers.get('x-request-id') || generateRequestId();
-  const perfTimer = startPerformanceTimer(requestId);
   
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: { ...corsHeaders, 'x-request-id': requestId } });
@@ -21,7 +20,6 @@ serve(async (req) => {
 
   if (!signature || !webhookSecret) {
     logError("Configuration error - missing signature or secret", undefined, requestId);
-    logPerformance(perfTimer, 'stripe-webhook:config_error');
     return new Response(JSON.stringify({ error: "Webhook configuration error" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json", 'x-request-id': requestId },
@@ -30,7 +28,6 @@ serve(async (req) => {
 
   try {
     logInfo('Webhook received', { event: 'processing' }, requestId);
-    checkpoint(perfTimer, 'init');
     
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
@@ -40,6 +37,9 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
+    
+    const perfTimer = startPerformanceTimer(requestId, supabaseClient);
+    checkpoint(perfTimer, 'init');
 
     // Get raw body for signature verification
     const body = await req.text();
@@ -51,7 +51,7 @@ serve(async (req) => {
       logInfo("Event verified", { event_type: event.type }, requestId);
     } catch (err) {
       logError("Signature verification failed", err, requestId);
-      logPerformance(perfTimer, 'stripe-webhook:signature_failed');
+      await logPerformance(perfTimer, 'stripe-webhook:signature_failed');
       return new Response(JSON.stringify({ error: "Invalid signature" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json", 'x-request-id': requestId },
@@ -343,7 +343,7 @@ serve(async (req) => {
         logInfo("Unhandled event type", { eventType: event.type }, requestId);
     }
 
-    logPerformance(perfTimer, `stripe-webhook:${event.type}`, { 
+    await logPerformance(perfTimer, `stripe-webhook:${event.type}`, { 
       eventType: event.type,
       handled: true 
     });
@@ -354,7 +354,6 @@ serve(async (req) => {
     });
   } catch (error) {
     logError('Webhook processing error', error, requestId);
-    logPerformance(perfTimer, 'stripe-webhook:error');
     return new Response(JSON.stringify({ error: 'An error occurred processing webhook. Please try again.' }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json", 'x-request-id': requestId },

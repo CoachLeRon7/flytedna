@@ -103,7 +103,7 @@ export const JoinRequestsManager = () => {
       const { data, error } = await supabase.rpc('process_join_request', {
         request_id: requestId,
         approve,
-        assign_team_id: approve ? (selectedTeams[requestId] || null) : null,
+        assign_team_id: approve ? (selectedTeams[requestId] && selectedTeams[requestId] !== 'none' ? selectedTeams[requestId] : null) : null,
       });
 
       if (error) throw error;
@@ -184,7 +184,7 @@ export const JoinRequestsManager = () => {
                           <SelectValue placeholder="Select team" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">No team</SelectItem>
+                          <SelectItem value="none">No team</SelectItem>
                           {teams.map((team) => (
                             <SelectItem key={team.id} value={team.id}>
                               {team.name}

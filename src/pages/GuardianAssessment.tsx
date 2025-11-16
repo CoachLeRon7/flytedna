@@ -18,6 +18,7 @@ export default function GuardianAssessment() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [expired, setExpired] = useState(false);
   const [invitation, setInvitation] = useState<any>(null);
   const [athleteInfo, setAthleteInfo] = useState<any>(null);
   const [responses, setResponses] = useState<Record<string, number>>({});
@@ -50,6 +51,14 @@ export default function GuardianAssessment() {
 
       if (invitationData.completed_at) {
         setSubmitted(true);
+        setLoading(false);
+        return;
+      }
+
+      // Check if invitation has expired
+      if (invitationData.expires_at && new Date(invitationData.expires_at) < new Date()) {
+        toast.error("This invitation has expired. Please contact the coach for a new invitation.");
+        setExpired(true);
         setLoading(false);
         return;
       }
@@ -135,11 +144,20 @@ export default function GuardianAssessment() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="max-w-md w-full text-center">
           <CardHeader>
-            <CardTitle>Invalid Invitation</CardTitle>
+            <CardTitle>{expired ? "Invitation Expired" : "Invalid Invitation"}</CardTitle>
             <CardDescription>
-              This invitation link is invalid or has expired.
+              {expired 
+                ? "This invitation has expired. Please contact your athlete's coach for a new invitation link."
+                : "This invitation link is invalid or has been used already."}
             </CardDescription>
           </CardHeader>
+          {expired && (
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Guardian assessment invitations are valid for 30 days from the date they are sent.
+              </p>
+            </CardContent>
+          )}
         </Card>
       </div>
     );

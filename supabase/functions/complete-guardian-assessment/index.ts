@@ -25,7 +25,7 @@ const assessmentSchema = z.object({
     b2: z.number().int().min(1).max(5),
     b3: z.number().int().min(1).max(5),
   }),
-  optional_comment: z.string().max(2000).optional(),
+  optional_comment: z.string().max(1000).optional(),
 });
 
 Deno.serve(async (req) => {
@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
     // Validate invitation token and check if not already completed
     const { data: assessment, error: fetchError } = await supabase
       .from('guardian_assessments')
-      .select('id, athlete_id, completed_at, timepoint, semester_label')
+      .select('id, athlete_id, completed_at, expires_at, timepoint, semester_label')
       .eq('invitation_token', validatedData.invitation_token)
       .is('completed_at', null)
       .single();
@@ -62,6 +62,15 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({ error: 'Invalid or expired invitation token' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check if invitation has expired
+    if (assessment.expires_at && new Date(assessment.expires_at) < new Date()) {
+      console.error('[complete-guardian-assessment] Invitation has expired');
+      return new Response(
+        JSON.stringify({ error: 'This invitation has expired. Please contact the coach for a new invitation.' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 

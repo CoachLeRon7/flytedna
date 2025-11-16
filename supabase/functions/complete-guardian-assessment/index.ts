@@ -1,42 +1,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.75.0';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
+import { generateRequestId, logError, logInfo } from '../_shared/logging.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-// Request ID utility
-const generateRequestId = () => crypto.randomUUID();
-
-// Secure logging helpers - mask sensitive data
-const maskEmail = (email: string) => {
-  if (!email) return '[NO_EMAIL]';
-  const [user, domain] = email.split('@');
-  return `${user.substring(0, 2)}***@${domain}`;
-};
-
-const maskUserId = (id: string) => id ? `${id.substring(0, 8)}***` : '[NO_ID]';
-
-const logError = (context: string, error: any, requestId?: string) => {
-  console.error(`[complete-guardian-assessment] ${context}`, {
-    requestId,
-    code: error?.code,
-    message: error?.message?.substring(0, 100), // Truncate messages
-    type: error?.constructor?.name
-  });
-};
-
-const logInfo = (context: string, data?: Record<string, any>, requestId?: string) => {
-  const sanitized = data ? Object.entries(data).reduce((acc, [key, val]) => {
-    if (key.includes('email')) acc[key] = maskEmail(val);
-    else if (key.includes('id') || key.includes('Id')) acc[key] = maskUserId(val);
-    else if (key.includes('token')) acc[key] = '[REDACTED]';
-    else acc[key] = val;
-    return acc;
-  }, {} as Record<string, any>) : {};
-  
-  console.log(`[complete-guardian-assessment] ${context}`, { requestId, ...sanitized });
 };
 
 const assessmentSchema = z.object({

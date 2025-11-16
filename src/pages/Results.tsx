@@ -10,6 +10,8 @@ import { ArrowLeft, Target, Plus, BookOpen } from "lucide-react";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/flyte-academy-logo.png";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ChartSkeleton, TableSkeleton } from "@/components/ui/skeleton-components";
 import { PeerFeedbackSection } from "@/components/student/PeerFeedbackSection";
 import { DomainBreakdownTable } from "@/components/student/DomainBreakdownTable";
 import { DomainExplanationCard } from "@/components/student/DomainExplanationCard";
@@ -270,6 +272,41 @@ const Results = () => {
       setAddingToGrowthPlan(null);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
+        <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+          <div className="container mx-auto px-4 py-4">
+            <img src={logo} alt="Flyte Academy" className="h-10" />
+          </div>
+        </header>
+        <main className="container mx-auto px-4 py-8">
+          <div className="space-y-6">
+            <Skeleton className="h-10 w-48" />
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-8 w-1/3 mb-2" />
+                <Skeleton className="h-4 w-1/2" />
+              </CardHeader>
+              <CardContent>
+                <ChartSkeleton />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-7 w-1/4 mb-2" />
+                <Skeleton className="h-4 w-2/3" />
+              </CardHeader>
+              <CardContent>
+                <TableSkeleton rows={5} columns={6} />
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   const getClassificationColor = (classification: string) => {
     switch (classification) {

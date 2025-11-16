@@ -15,6 +15,8 @@ import { RoleRequestButton } from "@/components/RoleRequestButton";
 import { Target, LogOut, AlertTriangle, ClipboardCheck, Bell, Compass, ArrowRight, Menu } from "lucide-react";
 import logo from "@/assets/flyte-academy-logo.png";
 import { useUserRole } from "@/hooks/useUserRole";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TableSkeleton, ChartSkeleton, StatCardSkeleton } from "@/components/ui/skeleton-components";
 import {
   Sheet,
   SheetContent,
@@ -446,13 +448,49 @@ export default function CoachDashboard() {
         </div>
       </header>
 
-      <div className="container mx-auto py-8 space-y-6">
-        <div>
-          <h1 className="text-4xl font-bold mb-2">Team Overview</h1>
-          <p className="text-muted-foreground">Monitor athlete development and provide guidance</p>
+      {loading ? (
+        <div className="container mx-auto py-8 space-y-6">
+          <div className="flex flex-wrap gap-4">
+            <Skeleton className="h-10 w-48" />
+            <Skeleton className="h-10 w-48" />
+            <Skeleton className="h-10 w-48" />
+          </div>
+          <StatCardSkeleton count={4} />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-1/3" />
+              </CardHeader>
+              <CardContent>
+                <ChartSkeleton />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-1/3" />
+              </CardHeader>
+              <CardContent>
+                <ChartSkeleton />
+              </CardContent>
+            </Card>
+          </div>
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-1/4" />
+            </CardHeader>
+            <CardContent>
+              <TableSkeleton rows={8} columns={7} />
+            </CardContent>
+          </Card>
         </div>
+      ) : (
+        <div className="container mx-auto py-8 space-y-6">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">Team Overview</h1>
+            <p className="text-muted-foreground">Monitor athlete development and provide guidance</p>
+          </div>
 
-      {/* Filters */}
+        {/* Filters */}
       <Card>
         <CardHeader>
           <CardTitle>Filters</CardTitle>
@@ -762,7 +800,8 @@ export default function CoachDashboard() {
           onClose={() => setSelectedAthlete(null)}
         />
       )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

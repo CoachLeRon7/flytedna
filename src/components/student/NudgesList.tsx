@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Bell, Check, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Nudge {
   id: string;
@@ -17,6 +18,7 @@ interface Nudge {
 
 export function NudgesList({ userId }: { userId: string }) {
   const [nudges, setNudges] = useState<Nudge[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -24,6 +26,7 @@ export function NudgesList({ userId }: { userId: string }) {
   }, [userId]);
 
   const loadNudges = async () => {
+    setLoading(true);
     const { data } = await supabase
       .from("nudges")
       .select("*")
@@ -32,6 +35,7 @@ export function NudgesList({ userId }: { userId: string }) {
       .order("created_at", { ascending: false });
 
     setNudges(data || []);
+    setLoading(false);
   };
 
   const markComplete = async (nudgeId: string) => {
@@ -45,6 +49,32 @@ export function NudgesList({ userId }: { userId: string }) {
       loadNudges();
     }
   };
+
+  if (loading) {
+    return (
+      <Card className="shadow-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="h-5 w-5 text-[hsl(var(--student-accent))]" />
+            🔔 My Nudges
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="border rounded-lg p-4 space-y-2">
+              <div className="flex items-center gap-2 mb-1">
+                <Skeleton className="h-5 w-20" />
+                <Skeleton className="h-5 w-16" />
+              </div>
+              <Skeleton className="h-5 w-3/4" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-9 w-full mt-2" />
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="shadow-card">

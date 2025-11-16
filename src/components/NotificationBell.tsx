@@ -10,6 +10,9 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+const notificationIdSchema = z.string().uuid();
 
 interface Notification {
   id: string;
@@ -71,6 +74,17 @@ export const NotificationBell = () => {
   };
 
   const markAsRead = async (notificationId: string) => {
+    // Validate notification ID
+    try {
+      notificationIdSchema.parse(notificationId);
+    } catch {
+      toast({
+        title: "Invalid notification",
+        variant: "destructive",
+      });
+      return;
+    }
+
     await supabase
       .from("notifications")
       .update({ read: true })

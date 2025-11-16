@@ -6,6 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Bell, Check, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { z } from "zod";
+
+const nudgeUpdateSchema = z.object({
+  id: z.string().uuid("Invalid nudge ID"),
+  status: z.enum(["scheduled", "sent", "snoozed", "completed"]),
+});
 
 interface Nudge {
   id: string;
@@ -39,6 +45,18 @@ export function NudgesList({ userId }: { userId: string }) {
   };
 
   const markComplete = async (nudgeId: string) => {
+    // Validate input
+    try {
+      nudgeUpdateSchema.parse({ id: nudgeId, status: "completed" });
+    } catch {
+      toast({ 
+        title: "Invalid request", 
+        description: "Unable to update nudge",
+        variant: "destructive" 
+      });
+      return;
+    }
+
     const { error } = await supabase
       .from("nudges")
       .update({ status: "completed" })

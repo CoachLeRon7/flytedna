@@ -54,12 +54,12 @@ const assessmentSchema = z.object({
   B4: z.number().min(1).max(5).optional(),
   B5: z.number().min(1).max(5).optional(),
   B6: z.number().min(1).max(5).optional(),
-  // Reflections (optional)
+  // Reflections (optional, max 2000 chars each)
   reflections: z.object({
-    habits_gap: z.string().optional(),
-    lead_from_discomfort: z.string().optional(),
-    who_challenges_you: z.string().optional(),
-    legacy: z.string().optional(),
+    habits_gap: z.string().max(2000, "Response must be 2000 characters or less").optional(),
+    lead_from_discomfort: z.string().max(2000, "Response must be 2000 characters or less").optional(),
+    who_challenges_you: z.string().max(2000, "Response must be 2000 characters or less").optional(),
+    legacy: z.string().max(2000, "Response must be 2000 characters or less").optional(),
   }),
 });
 

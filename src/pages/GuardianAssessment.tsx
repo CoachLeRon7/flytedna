@@ -71,6 +71,11 @@ export default function GuardianAssessment() {
       return;
     }
 
+    if (comment && comment.length > 1000) {
+      toast.error("Comment must be 1000 characters or less");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const { data, error } = await supabase.functions.invoke('complete-guardian-assessment', {
@@ -222,7 +227,7 @@ export default function GuardianAssessment() {
           <CardHeader>
             <CardTitle>Additional Comments (Optional)</CardTitle>
             <CardDescription>
-              Share any additional observations or context about {athleteInfo?.first_name}'s leadership development
+              Share any additional observations or context about {athleteInfo?.first_name}'s leadership development (max 1000 characters)
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -230,8 +235,12 @@ export default function GuardianAssessment() {
               placeholder="Your comments here..."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
+              maxLength={1000}
               rows={4}
             />
+            <p className="text-sm text-muted-foreground mt-2 text-right">
+              {comment.length}/1000 characters
+            </p>
           </CardContent>
         </Card>
 

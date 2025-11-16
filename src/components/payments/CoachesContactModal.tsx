@@ -1,13 +1,62 @@
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CheckCircle2 } from "lucide-react";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const coachInquirySchema = z.object({
+  coach_name: z.string()
+    .trim()
+    .min(2, "Name must be at least 2 characters")
+    .max(100, "Name must be less than 100 characters")
+    .regex(/^[a-zA-Z\s'-]+$/, "Name can only contain letters, spaces, hyphens, and apostrophes"),
+  coach_email: z.string()
+    .trim()
+    .email("Invalid email address")
+    .max(255, "Email must be less than 255 characters")
+    .toLowerCase(),
+  phone_number: z.string()
+    .trim()
+    .regex(/^[\d\s\-\+\(\)]+$/, "Invalid phone number format")
+    .min(10, "Phone number must be at least 10 digits")
+    .max(20, "Phone number must be less than 20 characters")
+    .optional()
+    .or(z.literal("")),
+  organization_name: z.string()
+    .trim()
+    .min(2, "Organization name must be at least 2 characters")
+    .max(200, "Organization name must be less than 200 characters"),
+  sport: z.string()
+    .trim()
+    .min(2, "Sport must be at least 2 characters")
+    .max(50, "Sport must be less than 50 characters"),
+  team_size: z.string()
+    .min(1, "Please select a team size"),
+  program_type: z.string()
+    .min(1, "Please select a program type"),
+  message: z.string()
+    .trim()
+    .max(1000, "Message must be less than 1000 characters")
+    .optional()
+    .or(z.literal("")),
+});
+
+type CoachInquiryFormData = z.infer<typeof coachInquirySchema>;
 
 interface CoachesContactModalProps {
   open: boolean;
@@ -15,28 +64,34 @@ interface CoachesContactModalProps {
 }
 
 export function CoachesContactModal({ open, onOpenChange }: CoachesContactModalProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [formData, setFormData] = useState({
-    coach_name: "",
-    coach_email: "",
-    phone_number: "",
-    organization_name: "",
-    sport: "",
-    team_size: "",
-    program_type: "",
-    message: "",
+  
+  const form = useForm<CoachInquiryFormData>({
+    resolver: zodResolver(coachInquirySchema),
+    defaultValues: {
+      coach_name: "",
+      coach_email: "",
+      phone_number: "",
+      organization_name: "",
+      sport: "",
+      team_size: "",
+      program_type: "",
+      message: "",
+    },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
+  const onSubmit = async (data: CoachInquiryFormData) => {
     try {
       const { error } = await supabase.from("coaches_inquiries").insert({
-        ...formData,
-        team_size: parseInt(formData.team_size),
-        estimated_value_cents: estimateValue(parseInt(formData.team_size)),
+        coach_name: data.coach_name,
+        coach_email: data.coach_email,
+        phone_number: data.phone_number || null,
+        organization_name: data.organization_name,
+        sport: data.sport,
+        team_size: parseInt(data.team_size),
+        program_type: data.program_type,
+        message: data.message || null,
+        estimated_value_cents: estimateValue(parseInt(data.team_size)),
       });
 
       if (error) throw error;
@@ -47,22 +102,10 @@ export function CoachesContactModal({ open, onOpenChange }: CoachesContactModalP
       setTimeout(() => {
         onOpenChange(false);
         setIsSuccess(false);
-        setFormData({
-          coach_name: "",
-          coach_email: "",
-          phone_number: "",
-          organization_name: "",
-          sport: "",
-          team_size: "",
-          program_type: "",
-          message: "",
-        });
+        form.reset();
       }, 3000);
-    } catch (error) {
-      console.error("Error submitting inquiry:", error);
-      toast.error("Failed to submit inquiry. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to submit inquiry. Please try again.");
     }
   };
 
@@ -97,107 +140,158 @@ export function CoachesContactModal({ open, onOpenChange }: CoachesContactModalP
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="coach_name">Coach Name *</Label>
-              <Input
-                id="coach_name"
-                required
-                value={formData.coach_name}
-                onChange={(e) => setFormData({ ...formData, coach_name: e.target.value })}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="coach_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Coach Name *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="John Smith" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="coach_email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email *</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="coach@school.edu" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="coach_email">Email *</Label>
-              <Input
-                id="coach_email"
-                type="email"
-                required
-                value={formData.coach_email}
-                onChange={(e) => setFormData({ ...formData, coach_email: e.target.value })}
+            <FormField
+              control={form.control}
+              name="phone_number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone Number</FormLabel>
+                  <FormControl>
+                    <Input type="tel" placeholder="(555) 123-4567" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="organization_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>School/Organization Name *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Lincoln High School" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="sport"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sport *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Basketball" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="team_size"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Team Size *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select size" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="12">10-15 athletes</SelectItem>
+                        <SelectItem value="18">16-20 athletes</SelectItem>
+                        <SelectItem value="23">21-25 athletes</SelectItem>
+                        <SelectItem value="30">25+ athletes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="phone_number">Phone Number</Label>
-            <Input
-              id="phone_number"
-              type="tel"
-              value={formData.phone_number}
-              onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+            <FormField
+              control={form.control}
+              name="program_type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Program Type *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="High School">High School</SelectItem>
+                      <SelectItem value="Club">Club</SelectItem>
+                      <SelectItem value="College">College</SelectItem>
+                      <SelectItem value="Youth">Youth</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="organization_name">School/Organization Name *</Label>
-            <Input
-              id="organization_name"
-              required
-              value={formData.organization_name}
-              onChange={(e) => setFormData({ ...formData, organization_name: e.target.value })}
+            <FormField
+              control={form.control}
+              name="message"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Message</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      rows={4}
+                      placeholder="Tell us about your team's needs and goals..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="sport">Sport *</Label>
-              <Input
-                id="sport"
-                required
-                value={formData.sport}
-                onChange={(e) => setFormData({ ...formData, sport: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="team_size">Team Size *</Label>
-              <Select value={formData.team_size} onValueChange={(v) => setFormData({ ...formData, team_size: v })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select size" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="12">10-15 athletes</SelectItem>
-                  <SelectItem value="18">16-20 athletes</SelectItem>
-                  <SelectItem value="23">21-25 athletes</SelectItem>
-                  <SelectItem value="30">25+ athletes</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="program_type">Program Type *</Label>
-            <Select value={formData.program_type} onValueChange={(v) => setFormData({ ...formData, program_type: v })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="High School">High School</SelectItem>
-                <SelectItem value="Club">Club</SelectItem>
-                <SelectItem value="College">College</SelectItem>
-                <SelectItem value="Youth">Youth</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="message">Message</Label>
-            <Textarea
-              id="message"
-              rows={4}
-              placeholder="Tell us about your team's needs and goals..."
-              value={formData.message}
-              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-            />
-          </div>
-
-          <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Submitting..." : "Submit Inquiry"}
-          </Button>
-        </form>
+            <Button 
+              type="submit" 
+              size="lg" 
+              className="w-full" 
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? "Submitting..." : "Submit Inquiry"}
+            </Button>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

@@ -7,39 +7,46 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Request ID utility
+const generateRequestId = () => crypto.randomUUID();
+
 // Secure logging helpers - mask sensitive payment data
 const maskAmount = () => '[AMOUNT_REDACTED]';
 const maskUserId = (id: string) => id ? `${id.substring(0, 8)}***` : '[NO_ID]';
 const maskPaymentId = (id: string) => id ? `${id.substring(0, 12)}***` : '[NO_ID]';
 
-const logError = (context: string, error?: any) => {
+const logError = (context: string, error?: any, requestId?: string) => {
   console.error(`[stripe-webhook] ${context}`, {
+    requestId,
     code: error?.code,
     type: error?.type || error?.constructor?.name
   });
 };
 
-const logInfo = (context: string, data?: Record<string, any>) => {
-  console.log(`[stripe-webhook] ${context}`, data || {});
+const logInfo = (context: string, data?: Record<string, any>, requestId?: string) => {
+  console.log(`[stripe-webhook] ${context}`, { requestId, ...(data || {}) });
 };
 
 serve(async (req) => {
+  const requestId = req.headers.get('x-request-id') || generateRequestId();
+  
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: { ...corsHeaders, 'x-request-id': requestId } });
   }
 
   const signature = req.headers.get("stripe-signature");
   const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
 
   if (!signature || !webhookSecret) {
-    logError("Configuration error - missing signature or secret");
+    logError("Configuration error - missing signature or secret", undefined, requestId);
     return new Response(JSON.stringify({ error: "Webhook configuration error" }), {
       status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, "Content-Type": "application/json", 'x-request-id': requestId },
     });
   }
 
   try {
+    logInfo('Webhook received', { event: 'processing' }, requestId);
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
     });
@@ -55,12 +62,12 @@ serve(async (req) => {
 
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-      logInfo("Event verified", { event_type: event.type });
+      logInfo("Event verified", { event_type: event.type }, requestId);
     } catch (err) {
-      logError("Signature verification failed");
+      logError("Signature verification failed", err, requestId);
       return new Response(JSON.stringify({ error: "Invalid signature" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...corsHeaders, "Content-Type": "application/json", 'x-request-id': requestId },
       });
     }
 
@@ -68,13 +75,13 @@ serve(async (req) => {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        logInfo("Checkout completed", { session_id: maskPaymentId(session.id) });
+        logInfo("Checkout completed", { session_id: maskPaymentId(session.id) }, requestId);
 
         const purchaseId = session.metadata?.purchase_id;
         const paymentType = session.metadata?.payment_type;
 
         if (!purchaseId) {
-          logError("Missing metadata");
+          logError("Missing metadata", undefined, requestId);
           break;
         }
 
@@ -86,7 +93,7 @@ serve(async (req) => {
           .single();
 
         if (fetchError || !purchase) {
-          logError("Purchase not found", fetchError);
+          logError("Purchase not found", fetchError, requestId);
           break;
         }
 
@@ -107,11 +114,11 @@ serve(async (req) => {
           .eq("id", purchaseId);
 
         if (updateError) {
-          logError("Purchase update failed", updateError);
+          logError("Purchase update failed", updateError, requestId);
           break;
         }
 
-        logInfo("Purchase updated", { status: isFullyPaid ? "completed" : "partial" });
+        logInfo("Purchase updated", { status: isFullyPaid ? "completed" : "partial" }, requestId);
 
         // Grant package access if fully paid
         if (isFullyPaid) {
@@ -127,9 +134,9 @@ serve(async (req) => {
             });
 
           if (accessError) {
-            logError("Access grant failed", accessError);
+            logError("Access grant failed", accessError, requestId);
           } else {
-            logInfo("Access granted");
+            logInfo("Access granted", {}, requestId);
           }
         }
 
@@ -141,11 +148,12 @@ serve(async (req) => {
               userId: purchase.user_id,
               amountPaid,
               isFullPayment: isFullyPaid,
+              requestId, // Pass request ID to child function
             },
           });
-          logInfo("Confirmation email queued");
+          logInfo("Confirmation email queued", {}, requestId);
         } catch (emailError) {
-          logError("Email send failed", emailError);
+          logError("Email send failed", emailError, requestId);
           // Don't fail the webhook if email fails
         }
 
@@ -154,7 +162,7 @@ serve(async (req) => {
 
       case "payment_intent.succeeded": {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        logInfo("Payment succeeded", { payment_intent_id: maskPaymentId(paymentIntent.id) });
+        logInfo("Payment succeeded", { payment_intent_id: maskPaymentId(paymentIntent.id) }, requestId);
 
         // Find purchase by payment_intent_id
         const { data: purchases } = await supabaseClient
@@ -164,7 +172,7 @@ serve(async (req) => {
 
         if (purchases && purchases.length > 0) {
           const purchase = purchases[0];
-          console.log("[stripe-webhook] Found purchase for payment intent:", purchase.id);
+          logInfo("Found purchase for payment intent", { purchaseId: purchase.id }, requestId);
 
           // Check if this is an installment payment
           const { data: installment } = await supabaseClient
@@ -188,9 +196,9 @@ serve(async (req) => {
               .eq("id", installment.id);
 
             if (installmentError) {
-              console.error("[stripe-webhook] Failed to update installment:", installmentError);
+              logError("Failed to update installment", installmentError, requestId);
             } else {
-              console.log("[stripe-webhook] Installment marked as paid:", installment.installment_number);
+              logInfo("Installment marked as paid", { installmentNumber: installment.installment_number }, requestId);
 
               // Update purchase amount_paid_cents
               const newAmountPaid = (purchase.amount_paid_cents || 0) + installment.amount_cents;
@@ -205,7 +213,7 @@ serve(async (req) => {
                 .eq("id", purchase.id);
 
               if (updateError) {
-                console.error("[stripe-webhook] Failed to update purchase amount:", updateError);
+                logError("Failed to update purchase amount", updateError, requestId);
               }
 
               // If fully paid, ensure package access
@@ -222,7 +230,7 @@ serve(async (req) => {
                   });
 
                 if (!accessError) {
-                  console.log("[stripe-webhook] Package access granted after full payment");
+                  logInfo("Package access granted after full payment", {}, requestId);
                 }
               }
 
@@ -249,7 +257,7 @@ serve(async (req) => {
 
       case "payment_intent.payment_failed": {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        console.log("[stripe-webhook] Payment intent failed:", paymentIntent.id);
+        logInfo("Payment intent failed", { payment_intent_id: maskPaymentId(paymentIntent.id) }, requestId);
 
         // Find related purchase or installment
         const { data: purchases } = await supabaseClient
@@ -259,7 +267,7 @@ serve(async (req) => {
 
         if (purchases && purchases.length > 0) {
           const purchase = purchases[0];
-          console.log("[stripe-webhook] Payment failed for purchase:", purchase.id);
+          logInfo("Payment failed for purchase", { purchaseId: purchase.id }, requestId);
 
           // Mark purchase as failed if it was pending
           if (purchase.status === "pending") {
@@ -269,7 +277,7 @@ serve(async (req) => {
               .eq("id", purchase.id);
 
             if (updateError) {
-              console.error("[stripe-webhook] Failed to update purchase status:", updateError);
+              logError("Failed to update purchase status", updateError, requestId);
             }
           }
 
@@ -287,9 +295,9 @@ serve(async (req) => {
               .eq("id", installment.id);
 
             if (installmentError) {
-              console.error("[stripe-webhook] Failed to update installment status:", installmentError);
+              logError("Failed to update installment status", installmentError, requestId);
             } else {
-              console.log("[stripe-webhook] Installment marked as failed:", installment.installment_number);
+              logInfo("Installment marked as failed", { installmentNumber: installment.installment_number }, requestId);
             }
           }
         }
@@ -299,7 +307,7 @@ serve(async (req) => {
 
       case "charge.refunded": {
         const charge = event.data.object as Stripe.Charge;
-        console.log("[stripe-webhook] Charge refunded:", charge.id);
+        logInfo("Charge refunded", { charge_id: maskPaymentId(charge.id) }, requestId);
 
         // Find purchase by payment_intent_id
         if (charge.payment_intent) {
@@ -322,9 +330,9 @@ serve(async (req) => {
               .eq("id", purchase.id);
 
             if (updateError) {
-              console.error("[stripe-webhook] Failed to update refunded purchase:", updateError);
+              logError("Failed to update refunded purchase", updateError, requestId);
             } else {
-              console.log("[stripe-webhook] Purchase marked as refunded:", purchase.id);
+              logInfo("Purchase marked as refunded", { purchaseId: purchase.id }, requestId);
 
               // Deactivate package access
               const { error: accessError } = await supabaseClient
@@ -333,9 +341,9 @@ serve(async (req) => {
                 .eq("purchase_id", purchase.id);
 
               if (accessError) {
-                console.error("[stripe-webhook] Failed to deactivate package access:", accessError);
+                logError("Failed to deactivate package access", accessError, requestId);
               } else {
-                console.log("[stripe-webhook] Package access deactivated");
+                logInfo("Package access deactivated", {}, requestId);
               }
             }
           }
@@ -345,19 +353,18 @@ serve(async (req) => {
       }
 
       default:
-        console.log("[stripe-webhook] Unhandled event type:", event.type);
+        logInfo("Unhandled event type", { eventType: event.type }, requestId);
     }
 
     return new Response(JSON.stringify({ received: true }), {
       status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, "Content-Type": "application/json", 'x-request-id': requestId },
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("[stripe-webhook] Error processing webhook:", errorMessage);
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    logError('Webhook processing error', error, requestId);
+    return new Response(JSON.stringify({ error: 'An error occurred processing webhook. Please try again.' }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, "Content-Type": "application/json", 'x-request-id': requestId },
     });
   }
 });

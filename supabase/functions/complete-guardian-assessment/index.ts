@@ -6,6 +6,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Request ID utility
+const generateRequestId = () => crypto.randomUUID();
+
 // Secure logging helpers - mask sensitive data
 const maskEmail = (email: string) => {
   if (!email) return '[NO_EMAIL]';
@@ -15,15 +18,16 @@ const maskEmail = (email: string) => {
 
 const maskUserId = (id: string) => id ? `${id.substring(0, 8)}***` : '[NO_ID]';
 
-const logError = (context: string, error: any) => {
+const logError = (context: string, error: any, requestId?: string) => {
   console.error(`[complete-guardian-assessment] ${context}`, {
+    requestId,
     code: error?.code,
     message: error?.message?.substring(0, 100), // Truncate messages
     type: error?.constructor?.name
   });
 };
 
-const logInfo = (context: string, data?: Record<string, any>) => {
+const logInfo = (context: string, data?: Record<string, any>, requestId?: string) => {
   const sanitized = data ? Object.entries(data).reduce((acc, [key, val]) => {
     if (key.includes('email')) acc[key] = maskEmail(val);
     else if (key.includes('id') || key.includes('Id')) acc[key] = maskUserId(val);
@@ -32,7 +36,7 @@ const logInfo = (context: string, data?: Record<string, any>) => {
     return acc;
   }, {} as Record<string, any>) : {};
   
-  console.log(`[complete-guardian-assessment] ${context}`, sanitized);
+  console.log(`[complete-guardian-assessment] ${context}`, { requestId, ...sanitized });
 };
 
 const assessmentSchema = z.object({
@@ -58,11 +62,14 @@ const assessmentSchema = z.object({
 });
 
 Deno.serve(async (req) => {
+  const requestId = req.headers.get('x-request-id') || generateRequestId();
+  
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: { ...corsHeaders, 'x-request-id': requestId } });
   }
 
   try {
+    logInfo('Request received', {}, requestId);
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
@@ -85,23 +92,23 @@ Deno.serve(async (req) => {
       .single();
 
     if (fetchError || !assessment) {
-      logError('Invalid token', { code: fetchError?.code });
+      logError('Invalid token', { code: fetchError?.code }, requestId);
       return new Response(
         JSON.stringify({ error: 'Invalid or expired invitation token' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'x-request-id': requestId } }
       );
     }
 
     // Check if invitation has expired
     if (assessment.expires_at && new Date(assessment.expires_at) < new Date()) {
-      logError('Expired invitation', {});
+      logError('Expired invitation', {}, requestId);
       return new Response(
         JSON.stringify({ error: 'This invitation has expired. Please contact the coach for a new invitation.' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'x-request-id': requestId } }
       );
     }
 
-    logInfo('Token validated', { assessment_id: assessment.id, athlete_id: assessment.athlete_id });
+    logInfo('Token validated', { assessment_id: assessment.id, athlete_id: assessment.athlete_id }, requestId);
 
     // Calculate domain means
     const responses = validatedData.responses;
@@ -130,30 +137,30 @@ Deno.serve(async (req) => {
       .eq('id', assessment.id);
 
     if (updateError) {
-      console.error('[complete-guardian-assessment] Update error:', updateError);
+      logError('Update error', updateError, requestId);
       throw updateError;
     }
 
-    console.log('[complete-guardian-assessment] Assessment completed successfully');
+    logInfo('Assessment completed successfully', {}, requestId);
 
     return new Response(
       JSON.stringify({ success: true, message: 'Assessment completed successfully' }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'x-request-id': requestId } }
     );
 
   } catch (error) {
-    console.error('[complete-guardian-assessment] Error:', error);
+    logError('Function error', error, requestId);
     
     if (error instanceof z.ZodError) {
       return new Response(
         JSON.stringify({ error: 'Invalid request data', details: error.errors }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'x-request-id': requestId } }
       );
     }
 
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'x-request-id': requestId } }
     );
   }
 });

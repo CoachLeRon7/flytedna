@@ -8,6 +8,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Request ID utility
+const generateRequestId = () => crypto.randomUUID();
+
 // Secure logging helpers
 const maskEmail = (email: string) => {
   if (!email) return '[NO_EMAIL]';
@@ -18,15 +21,16 @@ const maskEmail = (email: string) => {
 const maskUserId = (id: string) => id ? `${id.substring(0, 8)}***` : '[NO_ID]';
 const maskName = () => '[NAME_REDACTED]';
 
-const logError = (context: string, error?: any) => {
+const logError = (context: string, error?: any, requestId?: string) => {
   console.error(`[send-guardian-invitation] ${context}`, {
+    requestId,
     code: error?.code,
     message: error?.message?.substring(0, 100),
     type: error?.constructor?.name
   });
 };
 
-const logInfo = (context: string, data?: Record<string, any>) => {
+const logInfo = (context: string, data?: Record<string, any>, requestId?: string) => {
   const sanitized = data ? Object.entries(data).reduce((acc, [key, val]) => {
     if (key.includes('email')) acc[key] = maskEmail(val);
     else if (key.includes('id') || key.includes('Id')) acc[key] = maskUserId(val);
@@ -35,7 +39,7 @@ const logInfo = (context: string, data?: Record<string, any>) => {
     return acc;
   }, {} as Record<string, any>) : {};
   
-  console.log(`[send-guardian-invitation] ${context}`, sanitized);
+  console.log(`[send-guardian-invitation] ${context}`, { requestId, ...sanitized });
 };
 
 const invitationSchema = z.object({
@@ -57,11 +61,14 @@ interface GuardianInvitationRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  const requestId = req.headers.get('x-request-id') || generateRequestId();
+  
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: { ...corsHeaders, 'x-request-id': requestId } });
   }
 
   try {
+    logInfo('Request received', {}, requestId);
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
@@ -90,10 +97,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
-      logError('Auth failed', userError);
+      logError('Auth failed', userError, requestId);
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'x-request-id': requestId } }
       );
     }
 
@@ -183,27 +190,27 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    logInfo('Email sent');
+    logInfo('Email sent', {}, requestId);
 
     return new Response(JSON.stringify({ 
       success: true, 
       message: 'Guardian invitation sent successfully'
     }), {
       status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json', 'x-request-id': requestId },
     });
 
   } catch (error: any) {
-    logError('Function error', error);
+    logError('Function error', error, requestId);
     if (error instanceof z.ZodError) {
       return new Response(JSON.stringify({ error: 'Invalid request data' }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json', 'x-request-id': requestId },
       });
     }
     return new Response(JSON.stringify({ error: 'Failed to send invitation' }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json', 'x-request-id': requestId },
     });
   }
 };

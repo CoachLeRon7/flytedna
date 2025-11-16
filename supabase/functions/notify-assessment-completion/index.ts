@@ -11,6 +11,9 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// Request ID utility
+const generateRequestId = () => crypto.randomUUID();
+
 // Secure logging helpers
 const maskEmail = (email: string) => {
   if (!email) return '[NO_EMAIL]';
@@ -20,15 +23,16 @@ const maskEmail = (email: string) => {
 
 const maskUserId = (id: string) => id ? `${id.substring(0, 8)}***` : '[NO_ID]';
 
-const logError = (context: string, error: any) => {
+const logError = (context: string, error: any, requestId?: string) => {
   console.error(`[notify-assessment-completion] ${context}`, {
+    requestId,
     code: error?.code,
     message: error?.message?.substring(0, 100),
     type: error?.constructor?.name
   });
 };
 
-const logInfo = (context: string, data?: Record<string, any>) => {
+const logInfo = (context: string, data?: Record<string, any>, requestId?: string) => {
   const sanitized = data ? Object.entries(data).reduce((acc, [key, val]) => {
     if (key.includes('email')) acc[key] = maskEmail(val);
     else if (key.includes('id') || key.includes('Id')) acc[key] = maskUserId(val);
@@ -36,7 +40,7 @@ const logInfo = (context: string, data?: Record<string, any>) => {
     return acc;
   }, {} as Record<string, any>) : {};
   
-  console.log(`[notify-assessment-completion] ${context}`, sanitized);
+  console.log(`[notify-assessment-completion] ${context}`, { requestId, ...sanitized });
 };
 
 // Input validation schema
@@ -51,11 +55,14 @@ interface AssessmentCompletedPayload {
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  const requestId = req.headers.get('x-request-id') || generateRequestId();
+  
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: { ...corsHeaders, 'x-request-id': requestId } });
   }
 
   try {
+    logInfo('Request received', {}, requestId);
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -130,7 +137,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    logInfo('Processing assessment completion', { assessmentId: assessment_id, userId: user_id });
+    logInfo('Processing assessment completion', { assessmentId: assessment_id, userId: user_id }, requestId);
 
     // Get student profile and assessment details
     const { data: student, error: studentError } = await supabase
@@ -140,7 +147,7 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     if (studentError || !student) {
-      logError('Student profile fetch failed', studentError);
+      logError('Student profile fetch failed', studentError, requestId);
       throw new Error("Student not found");
     }
 
@@ -151,7 +158,7 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     if (assessmentError || !assessment) {
-      logError('Assessment details fetch failed', assessmentError);
+      logError('Assessment details fetch failed', assessmentError, requestId);
       throw new Error("Assessment not found");
     }
 
@@ -186,7 +193,7 @@ const handler = async (req: Request): Promise<Response> => {
         `,
       });
     } catch (emailError) {
-      logError('Student email send failed', emailError);
+      logError('Student email send failed', emailError, requestId);
     }
 
     // Get coaches for the student's team
@@ -234,7 +241,7 @@ const handler = async (req: Request): Promise<Response> => {
                 `,
               });
             } catch (emailError) {
-              logError('Coach email send failed', emailError);
+              logError('Coach email send failed', emailError, requestId);
             }
           }
         }
@@ -276,7 +283,7 @@ const handler = async (req: Request): Promise<Response> => {
               `,
             });
           } catch (emailError) {
-            logError('Teammate email send failed', emailError);
+            logError('Teammate email send failed', emailError, requestId);
           }
         }
       }
@@ -312,25 +319,27 @@ const handler = async (req: Request): Promise<Response> => {
               `,
             });
           } catch (emailError) {
-            logError('Admin email send failed', emailError);
+            logError('Admin email send failed', emailError, requestId);
           }
         }
       }
     }
 
+    logInfo('Notifications sent successfully', {}, requestId);
+    
     return new Response(
       JSON.stringify({ success: true, message: "Notifications sent" }),
       {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...corsHeaders, "Content-Type": "application/json", 'x-request-id': requestId },
         status: 200,
       }
     );
   } catch (error: any) {
-    logError('Function error', error);
+    logError('Function error', error, requestId);
     return new Response(
       JSON.stringify({ error: "An error occurred sending notifications. Please try again." }),
       {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...corsHeaders, "Content-Type": "application/json", 'x-request-id': requestId },
         status: 500,
       }
     );

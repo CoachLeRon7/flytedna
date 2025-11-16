@@ -7,6 +7,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Request ID utility
+const generateRequestId = () => crypto.randomUUID();
+
 // Secure logging helpers
 const maskEmail = (email: string) => {
   if (!email) return '[NO_EMAIL]';
@@ -16,15 +19,16 @@ const maskEmail = (email: string) => {
 
 const maskUserId = (id: string) => id ? `${id.substring(0, 8)}***` : '[NO_ID]';
 
-const logError = (context: string, error: any) => {
+const logError = (context: string, error: any, requestId?: string) => {
   console.error(`[send-announcement] ${context}`, {
+    requestId,
     code: error?.code,
     message: error?.message?.substring(0, 100),
     type: error?.constructor?.name
   });
 };
 
-const logInfo = (context: string, data?: Record<string, any>) => {
+const logInfo = (context: string, data?: Record<string, any>, requestId?: string) => {
   const sanitized = data ? Object.entries(data).reduce((acc, [key, val]) => {
     if (key.includes('email')) acc[key] = maskEmail(val);
     else if (key.includes('id') || key.includes('Id')) acc[key] = maskUserId(val);
@@ -34,7 +38,7 @@ const logInfo = (context: string, data?: Record<string, any>) => {
     return acc;
   }, {} as Record<string, any>) : {};
   
-  console.log(`[send-announcement] ${context}`, sanitized);
+  console.log(`[send-announcement] ${context}`, { requestId, ...sanitized });
 };
 
 interface AnnouncementRequest {
@@ -55,11 +59,14 @@ const escapeHtml = (text: string): string => {
 };
 
 const handler = async (req: Request): Promise<Response> => {
+  const requestId = req.headers.get('x-request-id') || generateRequestId();
+  
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: { ...corsHeaders, 'x-request-id': requestId } });
   }
 
   try {
+    logInfo('Request received', {}, requestId);
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
@@ -79,10 +86,10 @@ const handler = async (req: Request): Promise<Response> => {
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
 
     if (userError || !user) {
-      logError('Authentication failed', userError);
+      logError('Authentication failed', userError, requestId);
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
+        headers: { "Content-Type": "application/json", ...corsHeaders, 'x-request-id': requestId },
       });
     }
 
@@ -106,15 +113,15 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     if (rateLimitError) {
-      logError('Rate limit check failed', rateLimitError);
+      logError('Rate limit check failed', rateLimitError, requestId);
       return new Response(
         JSON.stringify({ error: "An error occurred processing your request. Please try again." }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders, 'x-request-id': requestId } }
       );
     }
 
     if (!rateLimitCheck.allowed) {
-      logInfo('Rate limit exceeded', { limit: rateLimitCheck.limit });
+      logInfo('Rate limit exceeded', { limit: rateLimitCheck.limit }, requestId);
       return new Response(
         JSON.stringify({ 
           error: rateLimitCheck.message,
@@ -122,11 +129,11 @@ const handler = async (req: Request): Promise<Response> => {
           count: rateLimitCheck.count,
           limit: rateLimitCheck.limit
         }),
-        { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders, 'x-request-id': requestId } }
       );
     }
 
-    logInfo('Rate limit check passed', { remaining: rateLimitCheck.remaining, limit: rateLimitCheck.limit });
+    logInfo('Rate limit check passed', { remaining: rateLimitCheck.remaining, limit: rateLimitCheck.limit }, requestId);
 
     const { title, message, targetAudience, sendEmail }: AnnouncementRequest = await req.json();
 
@@ -219,7 +226,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    logInfo('Target users found', { recipientsCount: targetUserIds.length });
+    logInfo('Target users found', { recipientsCount: targetUserIds.length }, requestId);
 
     // Create announcement record
     const { data: announcement, error: announcementError } = await supabase
@@ -236,7 +243,7 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     if (announcementError) {
-      logError('Announcement creation failed', announcementError);
+      logError('Announcement creation failed', announcementError, requestId);
       throw announcementError;
     }
 
@@ -253,7 +260,7 @@ const handler = async (req: Request): Promise<Response> => {
       .insert(notifications);
 
     if (notifError) {
-      logError('Notifications creation failed', notifError);
+      logError('Notifications creation failed', notifError, requestId);
     }
 
     // Record the announcement send for rate limiting
@@ -263,7 +270,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     if (recordError) {
-      logError('Rate limit recording failed', recordError);
+      logError('Rate limit recording failed', recordError, requestId);
       // Continue anyway - don't block announcement
     }
 
@@ -294,16 +301,18 @@ const handler = async (req: Request): Promise<Response> => {
             });
             emailsSent++;
           } catch (emailError) {
-            logError('Individual email send failed', emailError);
+            logError('Individual email send failed', emailError, requestId);
           }
         }
 
-        logInfo('Emails sent', { emailsSent });
+        logInfo('Emails sent', { emailsSent }, requestId);
       } catch (error) {
-        logError('Email sending failed', error);
+        logError('Email sending failed', error, requestId);
       }
     }
 
+    logInfo('Announcement sent successfully', { recipientsCount: targetUserIds.length, emailsSent }, requestId);
+    
     return new Response(
       JSON.stringify({
         success: true,
@@ -313,16 +322,16 @@ const handler = async (req: Request): Promise<Response> => {
       }),
       {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
+        headers: { "Content-Type": "application/json", ...corsHeaders, 'x-request-id': requestId },
       }
     );
   } catch (error: any) {
-    logError('Function error', error);
+    logError('Function error', error, requestId);
     return new Response(
       JSON.stringify({ error: "An error occurred processing your request. Please try again." }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
+        headers: { "Content-Type": "application/json", ...corsHeaders, 'x-request-id': requestId },
       }
     );
   }

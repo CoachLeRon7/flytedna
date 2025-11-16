@@ -31,7 +31,6 @@ const assessmentSchema = z.object({
 
 Deno.serve(async (req) => {
   const requestId = req.headers.get('x-request-id') || generateRequestId();
-  const perfTimer = startPerformanceTimer(requestId);
   
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: { ...corsHeaders, 'x-request-id': requestId } });
@@ -39,7 +38,6 @@ Deno.serve(async (req) => {
 
   try {
     logInfo('Request received', {}, requestId);
-    checkpoint(perfTimer, 'init');
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -50,6 +48,9 @@ Deno.serve(async (req) => {
 
     // Use service role client to bypass RLS
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const perfTimer = startPerformanceTimer(requestId, supabase);
+    
+    checkpoint(perfTimer, 'init');
 
     const body = await req.json();
     checkpoint(perfTimer, 'body_parsed');
@@ -69,7 +70,7 @@ Deno.serve(async (req) => {
 
     if (fetchError || !assessment) {
       logError('Invalid token', { code: fetchError?.code }, requestId);
-      logPerformance(perfTimer, 'complete-guardian-assessment:invalid_token');
+      await logPerformance(perfTimer, 'complete-guardian-assessment:invalid_token');
       return new Response(
         JSON.stringify({ error: 'Invalid or expired invitation token' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'x-request-id': requestId } }
@@ -79,7 +80,7 @@ Deno.serve(async (req) => {
     // Check if invitation has expired
     if (assessment.expires_at && new Date(assessment.expires_at) < new Date()) {
       logError('Expired invitation', {}, requestId);
-      logPerformance(perfTimer, 'complete-guardian-assessment:expired');
+      await logPerformance(perfTimer, 'complete-guardian-assessment:expired');
       return new Response(
         JSON.stringify({ error: 'This invitation has expired. Please contact the coach for a new invitation.' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'x-request-id': requestId } }
@@ -119,12 +120,12 @@ Deno.serve(async (req) => {
 
     if (updateError) {
       logError('Update error', updateError, requestId);
-      logPerformance(perfTimer, 'complete-guardian-assessment:failed');
+      await logPerformance(perfTimer, 'complete-guardian-assessment:failed');
       throw updateError;
     }
 
     logInfo('Assessment completed successfully', {}, requestId);
-    logPerformance(perfTimer, 'complete-guardian-assessment:success');
+    await logPerformance(perfTimer, 'complete-guardian-assessment:success');
 
     return new Response(
       JSON.stringify({ success: true, message: 'Assessment completed successfully' }),
@@ -133,7 +134,6 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     logError('Function error', error, requestId);
-    logPerformance(perfTimer, 'complete-guardian-assessment:error');
     
     if (error instanceof z.ZodError) {
       return new Response(

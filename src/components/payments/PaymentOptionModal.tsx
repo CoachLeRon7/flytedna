@@ -26,7 +26,7 @@ interface PaymentOptionModalProps {
 }
 
 export function PaymentOptionModal({ open, onOpenChange, package: pkg }: PaymentOptionModalProps) {
-  const [paymentType, setPaymentType] = useState<"full" | "plan">("full");
+  const [paymentType, setPaymentType] = useState<"full_payment" | "payment_plan">("full_payment");
   const [enrollInSummer, setEnrollInSummer] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -115,15 +115,15 @@ export function PaymentOptionModal({ open, onOpenChange, package: pkg }: Payment
           </DialogDescription>
         </DialogHeader>
 
-        <RadioGroup value={paymentType} onValueChange={(v) => setPaymentType(v as "full" | "plan")}>
+        <RadioGroup value={paymentType} onValueChange={(v) => setPaymentType(v as "full_payment" | "payment_plan")}>
           {/* Full Payment Option */}
           <div className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-            paymentType === "full" ? "border-primary bg-primary/5" : "border-border"
-          }`} onClick={() => setPaymentType("full")}>
+            paymentType === "full_payment" ? "border-primary bg-primary/5" : "border-border"
+          }`} onClick={() => setPaymentType("full_payment")}>
             <div className="flex items-start gap-3">
-              <RadioGroupItem value="full" id="full" />
+              <RadioGroupItem value="full_payment" id="full_payment" />
               <div className="flex-1">
-                <Label htmlFor="full" className="text-lg font-semibold cursor-pointer">
+                <Label htmlFor="full_payment" className="text-lg font-semibold cursor-pointer">
                   Pay in Full
                 </Label>
                 <p className="text-3xl font-bold mt-2">{formatPrice(pkg.base_price_cents)}</p>
@@ -134,12 +134,12 @@ export function PaymentOptionModal({ open, onOpenChange, package: pkg }: Payment
 
           {/* Payment Plan Option */}
           <div className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-            paymentType === "plan" ? "border-primary bg-primary/5" : "border-border"
-          }`} onClick={() => setPaymentType("plan")}>
+            paymentType === "payment_plan" ? "border-primary bg-primary/5" : "border-border"
+          }`} onClick={() => setPaymentType("payment_plan")}>
             <div className="flex items-start gap-3">
-              <RadioGroupItem value="plan" id="plan" />
+              <RadioGroupItem value="payment_plan" id="payment_plan" />
               <div className="flex-1">
-                <Label htmlFor="plan" className="text-lg font-semibold cursor-pointer flex items-center gap-2">
+                <Label htmlFor="payment_plan" className="text-lg font-semibold cursor-pointer flex items-center gap-2">
                   Payment Plan
                   <Calendar className="h-4 w-4" />
                 </Label>

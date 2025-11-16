@@ -9,7 +9,7 @@ const corsHeaders = {
 
 interface CheckoutRequest {
   package_id: string;
-  payment_type: "full" | "plan";
+  payment_type: "full_payment" | "payment_plan";
 }
 
 serve(async (req) => {
@@ -44,7 +44,7 @@ serve(async (req) => {
 
     // Parse request body
     const body: CheckoutRequest = await req.json();
-    const { package_id, payment_type = "full" } = body;
+    const { package_id, payment_type = "full_payment" } = body;
 
     if (!package_id) {
       throw new Error("package_id is required");
@@ -65,7 +65,7 @@ serve(async (req) => {
     }
 
     // Validate payment plan request
-    if (payment_type === "plan" && !packageData.has_payment_plan) {
+    if (payment_type === "payment_plan" && !packageData.has_payment_plan) {
       throw new Error("This package does not support payment plans");
     }
 
@@ -88,7 +88,7 @@ serve(async (req) => {
     const totalAmount = packageData.base_price_cents;
     let initialPayment = totalAmount;
     
-    if (payment_type === "plan" && packageData.payment_plan_config) {
+    if (payment_type === "payment_plan" && packageData.payment_plan_config) {
       const config = packageData.payment_plan_config as any;
       initialPayment = config.down_payment_cents || Math.floor(totalAmount * 0.25);
     }
@@ -125,7 +125,7 @@ serve(async (req) => {
     console.log("[create-checkout] Purchase created:", purchase.id);
 
     // If payment plan, create installments
-    if (payment_type === "plan" && packageData.payment_plan_config) {
+    if (payment_type === "payment_plan" && packageData.payment_plan_config) {
       const config = packageData.payment_plan_config as any;
       const remainingAmount = totalAmount - initialPayment;
       const numInstallments = config.installments || 3;
@@ -171,10 +171,10 @@ serve(async (req) => {
             currency: "usd",
             unit_amount: initialPayment,
             product_data: {
-              name: payment_type === "plan" 
+              name: payment_type === "payment_plan" 
                 ? `${packageData.name} - Down Payment`
                 : packageData.name,
-              description: payment_type === "plan"
+              description: payment_type === "payment_plan"
                 ? `Initial payment for ${packageData.name}`
                 : packageData.description,
             },

@@ -6,6 +6,35 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Secure logging helpers - mask sensitive data
+const maskEmail = (email: string) => {
+  if (!email) return '[NO_EMAIL]';
+  const [user, domain] = email.split('@');
+  return `${user.substring(0, 2)}***@${domain}`;
+};
+
+const maskUserId = (id: string) => id ? `${id.substring(0, 8)}***` : '[NO_ID]';
+
+const logError = (context: string, error: any) => {
+  console.error(`[complete-guardian-assessment] ${context}`, {
+    code: error?.code,
+    message: error?.message?.substring(0, 100), // Truncate messages
+    type: error?.constructor?.name
+  });
+};
+
+const logInfo = (context: string, data?: Record<string, any>) => {
+  const sanitized = data ? Object.entries(data).reduce((acc, [key, val]) => {
+    if (key.includes('email')) acc[key] = maskEmail(val);
+    else if (key.includes('id') || key.includes('Id')) acc[key] = maskUserId(val);
+    else if (key.includes('token')) acc[key] = '[REDACTED]';
+    else acc[key] = val;
+    return acc;
+  }, {} as Record<string, any>) : {};
+  
+  console.log(`[complete-guardian-assessment] ${context}`, sanitized);
+};
+
 const assessmentSchema = z.object({
   invitation_token: z.string().uuid(),
   responses: z.object({
@@ -47,8 +76,6 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const validatedData = assessmentSchema.parse(body);
 
-    console.log('[complete-guardian-assessment] Validating token:', validatedData.invitation_token);
-
     // Validate invitation token and check if not already completed
     const { data: assessment, error: fetchError } = await supabase
       .from('guardian_assessments')
@@ -58,7 +85,7 @@ Deno.serve(async (req) => {
       .single();
 
     if (fetchError || !assessment) {
-      console.error('[complete-guardian-assessment] Invalid or expired token');
+      logError('Invalid token', { code: fetchError?.code });
       return new Response(
         JSON.stringify({ error: 'Invalid or expired invitation token' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -67,14 +94,14 @@ Deno.serve(async (req) => {
 
     // Check if invitation has expired
     if (assessment.expires_at && new Date(assessment.expires_at) < new Date()) {
-      console.error('[complete-guardian-assessment] Invitation has expired');
+      logError('Expired invitation', {});
       return new Response(
         JSON.stringify({ error: 'This invitation has expired. Please contact the coach for a new invitation.' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('[complete-guardian-assessment] Token valid, completing assessment:', assessment.id);
+    logInfo('Token validated', { assessment_id: assessment.id, athlete_id: assessment.athlete_id });
 
     // Calculate domain means
     const responses = validatedData.responses;

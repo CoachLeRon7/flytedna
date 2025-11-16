@@ -22,7 +22,8 @@ export default function PaymentSuccess() {
         .select(`
           *,
           packages (*),
-          payment_plan_installments (*)
+          payment_plan_installments (*),
+          package_access (*)
         `)
         .eq("stripe_checkout_session_id", sessionId)
         .single();
@@ -57,6 +58,9 @@ export default function PaymentSuccess() {
 
   const pkg = purchase.packages as any;
   const installments = (purchase.payment_plan_installments || []) as any[];
+  const packageAccess = (purchase.package_access || []) as any[];
+  const hasActiveAccess = packageAccess.some((access: any) => access.is_active);
+  const isFullyPaid = purchase.status === "completed";
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-20">
@@ -70,7 +74,21 @@ export default function PaymentSuccess() {
           <p className="text-xl text-muted-foreground">
             Welcome to {pkg.name}
           </p>
+          {!isFullyPaid && (
+            <Badge variant="outline" className="mt-2">
+              Payment Plan Active
+            </Badge>
+          )}
         </div>
+
+        {/* Confirmation Notice */}
+        <Card className="mb-6 border-primary/20 bg-primary/5">
+          <CardContent className="pt-6">
+            <p className="text-sm text-center">
+              📧 A confirmation email has been sent to your inbox with your receipt and access details.
+            </p>
+          </CardContent>
+        </Card>
 
         {/* Order Summary */}
         <Card className="mb-6">
@@ -118,36 +136,41 @@ export default function PaymentSuccess() {
         </Card>
 
         {/* Payment Plan Schedule */}
-        {purchase.purchase_type === "payment_plan" && installments.length > 0 && (
+        {!isFullyPaid && installments.length > 0 && (
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Payment Schedule
+                Upcoming Payments
               </CardTitle>
+              <CardDescription>
+                Your remaining installments will be automatically charged
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {installments.map((inst: any, idx: number) => (
-                  <div key={inst.id} className="flex justify-between items-center">
-                    <div>
-                      <p className="font-medium">
-                        Payment {inst.installment_number}
-                        {inst.status === "paid" && " ✓"}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {inst.status === "paid" 
-                          ? `Paid on ${format(new Date(inst.paid_at), "MMM d, yyyy")}`
-                          : `Due ${format(new Date(inst.due_date), "MMM d, yyyy")}`
-                        }
-                      </p>
+                {installments
+                  .filter((inst: any) => inst.status !== "paid")
+                  .map((inst: any) => (
+                    <div key={inst.id} className="flex justify-between items-center p-3 border rounded-lg">
+                      <div>
+                        <p className="font-medium">Payment {inst.installment_number}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Due on {format(new Date(inst.due_date), "MMMM d, yyyy")}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold">{formatPrice(inst.amount_cents)}</p>
+                        <Badge variant="outline" className="mt-1">
+                          {inst.status === "pending" ? "Scheduled" : inst.status}
+                        </Badge>
+                      </div>
                     </div>
-                    <Badge variant={inst.status === "paid" ? "default" : "outline"}>
-                      {formatPrice(inst.amount_cents)}
-                    </Badge>
-                  </div>
-                ))}
+                  ))}
               </div>
+              <p className="text-xs text-muted-foreground mt-4">
+                Payment method on file will be charged automatically. You'll receive email reminders before each payment.
+              </p>
             </CardContent>
           </Card>
         )}
@@ -162,13 +185,13 @@ export default function PaymentSuccess() {
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                 <FileText className="h-4 w-4 text-primary" />
               </div>
-              <div>
-                <p className="font-semibold">Access Workshop Replays</p>
+              <div className="flex-1">
+                <p className="font-semibold">1. Access Your Dashboard</p>
                 <p className="text-sm text-muted-foreground">
-                  Your lifetime access to all workshop content is now active
+                  View your leadership assessment results, growth plans, and workshop replays
                 </p>
                 <Button variant="link" className="px-0 h-auto" asChild>
-                  <Link to="/dashboard">View Workshops</Link>
+                  <Link to="/dashboard">Go to Dashboard →</Link>
                 </Button>
               </div>
             </div>
@@ -177,13 +200,28 @@ export default function PaymentSuccess() {
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                 <Download className="h-4 w-4 text-primary" />
               </div>
-              <div>
-                <p className="font-semibold">Download Starter Materials</p>
+              <div className="flex-1">
+                <p className="font-semibold">2. Download Your Materials</p>
                 <p className="text-sm text-muted-foreground">
-                  Get your leadership workbook and assessment tools
+                  Get your leadership workbook, assessment tools, and exclusive resources
                 </p>
                 <Button variant="link" className="px-0 h-auto">
-                  Download Resources
+                  Download Resources →
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <CheckCircle2 className="h-4 w-4 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold">3. Complete Your First Assessment</p>
+                <p className="text-sm text-muted-foreground">
+                  Start your leadership journey by taking your initial self-assessment
+                </p>
+                <Button variant="link" className="px-0 h-auto" asChild>
+                  <Link to="/assessment">Take Assessment →</Link>
                 </Button>
               </div>
             </div>

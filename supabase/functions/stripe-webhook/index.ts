@@ -121,6 +121,22 @@ serve(async (req) => {
           }
         }
 
+        // Send payment confirmation email
+        try {
+          await supabaseClient.functions.invoke("send-payment-confirmation", {
+            body: {
+              purchaseId,
+              userId: purchase.user_id,
+              amountPaid,
+              isFullPayment: isFullyPaid,
+            },
+          });
+          console.log("[stripe-webhook] Payment confirmation email sent");
+        } catch (emailError) {
+          console.error("[stripe-webhook] Failed to send confirmation email:", emailError);
+          // Don't fail the webhook if email fails
+        }
+
         break;
       }
 
@@ -196,6 +212,21 @@ serve(async (req) => {
                 if (!accessError) {
                   console.log("[stripe-webhook] Package access granted after full payment");
                 }
+              }
+
+              // Send payment confirmation email for installment
+              try {
+                await supabaseClient.functions.invoke("send-payment-confirmation", {
+                  body: {
+                    purchaseId: purchase.id,
+                    userId: purchase.user_id,
+                    amountPaid: installment.amount_cents,
+                    isFullPayment: isFullyPaid,
+                  },
+                });
+                console.log("[stripe-webhook] Installment confirmation email sent");
+              } catch (emailError) {
+                console.error("[stripe-webhook] Failed to send installment email:", emailError);
               }
             }
           }

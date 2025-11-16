@@ -32,6 +32,7 @@ import { OrganizationManagement } from "@/components/admin/OrganizationManagemen
 import { InvitationManager } from "@/components/admin/InvitationManager";
 import { JoinRequestsManager } from "@/components/admin/JoinRequestsManager";
 import { PerformanceDashboard } from "@/components/admin/PerformanceDashboard";
+import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -418,12 +419,16 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="users" className="space-y-6">
-            <UserManagementDashboard />
+            <SectionErrorBoundary title="User Management Error">
+              <UserManagementDashboard />
+            </SectionErrorBoundary>
           </TabsContent>
 
           {isSuperAdmin && (
             <TabsContent value="organizations" className="space-y-6">
-              <OrganizationManagement />
+              <SectionErrorBoundary title="Organization Management Error">
+                <OrganizationManagement />
+              </SectionErrorBoundary>
             </TabsContent>
           )}
 
@@ -437,15 +442,21 @@ export default function AdminDashboard() {
               </TabsList>
 
               <TabsContent value="role-requests">
-                <RoleRequestsManager />
+                <SectionErrorBoundary title="Role Requests Error">
+                  <RoleRequestsManager />
+                </SectionErrorBoundary>
               </TabsContent>
 
               <TabsContent value="invitations">
-                <InvitationManager />
+                <SectionErrorBoundary title="Invitations Error">
+                  <InvitationManager />
+                </SectionErrorBoundary>
               </TabsContent>
 
               <TabsContent value="join-requests">
-                <JoinRequestsManager />
+                <SectionErrorBoundary title="Join Requests Error">
+                  <JoinRequestsManager />
+                </SectionErrorBoundary>
               </TabsContent>
 
               <TabsContent value="system">
@@ -480,7 +491,9 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="performance" className="space-y-6">
-            <PerformanceDashboard />
+            <SectionErrorBoundary title="Performance Dashboard Error">
+              <PerformanceDashboard />
+            </SectionErrorBoundary>
           </TabsContent>
 
           <TabsContent value="export" className="space-y-6">

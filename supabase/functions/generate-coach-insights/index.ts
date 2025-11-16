@@ -7,6 +7,34 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Secure logging helpers
+const maskEmail = (email: string) => {
+  if (!email) return '[NO_EMAIL]';
+  const [user, domain] = email.split('@');
+  return `${user.substring(0, 2)}***@${domain}`;
+};
+
+const maskUserId = (id: string) => id ? `${id.substring(0, 8)}***` : '[NO_ID]';
+
+const logError = (context: string, error: any) => {
+  console.error(`[generate-coach-insights] ${context}`, {
+    code: error?.code,
+    message: error?.message?.substring(0, 100),
+    type: error?.constructor?.name
+  });
+};
+
+const logInfo = (context: string, data?: Record<string, any>) => {
+  const sanitized = data ? Object.entries(data).reduce((acc, [key, val]) => {
+    if (key.includes('email')) acc[key] = maskEmail(val);
+    else if (key.includes('id') || key.includes('Id')) acc[key] = maskUserId(val);
+    else acc[key] = val;
+    return acc;
+  }, {} as Record<string, any>) : {};
+  
+  console.log(`[generate-coach-insights] ${context}`, sanitized);
+};
+
 // Define schema for AI insights validation
 const insightsSchema = z.object({
   summary: z.string().min(10).max(500),
@@ -61,7 +89,7 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
     
     if (authError || !user) {
-      console.error('Auth error:', authError);
+      logError('Authentication failed', authError);
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -97,6 +125,7 @@ serve(async (req) => {
       .single();
 
     if (fetchError || !assessment) {
+      logError('Assessment fetch failed', fetchError);
       throw new Error("Could not fetch assessment");
     }
 
@@ -225,7 +254,7 @@ Be specific, constructive, and actionable. Reference the scores and reflections 
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('AI Gateway error:', aiResponse.status, errorText);
+      logError('AI Gateway error', { status: aiResponse.status, errorText: errorText.substring(0, 100) });
       throw new Error(`AI Gateway error: ${aiResponse.status}`);
     }
 
@@ -242,9 +271,9 @@ Be specific, constructive, and actionable. Reference the scores and reflections 
       const rawInsights = JSON.parse(toolCall.function.arguments);
       insights = insightsSchema.parse(rawInsights);
     } catch (parseError) {
-      console.error('Failed to parse or validate AI insights:', parseError);
+      logError('Failed to parse/validate AI insights', parseError);
       if (parseError instanceof z.ZodError) {
-        console.error('Validation errors:', parseError.errors);
+        logError('Validation errors', { errors: parseError.errors });
         throw new Error('AI generated invalid insights format');
       }
       throw new Error('Failed to parse AI response');
@@ -257,7 +286,7 @@ Be specific, constructive, and actionable. Reference the scores and reflections 
       .eq('id', assessmentId);
 
     if (updateError) {
-      console.error('Error storing insights:', updateError);
+      logError('Failed to store insights', updateError);
       throw updateError;
     }
 
@@ -266,7 +295,7 @@ Be specific, constructive, and actionable. Reference the scores and reflections 
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error: any) {
-    console.error('Error in generate-coach-insights:', error);
+    logError('Function error', error);
     return new Response(
       JSON.stringify({ error: 'An error occurred generating insights. Please try again.' }),
       { 

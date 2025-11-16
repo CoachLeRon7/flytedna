@@ -11,6 +11,34 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// Secure logging helpers
+const maskEmail = (email: string) => {
+  if (!email) return '[NO_EMAIL]';
+  const [user, domain] = email.split('@');
+  return `${user.substring(0, 2)}***@${domain}`;
+};
+
+const maskUserId = (id: string) => id ? `${id.substring(0, 8)}***` : '[NO_ID]';
+
+const logError = (context: string, error: any) => {
+  console.error(`[notify-assessment-completion] ${context}`, {
+    code: error?.code,
+    message: error?.message?.substring(0, 100),
+    type: error?.constructor?.name
+  });
+};
+
+const logInfo = (context: string, data?: Record<string, any>) => {
+  const sanitized = data ? Object.entries(data).reduce((acc, [key, val]) => {
+    if (key.includes('email')) acc[key] = maskEmail(val);
+    else if (key.includes('id') || key.includes('Id')) acc[key] = maskUserId(val);
+    else acc[key] = val;
+    return acc;
+  }, {} as Record<string, any>) : {};
+  
+  console.log(`[notify-assessment-completion] ${context}`, sanitized);
+};
+
 // Input validation schema
 const assessmentPayloadSchema = z.object({
   assessment_id: z.string().uuid("Invalid assessment ID format"),
@@ -102,7 +130,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log("Processing assessment completion notification:", { assessment_id, user_id });
+    logInfo('Processing assessment completion', { assessmentId: assessment_id, userId: user_id });
 
     // Get student profile and assessment details
     const { data: student, error: studentError } = await supabase
@@ -112,7 +140,7 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     if (studentError || !student) {
-      console.error("Error fetching student:", studentError);
+      logError('Student profile fetch failed', studentError);
       throw new Error("Student not found");
     }
 
@@ -123,7 +151,7 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     if (assessmentError || !assessment) {
-      console.error("Error fetching assessment:", assessmentError);
+      logError('Assessment details fetch failed', assessmentError);
       throw new Error("Assessment not found");
     }
 
@@ -158,7 +186,7 @@ const handler = async (req: Request): Promise<Response> => {
         `,
       });
     } catch (emailError) {
-      console.error("Error sending student email:", emailError);
+      logError('Student email send failed', emailError);
     }
 
     // Get coaches for the student's team
@@ -206,7 +234,7 @@ const handler = async (req: Request): Promise<Response> => {
                 `,
               });
             } catch (emailError) {
-              console.error(`Error sending coach email to ${coachId}:`, emailError);
+              logError('Coach email send failed', emailError);
             }
           }
         }
@@ -248,7 +276,7 @@ const handler = async (req: Request): Promise<Response> => {
               `,
             });
           } catch (emailError) {
-            console.error(`Error sending teammate email to ${teammate.id}:`, emailError);
+            logError('Teammate email send failed', emailError);
           }
         }
       }
@@ -284,7 +312,7 @@ const handler = async (req: Request): Promise<Response> => {
               `,
             });
           } catch (emailError) {
-            console.error(`Error sending admin email to ${admin.user_id}:`, emailError);
+            logError('Admin email send failed', emailError);
           }
         }
       }
@@ -298,7 +326,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
   } catch (error: any) {
-    console.error("Error in notify-assessment-completion:", error);
+    logError('Function error', error);
     return new Response(
       JSON.stringify({ error: "An error occurred sending notifications. Please try again." }),
       {

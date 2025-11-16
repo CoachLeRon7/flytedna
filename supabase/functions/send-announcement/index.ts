@@ -7,6 +7,36 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Secure logging helpers
+const maskEmail = (email: string) => {
+  if (!email) return '[NO_EMAIL]';
+  const [user, domain] = email.split('@');
+  return `${user.substring(0, 2)}***@${domain}`;
+};
+
+const maskUserId = (id: string) => id ? `${id.substring(0, 8)}***` : '[NO_ID]';
+
+const logError = (context: string, error: any) => {
+  console.error(`[send-announcement] ${context}`, {
+    code: error?.code,
+    message: error?.message?.substring(0, 100),
+    type: error?.constructor?.name
+  });
+};
+
+const logInfo = (context: string, data?: Record<string, any>) => {
+  const sanitized = data ? Object.entries(data).reduce((acc, [key, val]) => {
+    if (key.includes('email')) acc[key] = maskEmail(val);
+    else if (key.includes('id') || key.includes('Id')) acc[key] = maskUserId(val);
+    else if (key === 'recipientsCount') acc[key] = val;
+    else if (key === 'targetAudience') acc[key] = val;
+    else acc[key] = val;
+    return acc;
+  }, {} as Record<string, any>) : {};
+  
+  console.log(`[send-announcement] ${context}`, sanitized);
+};
+
 interface AnnouncementRequest {
   title: string;
   message: string;
@@ -49,7 +79,7 @@ const handler = async (req: Request): Promise<Response> => {
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
 
     if (userError || !user) {
-      console.error("Auth error:", userError);
+      logError('Authentication failed', userError);
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -76,7 +106,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     if (rateLimitError) {
-      console.error('Rate limit check error:', rateLimitError);
+      logError('Rate limit check failed', rateLimitError);
       return new Response(
         JSON.stringify({ error: "An error occurred processing your request. Please try again." }),
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
@@ -84,7 +114,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!rateLimitCheck.allowed) {
-      console.log(`Rate limit exceeded for user ${user.id}:`, rateLimitCheck);
+      logInfo('Rate limit exceeded', { limit: rateLimitCheck.limit });
       return new Response(
         JSON.stringify({ 
           error: rateLimitCheck.message,
@@ -96,7 +126,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log(`Rate limit check passed. Remaining: ${rateLimitCheck.remaining}/${rateLimitCheck.limit}`);
+    logInfo('Rate limit check passed', { remaining: rateLimitCheck.remaining, limit: rateLimitCheck.limit });
 
     const { title, message, targetAudience, sendEmail }: AnnouncementRequest = await req.json();
 
@@ -189,7 +219,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    console.log(`Found ${targetUserIds.length} target users`);
+    logInfo('Target users found', { recipientsCount: targetUserIds.length });
 
     // Create announcement record
     const { data: announcement, error: announcementError } = await supabase
@@ -206,7 +236,7 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     if (announcementError) {
-      console.error("Error creating announcement:", announcementError);
+      logError('Announcement creation failed', announcementError);
       throw announcementError;
     }
 
@@ -223,7 +253,7 @@ const handler = async (req: Request): Promise<Response> => {
       .insert(notifications);
 
     if (notifError) {
-      console.error("Error creating notifications:", notifError);
+      logError('Notifications creation failed', notifError);
     }
 
     // Record the announcement send for rate limiting
@@ -233,7 +263,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     if (recordError) {
-      console.error('Failed to record rate limit:', recordError);
+      logError('Rate limit recording failed', recordError);
       // Continue anyway - don't block announcement
     }
 
@@ -264,13 +294,13 @@ const handler = async (req: Request): Promise<Response> => {
             });
             emailsSent++;
           } catch (emailError) {
-            console.error(`Failed to send email to ${recipient.email}:`, emailError);
+            logError('Individual email send failed', emailError);
           }
         }
 
-        console.log(`Successfully sent ${emailsSent} emails`);
+        logInfo('Emails sent', { emailsSent });
       } catch (error) {
-        console.error("Email sending error:", error);
+        logError('Email sending failed', error);
       }
     }
 
@@ -287,7 +317,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
   } catch (error: any) {
-    console.error("Error in send-announcement function:", error);
+    logError('Function error', error);
     return new Response(
       JSON.stringify({ error: "An error occurred processing your request. Please try again." }),
       {

@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Calendar } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface PaymentOptionModalProps {
   open: boolean;
@@ -26,20 +28,61 @@ interface PaymentOptionModalProps {
 export function PaymentOptionModal({ open, onOpenChange, package: pkg }: PaymentOptionModalProps) {
   const [paymentType, setPaymentType] = useState<"full" | "plan">("full");
   const [enrollInSummer, setEnrollInSummer] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { toast } = useToast();
 
   const formatPrice = (cents: number) => `$${(cents / 100).toFixed(0)}`;
 
-  const handleProceed = () => {
-    const params = new URLSearchParams({
-      package: pkg.id,
-      type: paymentType,
-    });
+  const handleProceed = async () => {
+    setIsProcessing(true);
     
-    if (enrollInSummer) {
-      params.append("summer", "true");
+    try {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !sessionData.session) {
+        toast({
+          variant: "destructive",
+          title: "Authentication Required",
+          description: "Please sign in to complete your purchase.",
+        });
+        setIsProcessing(false);
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: {
+          package_id: pkg.id,
+          purchase_type: paymentType === "full" ? "full" : "payment_plan",
+        },
+      });
+
+      if (error) {
+        console.error("Checkout error:", error);
+        toast({
+          variant: "destructive",
+          title: "Checkout Failed",
+          description: error.message || "Failed to create checkout session. Please try again.",
+        });
+        setIsProcessing(false);
+        return;
+      }
+
+      if (data?.url) {
+        window.open(data.url, "_blank");
+        onOpenChange(false);
+      } else {
+        throw new Error("No checkout URL received");
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+      });
+    } finally {
+      setIsProcessing(false);
     }
-    
-    window.location.href = `/checkout?${params.toString()}`;
   };
 
   const getPaymentPlanBreakdown = () => {
@@ -151,8 +194,8 @@ export function PaymentOptionModal({ open, onOpenChange, package: pkg }: Payment
           </div>
         )}
 
-        <Button size="lg" className="w-full" onClick={handleProceed}>
-          Proceed to Checkout
+        <Button size="lg" className="w-full" onClick={handleProceed} disabled={isProcessing}>
+          {isProcessing ? "Processing..." : "Proceed to Checkout"}
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </DialogContent>

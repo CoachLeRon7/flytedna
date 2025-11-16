@@ -142,7 +142,7 @@ export function PaymentOptionModal({ open, onOpenChange, package: pkg }: Payment
         <div className="space-y-2 text-sm">
           <div className="mb-3 p-2 bg-accent/10 border border-accent/20 rounded text-xs">
             <p className="font-medium text-accent-foreground">
-              ✨ 4 Equal Payments with WORKSHOP20
+              ✨ 4 Equal Payments with BEYONDTHEGAME25
             </p>
             <p className="text-muted-foreground mt-1">
               Original: {formatPrice(pkg.base_price_cents)} → 
@@ -352,7 +352,7 @@ export function PaymentOptionModal({ open, onOpenChange, package: pkg }: Payment
             {couponValid && couponData && (
               <div className="mt-3 pt-3 border-t">
                 <p className="text-sm font-medium text-primary">
-                  Special pricing with WORKSHOP20: Save {formatPrice(calculateDiscount())}!
+                  Special pricing with BEYONDTHEGAME25: Save {formatPrice(calculateDiscount())}!
                 </p>
               </div>
             )}

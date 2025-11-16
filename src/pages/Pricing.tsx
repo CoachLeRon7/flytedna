@@ -113,6 +113,7 @@ export default function Pricing() {
   const getBadge = (slug: string) => {
     if (slug === "elevation") return <Badge className="bg-primary">Most Popular</Badge>;
     if (slug === "transformation") return <Badge className="bg-accent">Best Value</Badge>;
+    if (slug === "summer-program") return <Badge className="bg-accent">Limited Time - 20% Off</Badge>;
     return null;
   };
 
@@ -167,6 +168,19 @@ export default function Pricing() {
               <CardHeader>
                 <CardTitle className="text-2xl">{pkg.name}</CardTitle>
                 <CardDescription className="text-base">{pkg.description}</CardDescription>
+                
+                {/* Summer program discount note */}
+                {pkg.slug === "summer-program" && (
+                  <div className="mt-3 p-3 bg-accent/10 border border-accent/20 rounded-lg">
+                    <p className="text-sm font-medium text-accent-foreground">
+                      💡 Use code <span className="font-bold">WORKSHOP20</span> at checkout for 20% off
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      ${formatPrice(pkg.base_price_cents)} → ${formatPrice(Math.floor(pkg.base_price_cents * 0.8))} with coupon
+                    </p>
+                  </div>
+                )}
+                
                 <div className="pt-4">
                   {pkg.slug === "coaches" ? (
                     <p className="text-3xl font-bold">Custom Pricing</p>

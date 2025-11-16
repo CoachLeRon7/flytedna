@@ -132,6 +132,43 @@ export function PaymentOptionModal({ open, onOpenChange, package: pkg }: Payment
     if (!pkg.payment_plan_config) return null;
     
     const { down_payment_cents, installments } = pkg.payment_plan_config;
+    const discountedPrice = couponData ? getDiscountedPrice() : pkg.base_price_cents;
+    const hasDiscount = couponData && couponValid;
+    
+    // Summer Program with coupon - 4 equal payments of discounted price
+    if (pkg.slug === "summer-program" && hasDiscount) {
+      const installmentAmount = Math.floor(discountedPrice / 4);
+      return (
+        <div className="space-y-2 text-sm">
+          <div className="mb-3 p-2 bg-accent/10 border border-accent/20 rounded text-xs">
+            <p className="font-medium text-accent-foreground">
+              ✨ 4 Equal Payments with WORKSHOP20
+            </p>
+            <p className="text-muted-foreground mt-1">
+              Original: {formatPrice(pkg.base_price_cents)} → 
+              With coupon: {formatPrice(discountedPrice)}
+            </p>
+          </div>
+          {Array.from({ length: 4 }, (_, idx) => (
+            <div key={idx} className="flex justify-between">
+              <span className={idx === 0 ? "font-semibold" : "text-muted-foreground"}>
+                {idx === 0 ? "Today:" : `Payment ${idx + 1} (${30 * idx} days):`}
+              </span>
+              <span className={idx === 0 ? "font-semibold" : ""}>
+                {formatPrice(installmentAmount)}
+              </span>
+            </div>
+          ))}
+          <div className="pt-2 border-t flex justify-between font-semibold">
+            <span>Total:</span>
+            <span>{formatPrice(discountedPrice)}</span>
+          </div>
+          <p className="text-xs text-green-600">
+            You save {formatPrice(calculateDiscount())}!
+          </p>
+        </div>
+      );
+    }
     
     if (pkg.slug === "transformation" && down_payment_cents) {
       return (
@@ -221,7 +258,7 @@ export function PaymentOptionModal({ open, onOpenChange, package: pkg }: Payment
                   {getPaymentPlanBreakdown()}
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Total: {formatPrice(pkg.base_price_cents)}
+                  Total: {formatPrice(couponValid && couponData ? getDiscountedPrice() : pkg.base_price_cents)}
                 </p>
               </div>
             </div>
@@ -298,6 +335,27 @@ export function PaymentOptionModal({ open, onOpenChange, package: pkg }: Payment
                 </p>
               </div>
             </div>
+          </div>
+        )}
+        
+        {/* Summer Program Details Note */}
+        {pkg.slug === "summer-program" && (
+          <div className="border rounded-lg p-4 bg-primary/5">
+            <h4 className="font-semibold text-sm mb-2">📅 Program Details</h4>
+            <ul className="text-sm text-muted-foreground space-y-1">
+              <li>• 6-week intensive leadership program</li>
+              <li>• Live coaching sessions throughout</li>
+              <li>• Peer collaboration activities</li>
+              <li>• Certificate of completion</li>
+              <li>• Exclusive community access</li>
+            </ul>
+            {couponValid && couponData && (
+              <div className="mt-3 pt-3 border-t">
+                <p className="text-sm font-medium text-primary">
+                  Special pricing with WORKSHOP20: Save {formatPrice(calculateDiscount())}!
+                </p>
+              </div>
+            )}
           </div>
         )}
 

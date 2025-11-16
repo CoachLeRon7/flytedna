@@ -252,13 +252,6 @@ export type Database = {
             foreignKeyName: "assessments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "profiles_secure"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "assessments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "user_activity_summary"
             referencedColumns: ["user_id"]
           },
@@ -439,13 +432,6 @@ export type Database = {
             foreignKeyName: "coaches_inquiries_assigned_to_fkey"
             columns: ["assigned_to"]
             isOneToOne: false
-            referencedRelation: "profiles_secure"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "coaches_inquiries_assigned_to_fkey"
-            columns: ["assigned_to"]
-            isOneToOne: false
             referencedRelation: "user_activity_summary"
             referencedColumns: ["user_id"]
           },
@@ -482,13 +468,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "growth_plans_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_secure"
             referencedColumns: ["id"]
           },
           {
@@ -624,13 +603,6 @@ export type Database = {
             foreignKeyName: "guardian_assessments_athlete_id_fkey"
             columns: ["athlete_id"]
             isOneToOne: false
-            referencedRelation: "profiles_secure"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "guardian_assessments_athlete_id_fkey"
-            columns: ["athlete_id"]
-            isOneToOne: false
             referencedRelation: "user_activity_summary"
             referencedColumns: ["user_id"]
           },
@@ -639,13 +611,6 @@ export type Database = {
             columns: ["invited_by"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "guardian_assessments_invited_by_fkey"
-            columns: ["invited_by"]
-            isOneToOne: false
-            referencedRelation: "profiles_secure"
             referencedColumns: ["id"]
           },
           {
@@ -945,13 +910,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "package_access_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_secure"
             referencedColumns: ["id"]
           },
           {
@@ -1332,13 +1290,6 @@ export type Database = {
             foreignKeyName: "purchases_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "profiles_secure"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "purchases_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "user_activity_summary"
             referencedColumns: ["user_id"]
           },
@@ -1406,13 +1357,6 @@ export type Database = {
             foreignKeyName: "refund_requests_reviewed_by_fkey"
             columns: ["reviewed_by"]
             isOneToOne: false
-            referencedRelation: "profiles_secure"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "refund_requests_reviewed_by_fkey"
-            columns: ["reviewed_by"]
-            isOneToOne: false
             referencedRelation: "user_activity_summary"
             referencedColumns: ["user_id"]
           },
@@ -1421,13 +1365,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "refund_requests_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_secure"
             referencedColumns: ["id"]
           },
           {
@@ -1477,13 +1414,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "renewal_reminders_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_secure"
             referencedColumns: ["id"]
           },
           {
@@ -1553,13 +1483,6 @@ export type Database = {
             foreignKeyName: "summer_program_enrollments_athlete_id_fkey"
             columns: ["athlete_id"]
             isOneToOne: false
-            referencedRelation: "profiles_secure"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "summer_program_enrollments_athlete_id_fkey"
-            columns: ["athlete_id"]
-            isOneToOne: false
             referencedRelation: "user_activity_summary"
             referencedColumns: ["user_id"]
           },
@@ -1568,13 +1491,6 @@ export type Database = {
             columns: ["parent_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "summer_program_enrollments_parent_user_id_fkey"
-            columns: ["parent_user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_secure"
             referencedColumns: ["id"]
           },
           {
@@ -1671,13 +1587,6 @@ export type Database = {
             foreignKeyName: "user_activity_log_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "profiles_secure"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_activity_log_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "user_activity_summary"
             referencedColumns: ["user_id"]
           },
@@ -1732,13 +1641,6 @@ export type Database = {
             foreignKeyName: "guardian_assessments_athlete_id_fkey"
             columns: ["athlete_id"]
             isOneToOne: false
-            referencedRelation: "profiles_secure"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "guardian_assessments_athlete_id_fkey"
-            columns: ["athlete_id"]
-            isOneToOne: false
             referencedRelation: "user_activity_summary"
             referencedColumns: ["user_id"]
           },
@@ -1759,47 +1661,6 @@ export type Database = {
           timepoint: Database["public"]["Enums"]["assessment_timepoint"] | null
         }
         Relationships: []
-      }
-      profiles_secure: {
-        Row: {
-          created_at: string | null
-          email: string | null
-          first_name: string | null
-          id: string | null
-          last_name: string | null
-          sport: string | null
-          team_id: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          email?: never
-          first_name?: string | null
-          id?: string | null
-          last_name?: string | null
-          sport?: string | null
-          team_id?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          email?: never
-          first_name?: string | null
-          id?: string | null
-          last_name?: string | null
-          sport?: string | null
-          team_id?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_profiles_team"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       user_activity_summary: {
         Row: {

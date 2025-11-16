@@ -12,6 +12,9 @@ verify_jwt = true
 [functions.send-guardian-invitation]
 verify_jwt = false
 
+[functions.complete-guardian-assessment]
+verify_jwt = false
+
 [functions.create-checkout]
 verify_jwt = true
 

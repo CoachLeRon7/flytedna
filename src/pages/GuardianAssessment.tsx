@@ -73,22 +73,22 @@ export default function GuardianAssessment() {
 
     setSubmitting(true);
     try {
-      const { error } = await supabase
-        .from("guardian_assessments")
-        .update({
-          ...responses,
+      const { data, error } = await supabase.functions.invoke('complete-guardian-assessment', {
+        body: {
+          invitation_token: token,
+          responses,
           optional_comment: comment || null,
-          completed_at: new Date().toISOString(),
-        })
-        .eq("invitation_token", token);
+        },
+      });
 
       if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Failed to submit assessment');
 
       toast.success("Assessment submitted successfully!");
       setSubmitted(true);
     } catch (error: any) {
       console.error("Error submitting assessment:", error);
-      toast.error("Failed to submit assessment");
+      toast.error(error.message || "Failed to submit assessment");
     } finally {
       setSubmitting(false);
     }

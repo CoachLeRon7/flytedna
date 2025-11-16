@@ -140,7 +140,14 @@ const Auth = () => {
         description: roleMessage,
       });
 
-      navigate("/dashboard");
+      // Check if there's an intended package and redirect to pricing
+      const intendedPackage = localStorage.getItem('intended_package');
+      if (intendedPackage) {
+        localStorage.removeItem('intended_package');
+        navigate('/pricing');
+      } else {
+        navigate("/dashboard");
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -201,7 +208,14 @@ const Auth = () => {
         description: "Redirecting to your dashboard...",
       });
 
-      navigate("/dashboard");
+      // Check if there's an intended package and redirect to pricing
+      const intendedPackage = localStorage.getItem('intended_package');
+      if (intendedPackage) {
+        localStorage.removeItem('intended_package');
+        navigate('/pricing');
+      } else {
+        navigate("/dashboard");
+      }
     } catch (error: any) {
       toast({
         title: "Error",

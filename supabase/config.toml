@@ -8,9 +8,3 @@ verify_jwt = true
 
 [functions.generate-coach-insights]
 verify_jwt = true
-
-[functions.create-checkout]
-verify_jwt = true
-
-[functions.stripe-webhook]
-verify_jwt = false

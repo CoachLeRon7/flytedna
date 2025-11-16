@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.75.0';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
-import { generateRequestId, logError, logInfo } from '../_shared/logging.ts';
+import { generateRequestId, logError, logInfo, startPerformanceTimer, checkpoint, logPerformance } from '../_shared/logging.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -31,6 +31,7 @@ const assessmentSchema = z.object({
 
 Deno.serve(async (req) => {
   const requestId = req.headers.get('x-request-id') || generateRequestId();
+  const perfTimer = startPerformanceTimer(requestId);
   
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: { ...corsHeaders, 'x-request-id': requestId } });
@@ -38,6 +39,8 @@ Deno.serve(async (req) => {
 
   try {
     logInfo('Request received', {}, requestId);
+    checkpoint(perfTimer, 'init');
+    
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
@@ -49,7 +52,10 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const body = await req.json();
+    checkpoint(perfTimer, 'body_parsed');
+    
     const validatedData = assessmentSchema.parse(body);
+    checkpoint(perfTimer, 'validation');
 
     // Validate invitation token and check if not already completed
     const { data: assessment, error: fetchError } = await supabase
@@ -59,8 +65,11 @@ Deno.serve(async (req) => {
       .is('completed_at', null)
       .single();
 
+    checkpoint(perfTimer, 'token_validated');
+
     if (fetchError || !assessment) {
       logError('Invalid token', { code: fetchError?.code }, requestId);
+      logPerformance(perfTimer, 'complete-guardian-assessment:invalid_token');
       return new Response(
         JSON.stringify({ error: 'Invalid or expired invitation token' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'x-request-id': requestId } }
@@ -70,6 +79,7 @@ Deno.serve(async (req) => {
     // Check if invitation has expired
     if (assessment.expires_at && new Date(assessment.expires_at) < new Date()) {
       logError('Expired invitation', {}, requestId);
+      logPerformance(perfTimer, 'complete-guardian-assessment:expired');
       return new Response(
         JSON.stringify({ error: 'This invitation has expired. Please contact the coach for a new invitation.' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'x-request-id': requestId } }
@@ -86,6 +96,7 @@ Deno.serve(async (req) => {
     const d_mean = (responses.d1 + responses.d2 + responses.d3) / 3;
     const b_mean = (responses.b1 + responses.b2 + responses.b3) / 3;
     const composite_mean = (l_mean + e_mean + a_mean + d_mean + b_mean) / 5;
+    checkpoint(perfTimer, 'calculations');
 
     // Update assessment with responses and completion timestamp
     const { error: updateError } = await supabase
@@ -104,12 +115,16 @@ Deno.serve(async (req) => {
       })
       .eq('id', assessment.id);
 
+    checkpoint(perfTimer, 'db_update');
+
     if (updateError) {
       logError('Update error', updateError, requestId);
+      logPerformance(perfTimer, 'complete-guardian-assessment:failed');
       throw updateError;
     }
 
     logInfo('Assessment completed successfully', {}, requestId);
+    logPerformance(perfTimer, 'complete-guardian-assessment:success');
 
     return new Response(
       JSON.stringify({ success: true, message: 'Assessment completed successfully' }),
@@ -118,6 +133,7 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     logError('Function error', error, requestId);
+    logPerformance(perfTimer, 'complete-guardian-assessment:error');
     
     if (error instanceof z.ZodError) {
       return new Response(

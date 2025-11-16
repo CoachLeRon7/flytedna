@@ -1,10 +1,38 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Define schema for AI insights validation
+const insightsSchema = z.object({
+  summary: z.string().min(10).max(500),
+  strengths: z.array(
+    z.object({
+      domain: z.string(),
+      score: z.number().min(1).max(5),
+      analysis: z.string().min(10).max(500),
+    })
+  ).min(2).max(2),
+  weaknesses: z.array(
+    z.object({
+      domain: z.string(),
+      score: z.number().min(1).max(5),
+      analysis: z.string().min(10).max(500),
+    })
+  ).min(2).max(2),
+  actionable_steps: z.array(
+    z.object({
+      title: z.string().min(5).max(100),
+      description: z.string().min(10).max(500),
+      domain: z.string(),
+      priority: z.enum(['high', 'medium', 'low']),
+    })
+  ).min(3).max(5),
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -208,7 +236,19 @@ Be specific, constructive, and actionable. Reference the scores and reflections 
       throw new Error("No insights generated");
     }
 
-    const insights = JSON.parse(toolCall.function.arguments);
+    // Parse and validate AI response with error handling
+    let insights;
+    try {
+      const rawInsights = JSON.parse(toolCall.function.arguments);
+      insights = insightsSchema.parse(rawInsights);
+    } catch (parseError) {
+      console.error('Failed to parse or validate AI insights:', parseError);
+      if (parseError instanceof z.ZodError) {
+        console.error('Validation errors:', parseError.errors);
+        throw new Error('AI generated invalid insights format');
+      }
+      throw new Error('Failed to parse AI response');
+    }
 
     // Store insights back to database
     const { error: updateError } = await supabase

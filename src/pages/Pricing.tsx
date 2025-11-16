@@ -68,7 +68,7 @@ export default function Pricing() {
         const { data, error } = await supabase.functions.invoke("create-checkout", {
           body: {
             package_id: pkg.id,
-            payment_type: "full",
+            payment_type: "full_payment",
           },
         });
 

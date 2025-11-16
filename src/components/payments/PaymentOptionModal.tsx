@@ -5,7 +5,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Calendar } from "lucide-react";
+import { ArrowRight, Calendar, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface PaymentOptionModalProps {
   open: boolean;
@@ -26,20 +28,42 @@ interface PaymentOptionModalProps {
 export function PaymentOptionModal({ open, onOpenChange, package: pkg }: PaymentOptionModalProps) {
   const [paymentType, setPaymentType] = useState<"full" | "plan">("full");
   const [enrollInSummer, setEnrollInSummer] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const formatPrice = (cents: number) => `$${(cents / 100).toFixed(0)}`;
 
-  const handleProceed = () => {
-    const params = new URLSearchParams({
-      package: pkg.id,
-      type: paymentType,
-    });
+  const handleProceed = async () => {
+    setIsLoading(true);
     
-    if (enrollInSummer) {
-      params.append("summer", "true");
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: {
+          package_id: pkg.id,
+          payment_type: paymentType,
+          metadata: enrollInSummer ? { summer_enrollment: true } : undefined,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        // Redirect to Stripe Checkout
+        window.open(data.url, '_blank');
+        onOpenChange(false);
+      } else {
+        throw new Error("No checkout URL returned");
+      }
+    } catch (error: any) {
+      console.error("Checkout error:", error);
+      toast({
+        title: "Checkout Error",
+        description: error.message || "Failed to create checkout session. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
-    
-    window.location.href = `/checkout?${params.toString()}`;
   };
 
   const getPaymentPlanBreakdown = () => {
@@ -151,9 +175,18 @@ export function PaymentOptionModal({ open, onOpenChange, package: pkg }: Payment
           </div>
         )}
 
-        <Button size="lg" className="w-full" onClick={handleProceed}>
-          Proceed to Checkout
-          <ArrowRight className="ml-2 h-4 w-4" />
+        <Button size="lg" className="w-full" onClick={handleProceed} disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Creating checkout...
+            </>
+          ) : (
+            <>
+              Proceed to Checkout
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </>
+          )}
         </Button>
       </DialogContent>
     </Dialog>

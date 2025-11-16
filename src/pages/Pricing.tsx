@@ -192,6 +192,24 @@ export default function Pricing() {
                     </li>
                   ))}
                 </ul>
+                
+                {/* Summer Program Inclusions */}
+                {pkg.slug === "transformation" && (
+                  <div className="mt-4 p-3 bg-accent/10 border border-accent/30 rounded-lg">
+                    <p className="text-sm font-semibold text-accent-foreground">Summer Leadership Program</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Includes $129 credit toward Summer Leadership Program enrollment
+                    </p>
+                  </div>
+                )}
+                {pkg.slug === "academy-lab" && (
+                  <div className="mt-4 p-3 bg-primary/10 border border-primary/30 rounded-lg">
+                    <p className="text-sm font-semibold text-primary">Summer Leadership Program</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Full Summer Leadership Program included at discounted rate
+                    </p>
+                  </div>
+                )}
               </CardContent>
 
               <CardFooter>

@@ -18,6 +18,9 @@ verify_jwt = false
 [functions.create-checkout]
 verify_jwt = true
 
+[functions.validate-coupon]
+verify_jwt = false
+
 [functions.stripe-webhook]
 verify_jwt = false
 
@@ -25,4 +28,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.send-installment-reminder]
+verify_jwt = false
+
+[functions.send-refund-status-email]
 verify_jwt = false

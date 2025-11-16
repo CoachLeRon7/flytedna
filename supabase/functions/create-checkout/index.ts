@@ -10,6 +10,8 @@ const corsHeaders = {
 interface CheckoutRequest {
   package_id: string;
   payment_type: "full_payment" | "payment_plan";
+  coupon_code?: string;
+  metadata?: Record<string, any>;
 }
 
 serve(async (req) => {
@@ -44,13 +46,13 @@ serve(async (req) => {
 
     // Parse request body
     const body: CheckoutRequest = await req.json();
-    const { package_id, payment_type = "full_payment" } = body;
+    const { package_id, payment_type = "full_payment", coupon_code, metadata } = body;
 
     if (!package_id) {
       throw new Error("package_id is required");
     }
 
-    console.log("[create-checkout] Request:", { package_id, payment_type });
+    console.log("[create-checkout] Request:", { package_id, payment_type, coupon_code });
 
     // Fetch package details
     const { data: packageData, error: packageError } = await supabaseClient
@@ -84,8 +86,67 @@ serve(async (req) => {
       console.log("[create-checkout] Existing customer found:", customerId);
     }
 
+    // Validate and apply coupon if provided
+    let couponData: any = null;
+    let discountAmountCents = 0;
+
+    if (coupon_code) {
+      const { data: coupon, error: couponError } = await supabaseClient
+        .from("coupon_codes")
+        .select("*")
+        .eq("code", coupon_code.toUpperCase())
+        .eq("is_active", true)
+        .single();
+
+      if (!coupon || couponError) {
+        throw new Error("Invalid coupon code");
+      }
+
+      // Check expiration
+      if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
+        throw new Error("Coupon has expired");
+      }
+
+      // Check max uses
+      if (coupon.max_uses && coupon.current_uses >= coupon.max_uses) {
+        throw new Error("Coupon usage limit reached");
+      }
+
+      // Check if applicable to package
+      const isApplicable = coupon.applicable_packages.length === 0 || 
+                           coupon.applicable_packages.includes(packageData.slug) ||
+                           coupon.applicable_packages.includes(package_id);
+
+      if (!isApplicable) {
+        throw new Error("Coupon not applicable to this package");
+      }
+
+      // Check if user already used this coupon
+      const { data: existingUsage } = await supabaseClient
+        .from("coupon_usage")
+        .select("id")
+        .eq("coupon_id", coupon.id)
+        .eq("user_id", user.id)
+        .single();
+
+      if (existingUsage) {
+        throw new Error("You have already used this coupon");
+      }
+
+      couponData = coupon;
+
+      // Calculate discount
+      if (coupon.discount_type === "percentage") {
+        discountAmountCents = Math.floor((packageData.base_price_cents * coupon.discount_value) / 100);
+      } else {
+        discountAmountCents = coupon.discount_value;
+      }
+
+      console.log("[create-checkout] Coupon applied:", { code: coupon.code, discount: discountAmountCents });
+    }
+
     // Calculate amounts
-    const totalAmount = packageData.base_price_cents;
+    const totalAmount = packageData.base_price_cents - discountAmountCents;
     let initialPayment = totalAmount;
     
     if (payment_type === "payment_plan" && packageData.payment_plan_config) {
@@ -113,6 +174,12 @@ serve(async (req) => {
         metadata: {
           payment_type,
           package_name: packageData.name,
+          ...(couponData && {
+            coupon_code: couponData.code,
+            coupon_discount_cents: discountAmountCents,
+            original_price_cents: packageData.base_price_cents,
+          }),
+          ...(metadata || {}),
         },
       })
       .select()
@@ -190,6 +257,11 @@ serve(async (req) => {
         package_id: package_id,
         user_id: user.id,
         payment_type: payment_type,
+        ...(couponData && {
+          coupon_code: couponData.code,
+          coupon_id: couponData.id,
+          discount_applied_cents: discountAmountCents,
+        }),
       },
     };
 
@@ -204,6 +276,38 @@ serve(async (req) => {
 
     if (updateError) {
       console.error("[create-checkout] Failed to update purchase:", updateError);
+    }
+
+    // Track coupon usage if coupon was applied
+    if (couponData) {
+      // Record coupon usage
+      const { error: usageError } = await supabaseClient
+        .from("coupon_usage")
+        .insert({
+          coupon_id: couponData.id,
+          user_id: user.id,
+          purchase_id: purchase.id,
+          discount_applied_cents: discountAmountCents,
+        });
+
+      if (usageError) {
+        console.error("[create-checkout] Failed to record coupon usage:", usageError);
+      }
+
+      // Increment coupon usage counter
+      const { error: incrementError } = await supabaseClient
+        .from("coupon_codes")
+        .update({ current_uses: couponData.current_uses + 1 })
+        .eq("id", couponData.id);
+
+      if (incrementError) {
+        console.error("[create-checkout] Failed to increment coupon usage:", incrementError);
+      }
+
+      console.log("[create-checkout] Coupon usage tracked:", { 
+        coupon_id: couponData.id, 
+        discount: discountAmountCents 
+      });
     }
 
     return new Response(

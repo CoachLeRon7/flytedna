@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, TrendingUp, AlertTriangle, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Activity, TrendingUp, AlertTriangle, Clock, Database, Trash2, TrendingDown } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   BarChart,
   Bar,
@@ -39,7 +41,7 @@ export const PerformanceDashboard = () => {
   const [timeRange, setTimeRange] = useState<'1h' | '24h' | '7d'>('24h');
 
   // Fetch performance metrics
-  const { data: metrics, isLoading } = useQuery({
+  const { data: metrics, isLoading, refetch } = useQuery({
     queryKey: ['performance-metrics', timeRange],
     queryFn: async () => {
       const now = new Date();
@@ -60,6 +62,17 @@ export const PerformanceDashboard = () => {
     },
     refetchInterval: 30000, // Refresh every 30 seconds
   });
+
+  const handleManualCleanup = async () => {
+    try {
+      const { data, error } = await supabase.rpc('cleanup_old_performance_metrics', { retention_days: 30 });
+      if (error) throw error;
+      toast.success(`Cleaned up ${data} old performance metrics`);
+      refetch();
+    } catch (error: any) {
+      toast.error(`Cleanup failed: ${error.message}`);
+    }
+  };
 
   // Calculate statistics
   const stats: OperationStats[] = metrics
@@ -155,6 +168,37 @@ export const PerformanceDashboard = () => {
           ))}
         </div>
       </div>
+
+      {/* Retention Policy Card */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Database className="h-5 w-5 text-muted-foreground" />
+              <CardTitle>Data Retention Policy</CardTitle>
+            </div>
+            <Button onClick={handleManualCleanup} variant="outline" size="sm">
+              <Trash2 className="h-4 w-4 mr-2" />
+              Clean Up Now
+            </Button>
+          </div>
+          <CardDescription>
+            Automated cleanup runs daily at 2 AM UTC • Metrics older than 30 days are automatically archived
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              <span>Retention: 30 days</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <TrendingDown className="h-4 w-4" />
+              <span>Auto-cleanup: Enabled</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Overview Cards */}
       <div className="grid gap-4 md:grid-cols-4">

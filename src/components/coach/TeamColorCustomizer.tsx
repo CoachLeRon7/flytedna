@@ -6,6 +6,13 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Palette, Save } from "lucide-react";
+import { z } from "zod";
+
+const colorSchema = z.object({
+  primary_color: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Invalid hex color format"),
+  secondary_color: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Invalid hex color format"),
+  institution: z.string().max(255, "Institution name too long").optional(),
+});
 
 interface Team {
   id: string;
@@ -52,6 +59,23 @@ export const TeamColorCustomizer = ({ teamId }: { teamId: string }) => {
 
   const handleSave = async () => {
     setLoading(true);
+
+    // Validate colors
+    try {
+      colorSchema.parse({
+        primary_color: primaryColor,
+        secondary_color: secondaryColor,
+        institution: institution || undefined,
+      });
+    } catch (error) {
+      toast({
+        title: "Invalid input",
+        description: error instanceof Error ? error.message : "Invalid color format",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
 
     const { error } = await supabase
       .from("teams")

@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Users, CheckCircle2 } from "lucide-react";
+import { z } from "zod";
 
 interface Team {
   id: string;
@@ -12,6 +13,10 @@ interface Team {
   sport: string;
   institution: string | null;
 }
+
+const teamSelectionSchema = z.object({
+  team_id: z.string().uuid("Invalid team ID"),
+});
 
 export const TeamSelector = ({ currentTeamId, onTeamSelected }: { currentTeamId: string | null; onTeamSelected: () => void }) => {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -43,6 +48,18 @@ export const TeamSelector = ({ currentTeamId, onTeamSelected }: { currentTeamId:
 
   const handleJoinTeam = async () => {
     if (!selectedTeamId) return;
+
+    // Validate team_id
+    try {
+      teamSelectionSchema.parse({ team_id: selectedTeamId });
+    } catch (error) {
+      toast({
+        title: "Invalid team selection",
+        description: "Please select a valid team",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();

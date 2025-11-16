@@ -56,7 +56,13 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-hero opacity-90" />
         
         <div className="relative z-10 container mx-auto px-4 text-center">
-          <img src={logo} alt="FLY.TE Academy Logo" width="288" height="288" className="h-48 md:h-72 w-auto mx-auto mb-3 mt-4 md:mt-0 animate-fade-in" />
+          <img 
+            src={logo} 
+            alt="FLY.TE Academy Logo" 
+            width="400" 
+            height="400" 
+            className="h-56 md:h-96 w-auto mx-auto mb-6 md:mb-8 mt-4 md:mt-0 animate-fade-in drop-shadow-[0_0_25px_rgba(251,191,36,0.5)] hover:drop-shadow-[0_0_35px_rgba(251,191,36,0.7)] transition-all duration-300" 
+          />
           <h1 className="text-3xl md:text-6xl font-bold text-primary-foreground mb-3 md:mb-6 animate-fade-in">
             Where Leadership Potential Transforms Into Leadership Power
           </h1>

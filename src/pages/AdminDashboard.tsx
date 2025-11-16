@@ -34,6 +34,7 @@ import { JoinRequestsManager } from "@/components/admin/JoinRequestsManager";
 import { PerformanceDashboard } from "@/components/admin/PerformanceDashboard";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
 import { RefundRequestsManager } from "@/components/admin/RefundRequestsManager";
+import { CouponCodesManager } from "@/components/admin/CouponCodesManager";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -440,6 +441,7 @@ export default function AdminDashboard() {
                 <TabsTrigger value="invitations">Invite Users</TabsTrigger>
                 <TabsTrigger value="join-requests">Join Requests</TabsTrigger>
                 <TabsTrigger value="refunds">Refund Requests</TabsTrigger>
+                <TabsTrigger value="coupons">Coupon Codes</TabsTrigger>
                 <TabsTrigger value="system">System</TabsTrigger>
               </TabsList>
 
@@ -464,6 +466,12 @@ export default function AdminDashboard() {
               <TabsContent value="refunds">
                 <SectionErrorBoundary title="Refund Requests Error">
                   <RefundRequestsManager />
+                </SectionErrorBoundary>
+              </TabsContent>
+
+              <TabsContent value="coupons">
+                <SectionErrorBoundary title="Coupon Codes Error">
+                  <CouponCodesManager />
                 </SectionErrorBoundary>
               </TabsContent>
 

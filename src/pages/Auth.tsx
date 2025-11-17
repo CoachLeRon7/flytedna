@@ -50,6 +50,7 @@ const signUpSchema = z.object({
     },
     { message: "Please enter a valid date of birth" }
   ),
+  referralSource: z.string().trim().max(200, "Referral source must be less than 200 characters").optional(),
 });
 
 const Auth = () => {
@@ -73,6 +74,7 @@ const Auth = () => {
     role: "student" as "student" | "coach" | "admin",
     sport: "",
     dateOfBirth: "",
+    referralSource: "",
   });
 
   const [signInData, setSignInData] = useState({
@@ -126,6 +128,7 @@ const Auth = () => {
             role: signUpData.role,
             sport: signUpData.sport?.trim() || null,
             date_of_birth: signUpData.dateOfBirth,
+            referral_source: signUpData.referralSource?.trim() || null,
           },
         },
       });
@@ -572,6 +575,48 @@ const Auth = () => {
                     Used for age-appropriate leadership development tracking
                   </p>
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="referral-source">How did you hear about us?</Label>
+                  <Select
+                    value={signUpData.referralSource}
+                    onValueChange={(value) =>
+                      setSignUpData({ ...signUpData, referralSource: value })
+                    }
+                  >
+                    <SelectTrigger id="referral-source">
+                      <SelectValue placeholder="Select an option..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Coach/Mentor">Coach or Mentor</SelectItem>
+                      <SelectItem value="Friend/Teammate">Friend or Teammate</SelectItem>
+                      <SelectItem value="Social Media">Social Media (Instagram, Twitter, etc.)</SelectItem>
+                      <SelectItem value="School/Organization">School or Organization</SelectItem>
+                      <SelectItem value="Search Engine">Search Engine (Google, etc.)</SelectItem>
+                      <SelectItem value="Advertisement">Advertisement</SelectItem>
+                      <SelectItem value="Conference/Event">Conference or Event</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Help us understand how athletes discover FLDI
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="pilot-code">Pilot Invitation Code (Optional)</Label>
+                  <Input
+                    id="pilot-code"
+                    placeholder="PILOT-XXX-XXX"
+                    value={pilotCode}
+                    onChange={(e) => setPilotCode(e.target.value.trim().toUpperCase())}
+                    maxLength={15}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Have a pilot invitation? Enter your code here for 90 days of free access.
+                  </p>
+                </div>
+
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? (
                     <>

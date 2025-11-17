@@ -1332,6 +1332,7 @@ export type Database = {
           login_count: number | null
           pilot_code_used: string | null
           pilot_started_at: string | null
+          referral_source: string | null
           registration_type: string | null
           sport: string | null
           team_id: string | null
@@ -1349,6 +1350,7 @@ export type Database = {
           login_count?: number | null
           pilot_code_used?: string | null
           pilot_started_at?: string | null
+          referral_source?: string | null
           registration_type?: string | null
           sport?: string | null
           team_id?: string | null
@@ -1366,6 +1368,7 @@ export type Database = {
           login_count?: number | null
           pilot_code_used?: string | null
           pilot_started_at?: string | null
+          referral_source?: string | null
           registration_type?: string | null
           sport?: string | null
           team_id?: string | null

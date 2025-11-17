@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Save } from "lucide-react";
 import { Form } from "@/components/ui/form";
 import { getUserFriendlyError } from "@/lib/errorHandling";
+import { AccessGate } from "@/components/AccessGate";
 
 const assessmentSchema = z.object({
   semester_label: z.string().min(1, "Semester label is required"),
@@ -350,45 +351,47 @@ const Assessment = () => {
   }
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <AssessmentHeader />
-      
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <AssessmentStepper currentStep={currentStep} steps={STEPS} />
+    <AccessGate requireAccess={true}>
+      <div className="min-h-screen bg-muted/30">
+        <AssessmentHeader />
+        
+        <main className="container mx-auto px-4 py-8 max-w-4xl">
+          <AssessmentStepper currentStep={currentStep} steps={STEPS} />
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8">
-            <div className="bg-card rounded-lg shadow-card p-8">
-              {renderStepContent()}
-            </div>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8">
+              <div className="bg-card rounded-lg shadow-card p-8">
+                {renderStepContent()}
+              </div>
 
-            <div className="flex justify-between mt-8">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handlePrevious}
-                disabled={currentStep === 0}
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Previous
-              </Button>
-
-              {currentStep < STEPS.length - 1 ? (
-                <Button type="button" onClick={handleNext}>
-                  Save and Continue
-                  <ArrowRight className="ml-2 h-4 w-4" />
+              <div className="flex justify-between mt-8">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handlePrevious}
+                  disabled={currentStep === 0}
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Previous
                 </Button>
-              ) : (
-                <Button type="submit" disabled={isSubmitting}>
-                  <Save className="mr-2 h-4 w-4" />
-                  {isSubmitting ? "Submitting..." : "Submit Assessment"}
-                </Button>
-              )}
-            </div>
-          </form>
-        </Form>
-      </main>
-    </div>
+
+                {currentStep < STEPS.length - 1 ? (
+                  <Button type="button" onClick={handleNext}>
+                    Save and Continue
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button type="submit" disabled={isSubmitting}>
+                    <Save className="mr-2 h-4 w-4" />
+                    {isSubmitting ? "Submitting..." : "Submit Assessment"}
+                  </Button>
+                )}
+              </div>
+            </form>
+          </Form>
+        </main>
+      </div>
+    </AccessGate>
   );
 };
 

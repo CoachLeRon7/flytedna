@@ -63,6 +63,8 @@ const Auth = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const [pilotCode, setPilotCode] = useState("");
+
   const [signUpData, setSignUpData] = useState({
     email: "",
     password: "",
@@ -78,13 +80,20 @@ const Auth = () => {
     password: "",
   });
 
-  // Check if user is coming from password reset email
+  // Check if user is coming from password reset email or has pilot code in URL
   useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const type = hashParams.get('type');
     
     if (type === 'recovery') {
       setIsPasswordReset(true);
+    }
+
+    // Check for pilot code in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const pilotCodeFromUrl = urlParams.get('pilot');
+    if (pilotCodeFromUrl) {
+      setPilotCode(pilotCodeFromUrl.toUpperCase());
     }
   }, []);
 
@@ -122,6 +131,38 @@ const Auth = () => {
       });
 
       if (error) throw error;
+
+      // Handle pilot code if provided
+      if (pilotCode) {
+        try {
+          const { data: pilotResult, error: pilotError } = await supabase.rpc(
+            'validate_and_consume_pilot_code',
+            { 
+              _code: pilotCode, 
+              _user_id: data.user.id 
+            }
+          );
+
+          if (pilotError) throw pilotError;
+          
+          const result = pilotResult as any;
+          if (result.success) {
+            toast({
+              title: "🎉 Pilot Access Granted!",
+              description: "You have 90 days of full access to the FLDI platform. Welcome!",
+            });
+          } else {
+            toast({
+              title: "Invalid Pilot Code",
+              description: result.message,
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          console.error('Pilot code error:', error);
+          // Don't block signup if pilot validation fails
+        }
+      }
 
       const roleMessage = (() => {
         if (signUpData.role === 'student') {

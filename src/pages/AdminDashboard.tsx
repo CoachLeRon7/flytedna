@@ -35,6 +35,7 @@ import { PerformanceDashboard } from "@/components/admin/PerformanceDashboard";
 import { SectionErrorBoundary } from "@/components/SectionErrorBoundary";
 import { RefundRequestsManager } from "@/components/admin/RefundRequestsManager";
 import { CouponCodesManager } from "@/components/admin/CouponCodesManager";
+import { PilotInvitationManager } from "@/components/admin/PilotInvitationManager";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -381,6 +382,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="users">User Management</TabsTrigger>
             {isSuperAdmin && <TabsTrigger value="organizations">Organizations</TabsTrigger>}
+            <TabsTrigger value="pilot">Pilot Program</TabsTrigger>
             <TabsTrigger value="management">System Management</TabsTrigger>
             <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="export">Export Center</TabsTrigger>
@@ -433,6 +435,12 @@ export default function AdminDashboard() {
               </SectionErrorBoundary>
             </TabsContent>
           )}
+
+          <TabsContent value="pilot" className="space-y-6">
+            <SectionErrorBoundary title="Pilot Program Error">
+              <PilotInvitationManager />
+            </SectionErrorBoundary>
+          </TabsContent>
 
           <TabsContent value="management" className="space-y-6">
             <Tabs defaultValue="role-requests" className="space-y-6">

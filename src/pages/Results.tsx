@@ -16,11 +16,16 @@ import { PeerFeedbackSection } from "@/components/student/PeerFeedbackSection";
 import { DomainBreakdownTable } from "@/components/student/DomainBreakdownTable";
 import { DomainExplanationCard } from "@/components/student/DomainExplanationCard";
 import { TrendAnalysisCard } from "@/components/student/TrendAnalysisCard";
+import { PilotExpirationBanner } from "@/components/PilotExpirationBanner";
+import { usePackageAccess } from "@/hooks/usePackageAccess";
+import { Info } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const Results = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { accessStatus } = usePackageAccess();
   const assessmentId = searchParams.get("assessment_id");
   const [assessment, setAssessment] = useState<any>(null);
   const [previousAssessment, setPreviousAssessment] = useState<any>(null);
@@ -351,6 +356,27 @@ const Results = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-7xl">
+        <PilotExpirationBanner />
+
+        {accessStatus?.status === 'expired' && (
+          <Alert className="mb-6">
+            <Info className="h-4 w-4" />
+            <AlertTitle>Viewing Historical Data</AlertTitle>
+            <AlertDescription>
+              {accessStatus.isPilot 
+                ? 'Your pilot access has expired. You can view your past assessments, but creating new ones requires a membership.'
+                : 'Your membership has expired. You can view your past assessments, but creating new ones requires an active membership.'}
+              <Button 
+                variant="link" 
+                onClick={() => navigate('/pricing')}
+                className="p-0 h-auto ml-1"
+              >
+                Upgrade to continue
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-4">Your Leadership Summary</h1>
           <p className="text-muted-foreground">

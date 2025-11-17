@@ -53,7 +53,7 @@ const Index = () => {
           className="absolute inset-0 w-full h-full object-cover"
           fetchPriority="high"
         />
-        <div className="absolute inset-0 bg-black opacity-90" />
+        <div className="absolute inset-0 bg-black opacity-50" />
         
         <div className="relative z-10 container mx-auto px-4 text-center">
           <img 

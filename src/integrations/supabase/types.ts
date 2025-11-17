@@ -1283,6 +1283,42 @@ export type Database = {
         }
         Relationships: []
       }
+      pilot_invitations: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          current_uses: number | null
+          expires_at: string | null
+          id: string
+          invitation_code: string
+          is_active: boolean | null
+          max_uses: number | null
+          notes: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          current_uses?: number | null
+          expires_at?: string | null
+          id?: string
+          invitation_code: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          notes?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          current_uses?: number | null
+          expires_at?: string | null
+          id?: string
+          invitation_code?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          notes?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -1294,6 +1330,8 @@ export type Database = {
           last_login_at: string | null
           last_name: string
           login_count: number | null
+          pilot_code_used: string | null
+          pilot_started_at: string | null
           registration_type: string | null
           sport: string | null
           team_id: string | null
@@ -1309,6 +1347,8 @@ export type Database = {
           last_login_at?: string | null
           last_name: string
           login_count?: number | null
+          pilot_code_used?: string | null
+          pilot_started_at?: string | null
           registration_type?: string | null
           sport?: string | null
           team_id?: string | null
@@ -1324,6 +1364,8 @@ export type Database = {
           last_login_at?: string | null
           last_name?: string
           login_count?: number | null
+          pilot_code_used?: string | null
+          pilot_started_at?: string | null
           registration_type?: string | null
           sport?: string | null
           team_id?: string | null
@@ -1342,6 +1384,7 @@ export type Database = {
       purchases: {
         Row: {
           amount_paid_cents: number | null
+          converted_from_pilot: boolean | null
           created_at: string | null
           id: string
           membership_end_date: string | null
@@ -1360,6 +1403,7 @@ export type Database = {
         }
         Insert: {
           amount_paid_cents?: number | null
+          converted_from_pilot?: boolean | null
           created_at?: string | null
           id?: string
           membership_end_date?: string | null
@@ -1378,6 +1422,7 @@ export type Database = {
         }
         Update: {
           amount_paid_cents?: number | null
+          converted_from_pilot?: boolean | null
           created_at?: string | null
           id?: string
           membership_end_date?: string | null
@@ -1837,6 +1882,11 @@ export type Database = {
         Args: { retention_days?: number }
         Returns: number
       }
+      extend_pilot_period: {
+        Args: { _additional_days: number; _user_id: string }
+        Returns: Json
+      }
+      generate_pilot_code: { Args: never; Returns: string }
       get_teammates_for_peer_assessment: {
         Args: {
           _semester_label: string
@@ -1849,6 +1899,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_user_access_status: { Args: { _user_id: string }; Returns: Json }
       get_user_organizations: { Args: { _user_id: string }; Returns: string[] }
       get_user_role: {
         Args: { _user_id: string }
@@ -1857,6 +1908,10 @@ export type Database = {
       get_user_roles: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"][]
+      }
+      has_active_package_access: {
+        Args: { _user_id: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
@@ -1934,6 +1989,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      validate_and_consume_pilot_code: {
+        Args: { _code: string; _user_id: string }
+        Returns: Json
       }
     }
     Enums: {

@@ -42,6 +42,7 @@ export default function Pricing() {
         .from("packages")
         .select("*")
         .eq("is_active", true)
+        .gte("display_order", 0)
         .order("display_order");
       
       if (error) throw error;

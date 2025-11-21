@@ -71,7 +71,16 @@ serve(async (req) => {
       throw new Error("This package does not support payment plans");
     }
 
-    console.log("[create-checkout] Package found:", packageData.name);
+    // Validate Price ID exists for full payments
+    if (payment_type === "full_payment" && !packageData.stripe_price_id) {
+      throw new Error(`Package "${packageData.name}" does not have a Stripe Price ID configured`);
+    }
+
+    console.log("[create-checkout] Package found:", {
+      name: packageData.name,
+      price_id: packageData.stripe_price_id,
+      payment_type
+    });
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -233,21 +242,24 @@ serve(async (req) => {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            unit_amount: initialPayment,
-            product_data: {
-              name: payment_type === "payment_plan" 
-                ? `${packageData.name} - Down Payment`
-                : packageData.name,
-              description: payment_type === "payment_plan"
-                ? `Initial payment for ${packageData.name}`
-                : packageData.description,
-            },
-          },
-          quantity: 1,
-        },
+        payment_type === "payment_plan" 
+          ? {
+              // For payment plans, use price_data for flexible down payment amounts
+              price_data: {
+                currency: "usd",
+                unit_amount: initialPayment,
+                product_data: {
+                  name: `${packageData.name} - Down Payment`,
+                  description: `Initial payment for ${packageData.name}`,
+                },
+              },
+              quantity: 1,
+            }
+          : {
+              // For full payments, use the Price ID from Stripe
+              price: packageData.stripe_price_id!,
+              quantity: 1,
+            }
       ],
       mode: "payment",
       success_url: `${origin}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -266,7 +278,13 @@ serve(async (req) => {
     };
 
     const session = await stripe.checkout.sessions.create(sessionParams);
-    console.log("[create-checkout] Checkout session created:", session.id);
+    console.log("[create-checkout] Checkout session created:", {
+      session_id: session.id,
+      payment_type,
+      amount: initialPayment,
+      used_price_id: payment_type === "full_payment",
+      price_id: payment_type === "full_payment" ? packageData.stripe_price_id : null
+    });
 
     // Update purchase with checkout session ID
     const { error: updateError } = await supabaseClient

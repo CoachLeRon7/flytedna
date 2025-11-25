@@ -46,7 +46,7 @@ serve(async (req) => {
     let event: Stripe.Event;
 
     try {
-      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+      event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
       checkpoint(perfTimer, 'event_verified');
       logInfo("Event verified", { event_type: event.type }, requestId);
     } catch (err) {

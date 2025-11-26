@@ -5,14 +5,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Download, Calendar, FileText, Shield } from "lucide-react";
+import { CheckCircle2, Download, Calendar, FileText, Shield, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get("session_id");
+  const [retryCount, setRetryCount] = useState(0);
 
-  const { data: purchase, isLoading } = useQuery({
+  const { data: purchase, isLoading, refetch } = useQuery({
     queryKey: ["purchase", sessionId],
     queryFn: async () => {
       if (!sessionId) throw new Error("No session ID");
@@ -32,7 +34,27 @@ export default function PaymentSuccess() {
       return data;
     },
     enabled: !!sessionId,
+    refetchInterval: (query) => {
+      // If purchase is still pending and we haven't retried too many times, keep polling
+      const data = query.state.data;
+      if (data && data.status === "pending" && retryCount < 10) {
+        return 3000; // Poll every 3 seconds
+      }
+      return false; // Stop polling
+    },
   });
+
+  // Track retry attempts
+  useEffect(() => {
+    if (purchase?.status === "pending") {
+      setRetryCount(prev => prev + 1);
+    }
+  }, [purchase?.status]);
+
+  const handleManualRefresh = async () => {
+    toast.info("Checking payment status...");
+    await refetch();
+  };
 
   const formatPrice = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 
@@ -48,8 +70,23 @@ export default function PaymentSuccess() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card className="max-w-md">
-          <CardContent className="pt-6">
-            <p className="text-center text-muted-foreground">Purchase not found</p>
+          <CardHeader>
+            <CardTitle>Purchase Not Found</CardTitle>
+            <CardDescription>
+              We couldn't locate your purchase. This might happen if the payment is still processing.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Your payment was received, but it may take a few moments for our system to process it.
+            </p>
+            <Button onClick={handleManualRefresh} className="w-full">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Check Status
+            </Button>
+            <p className="text-xs text-center text-muted-foreground">
+              If the issue persists, please contact support@flyteacademy.com
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -61,22 +98,48 @@ export default function PaymentSuccess() {
   const packageAccess = (purchase.package_access || []) as any[];
   const hasActiveAccess = packageAccess.some((access: any) => access.is_active);
   const isFullyPaid = purchase.status === "completed";
+  const isPending = purchase.status === "pending";
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-20">
       <div className="container mx-auto px-4 max-w-3xl">
+        {/* Processing Notice */}
+        {isPending && (
+          <Card className="mb-6 border-amber-500/20 bg-amber-500/5">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-amber-500"></div>
+                  <div>
+                    <p className="font-semibold text-amber-700 dark:text-amber-400">Payment Processing</p>
+                    <p className="text-sm text-muted-foreground">
+                      Your payment was received and is being processed. This usually takes just a few seconds.
+                    </p>
+                  </div>
+                </div>
+                <Button onClick={handleManualRefresh} variant="outline" size="sm">
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Refresh
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Success Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-4">
             <CheckCircle2 className="h-12 w-12 text-primary" />
           </div>
-          <h1 className="text-4xl font-bold mb-2">Payment Successful!</h1>
+          <h1 className="text-4xl font-bold mb-2">
+            {isFullyPaid ? "Payment Successful!" : "Payment Received!"}
+          </h1>
           <p className="text-xl text-muted-foreground">
             Welcome to {pkg.name}
           </p>
           {!isFullyPaid && (
             <Badge variant="outline" className="mt-2">
-              Payment Plan Active
+              {isPending ? "Processing" : "Payment Plan Active"}
             </Badge>
           )}
         </div>

@@ -11,7 +11,11 @@ export const maskEmail = (email: string) => {
   return `${user.substring(0, 2)}***@${domain}`;
 };
 
-export const maskUserId = (id: string) => id ? `${id.substring(0, 8)}***` : '[NO_ID]';
+export const maskUserId = (id: any) => {
+  if (!id) return '[NO_ID]';
+  const idStr = String(id);
+  return `${idStr.substring(0, 8)}***`;
+};
 
 export const maskName = () => '[NAME_REDACTED]';
 
@@ -20,7 +24,11 @@ export const maskAmount = (amount: number | string) => {
   return '[AMOUNT_REDACTED]';
 };
 
-export const maskPaymentId = (id: string) => id ? `${id.substring(0, 12)}***` : '[NO_ID]';
+export const maskPaymentId = (id: any) => {
+  if (!id) return '[NO_ID]';
+  const idStr = String(id);
+  return `${idStr.substring(0, 12)}***`;
+};
 
 // Structured error logging - only logs error codes in production
 export const logError = (context: string, error: any, requestId?: string) => {

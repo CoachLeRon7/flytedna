@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertTriangle } from "lucide-react";
 import logo from "@/assets/flyte-academy-logo.png";
 import { z } from "zod";
 import { getUserFriendlyError } from "@/lib/errorHandling";
@@ -23,6 +23,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useActivityLogger } from "@/hooks/useActivityLogger";
+import { Badge } from "@/components/ui/badge";
 
 // Validation schemas
 const signInSchema = z.object({
@@ -137,34 +138,62 @@ const Auth = () => {
 
       // Handle pilot code if provided
       if (pilotCode) {
-        try {
-          const { data: pilotResult, error: pilotError } = await supabase.rpc(
-            'validate_and_consume_pilot_code',
-            { 
-              _code: pilotCode, 
-              _user_id: data.user.id 
-            }
-          );
+        const validatePilotCode = async (attempt = 1): Promise<boolean> => {
+          try {
+            console.log(`[Pilot Code] Attempt ${attempt}: Validating code ${pilotCode} for user ${data.user.id}`);
+            
+            const { data: pilotResult, error: pilotError } = await supabase.rpc(
+              'validate_and_consume_pilot_code',
+              { 
+                _code: pilotCode, 
+                _user_id: data.user.id 
+              }
+            );
 
-          if (pilotError) throw pilotError;
-          
-          const result = pilotResult as any;
-          if (result.success) {
+            if (pilotError) {
+              console.error(`[Pilot Code] Attempt ${attempt} failed:`, pilotError);
+              throw pilotError;
+            }
+            
+            const result = pilotResult as any;
+            console.log(`[Pilot Code] Attempt ${attempt} result:`, result);
+            
+            if (result.success) {
+              toast({
+                title: "🎉 Pilot Access Granted!",
+                description: "You have 90 days of full access to the FLDI platform. Welcome!",
+              });
+              return true;
+            } else {
+              toast({
+                title: "Invalid Pilot Code",
+                description: result.message,
+                variant: "destructive",
+              });
+              return false;
+            }
+          } catch (error) {
+            console.error(`[Pilot Code] Attempt ${attempt} error:`, error);
+            
+            // Retry once if first attempt fails
+            if (attempt === 1) {
+              console.log('[Pilot Code] Retrying pilot code validation...');
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              return validatePilotCode(2);
+            }
+            
+            // Show warning toast on final failure
             toast({
-              title: "🎉 Pilot Access Granted!",
-              description: "You have 90 days of full access to the FLDI platform. Welcome!",
-            });
-          } else {
-            toast({
-              title: "Invalid Pilot Code",
-              description: result.message,
+              title: "Pilot Code Validation Failed",
+              description: "Unable to apply pilot code. Please contact support if you have a valid code.",
               variant: "destructive",
             });
+            console.error('[Pilot Code] Final validation failed after retry:', error);
+            return false;
           }
-        } catch (error) {
-          console.error('Pilot code error:', error);
-          // Don't block signup if pilot validation fails
-        }
+        };
+
+        await validatePilotCode();
       }
 
       const roleMessage = (() => {
@@ -604,17 +633,34 @@ const Auth = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="pilot-code">Pilot Invitation Code (Optional)</Label>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="pilot-code">Pilot Invitation Code</Label>
+                    {pilotCode && (
+                      <Badge variant="secondary" className="text-xs">
+                        Code Applied
+                      </Badge>
+                    )}
+                  </div>
                   <Input
                     id="pilot-code"
                     placeholder="PILOT-XXX-XXX"
                     value={pilotCode}
                     onChange={(e) => setPilotCode(e.target.value.trim().toUpperCase())}
                     maxLength={15}
+                    className={pilotCode ? "border-primary" : ""}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Have a pilot invitation? Enter your code here for 90 days of free access.
-                  </p>
+                  {pilotCode ? (
+                    <div className="flex items-start gap-2 text-xs text-primary">
+                      <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                      <p>
+                        Pilot code <strong>{pilotCode}</strong> will be validated after signup. You'll receive 90 days of free access if valid.
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      Have a pilot invitation? Enter your code here for 90 days of free access.
+                    </p>
+                  )}
                 </div>
 
                 <Button type="submit" className="w-full" disabled={loading}>

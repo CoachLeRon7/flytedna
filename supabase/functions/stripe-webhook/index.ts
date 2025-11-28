@@ -17,6 +17,10 @@ serve(async (req) => {
 
   const signature = req.headers.get("stripe-signature");
   const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+  if (!signature || !webhookSecret) {
+    logError("Missing stripe-signature header or webhook secret", new Error("No signature"), requestId);
+    return new Response("Missing stripe-signature header", { status: 400 });
+  }
 
   if (!signature || !webhookSecret) {
     logError("Configuration error - missing signature or secret", undefined, requestId);
@@ -231,9 +235,9 @@ serve(async (req) => {
                     isFullPayment: isFullyPaid,
                   },
                 });
-                console.log("[stripe-webhook] Installment confirmation email sent");
+                logInfo("Installment confirmation email sent", {}, requestId);
               } catch (emailError) {
-                console.error("[stripe-webhook] Failed to send installment email:", emailError);
+                logError("Failed to send installment confirmation email", emailError, requestId);
               }
             }
           }

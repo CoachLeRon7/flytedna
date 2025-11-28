@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { generateRequestId, logInfo, logError, maskEmail } from "../_shared/logging.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
@@ -25,12 +26,14 @@ const formatDate = (date: string) => {
 };
 
 serve(async (req) => {
+  const requestId = generateRequestId();
+  
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log("[send-installment-reminder] Function invoked");
+    logInfo("Function invoked", {}, requestId);
 
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -67,7 +70,7 @@ serve(async (req) => {
     }
 
     if (!upcomingInstallments || upcomingInstallments.length === 0) {
-      console.log("[send-installment-reminder] No upcoming installments found");
+      logInfo("No upcoming installments found", {}, requestId);
       return new Response(
         JSON.stringify({ message: "No upcoming installments to remind" }),
         {
@@ -77,12 +80,12 @@ serve(async (req) => {
       );
     }
 
-    console.log(`[send-installment-reminder] Found ${upcomingInstallments.length} installments to remind`);
+    logInfo("Found installments to remind", { count: upcomingInstallments.length }, requestId);
 
     const emailPromises = upcomingInstallments.map(async (installment: any) => {
       const purchase = installment.purchases;
       if (!purchase || !purchase.user_id) {
-        console.error("[send-installment-reminder] Invalid purchase data for installment:", installment.id);
+        logError("Invalid purchase data for installment", { installmentId: installment.id }, requestId);
         return null;
       }
 
@@ -94,7 +97,7 @@ serve(async (req) => {
         .single();
 
       if (profileError || !profile) {
-        console.error("[send-installment-reminder] User profile not found:", purchase.user_id);
+        logError("User profile not found", { userId: purchase.user_id }, requestId);
         return null;
       }
 
@@ -197,14 +200,14 @@ serve(async (req) => {
         const result = await response.json();
 
         if (!response.ok) {
-          console.error("[send-installment-reminder] Resend error for installment:", installment.id, result);
+          logError("Resend error for installment", { installmentId: installment.id, error: result }, requestId);
           return null;
         }
 
-        console.log("[send-installment-reminder] Email sent to:", profile.email);
+        logInfo("Email sent", { email: maskEmail(profile.email) }, requestId);
         return { installmentId: installment.id, emailId: result?.id || "sent" };
       } catch (error: any) {
-        console.error("[send-installment-reminder] Error sending email:", error);
+        logError("Error sending email", error, requestId);
         return null;
       }
     });
@@ -212,7 +215,7 @@ serve(async (req) => {
     const results = await Promise.all(emailPromises);
     const successful = results.filter((r) => r !== null);
 
-    console.log(`[send-installment-reminder] Sent ${successful.length} reminder emails`);
+    logInfo("Reminder emails sent", { count: successful.length }, requestId);
 
     return new Response(
       JSON.stringify({
@@ -226,7 +229,7 @@ serve(async (req) => {
       }
     );
   } catch (error: any) {
-    console.error("[send-installment-reminder] Error:", error);
+    logError("Error in reminder function", error, requestId);
     return new Response(
       JSON.stringify({ error: error.message }),
       {

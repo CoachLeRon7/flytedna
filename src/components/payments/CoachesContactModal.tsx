@@ -82,19 +82,21 @@ export function CoachesContactModal({ open, onOpenChange }: CoachesContactModalP
 
   const onSubmit = async (data: CoachInquiryFormData) => {
     try {
-      const { error } = await supabase.from("coaches_inquiries").insert({
-        coach_name: data.coach_name,
-        coach_email: data.coach_email,
-        phone_number: data.phone_number || null,
-        organization_name: data.organization_name,
-        sport: data.sport,
-        team_size: parseInt(data.team_size),
-        program_type: data.program_type,
-        message: data.message || null,
-        estimated_value_cents: estimateValue(parseInt(data.team_size)),
+      const { data: response, error } = await supabase.functions.invoke("submit-coach-inquiry", {
+        body: {
+          coach_name: data.coach_name,
+          coach_email: data.coach_email,
+          phone_number: data.phone_number || "",
+          organization_name: data.organization_name,
+          sport: data.sport,
+          team_size: parseInt(data.team_size),
+          program_type: data.program_type,
+          message: data.message || "",
+        },
       });
 
       if (error) throw error;
+      if (response?.error) throw new Error(response.error);
 
       setIsSuccess(true);
       toast.success("Inquiry submitted successfully!");

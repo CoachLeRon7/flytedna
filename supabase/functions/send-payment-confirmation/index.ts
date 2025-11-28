@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { generateRequestId, logInfo, logError, maskEmail } from "../_shared/logging.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
@@ -32,12 +33,14 @@ const formatDate = (date: string) => {
 };
 
 serve(async (req) => {
+  const requestId = generateRequestId();
+  
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log("[send-payment-confirmation] Function invoked");
+    logInfo("Function invoked", {}, requestId);
 
     const { purchaseId, userId, amountPaid, isFullPayment }: PaymentConfirmationRequest = await req.json();
 
@@ -78,7 +81,7 @@ serve(async (req) => {
       throw new Error(`User profile not found: ${profileError?.message}`);
     }
 
-    console.log("[send-payment-confirmation] Sending email to:", profile.email);
+    logInfo("Sending email", { email: maskEmail(profile.email) }, requestId);
 
     // Fetch installments if it's a payment plan
     let installmentsHtml = "";
@@ -222,11 +225,11 @@ serve(async (req) => {
     }).then(res => res.json());
 
     if (error) {
-      console.error("[send-payment-confirmation] Resend error:", error);
+      logError("Resend error", error, requestId);
       throw error;
     }
 
-    console.log("[send-payment-confirmation] Email sent successfully:", data);
+    logInfo("Email sent successfully", {}, requestId);
 
     return new Response(
       JSON.stringify({ success: true, emailId: data?.id || "sent" }),
@@ -236,7 +239,7 @@ serve(async (req) => {
       }
     );
   } catch (error: any) {
-    console.error("[send-payment-confirmation] Error:", error);
+    logError("Error sending payment confirmation", error, requestId);
     return new Response(
       JSON.stringify({ error: error.message }),
       {

@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { generateRequestId, logInfo, logError, maskEmail, maskUserId } from "../_shared/logging.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,6 +16,8 @@ interface CheckoutRequest {
 }
 
 serve(async (req) => {
+  const requestId = generateRequestId();
+  
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -26,7 +29,7 @@ serve(async (req) => {
   );
 
   try {
-    console.log("[create-checkout] Function started");
+    logInfo("Function started", {}, requestId);
 
     // Authenticate user
     const authHeader = req.headers.get("Authorization");
@@ -42,7 +45,7 @@ serve(async (req) => {
     if (!user?.email) {
       throw new Error("User not authenticated or email not available");
     }
-    console.log("[create-checkout] User authenticated:", user.id);
+    logInfo("User authenticated", { userId: maskUserId(user.id) }, requestId);
 
     // Parse request body
     const body: CheckoutRequest = await req.json();
@@ -52,7 +55,7 @@ serve(async (req) => {
       throw new Error("package_id is required");
     }
 
-    console.log("[create-checkout] Request:", { package_id, payment_type, coupon_code });
+    logInfo("Request received", { package_id, payment_type }, requestId);
 
     // Fetch package details
     const { data: packageData, error: packageError } = await supabaseClient
@@ -76,11 +79,10 @@ serve(async (req) => {
       throw new Error(`Package "${packageData.name}" does not have a Stripe Price ID configured`);
     }
 
-    console.log("[create-checkout] Package found:", {
+    logInfo("Package found", {
       name: packageData.name,
-      price_id: packageData.stripe_price_id,
       payment_type
-    });
+    }, requestId);
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -92,7 +94,7 @@ serve(async (req) => {
     let customerId: string | undefined;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
-      console.log("[create-checkout] Existing customer found:", customerId);
+      logInfo("Existing customer found", {}, requestId);
     }
 
     // Validate and apply coupon if provided
@@ -151,7 +153,7 @@ serve(async (req) => {
         discountAmountCents = coupon.discount_value;
       }
 
-      console.log("[create-checkout] Coupon applied:", { code: coupon.code, discount: discountAmountCents });
+      logInfo("Coupon applied", { code: coupon.code }, requestId);
     }
 
     // Calculate amounts
@@ -198,7 +200,7 @@ serve(async (req) => {
       throw new Error(`Failed to create purchase: ${purchaseError?.message}`);
     }
 
-    console.log("[create-checkout] Purchase created:", purchase.id);
+    logInfo("Purchase created", {}, requestId);
 
     // If payment plan, create installments
     if (payment_type === "payment_plan" && packageData.payment_plan_config) {
@@ -228,10 +230,9 @@ serve(async (req) => {
         .insert(installments);
 
       if (installmentsError) {
-        console.error("[create-checkout] Failed to create installments:", installmentsError);
-        // Don't fail the entire transaction, just log
+        logError("Failed to create installments", installmentsError, requestId);
       } else {
-        console.log("[create-checkout] Created", installments.length, "installments");
+        logInfo("Created installments", { count: installments.length }, requestId);
       }
     }
 
@@ -278,13 +279,10 @@ serve(async (req) => {
     };
 
     const session = await stripe.checkout.sessions.create(sessionParams);
-    console.log("[create-checkout] Checkout session created:", {
-      session_id: session.id,
+    logInfo("Checkout session created", {
       payment_type,
-      amount: initialPayment,
-      used_price_id: payment_type === "full_payment",
-      price_id: payment_type === "full_payment" ? packageData.stripe_price_id : null
-    });
+      used_price_id: payment_type === "full_payment"
+    }, requestId);
 
     // Update purchase with checkout session ID
     const { error: updateError } = await supabaseClient
@@ -293,7 +291,7 @@ serve(async (req) => {
       .eq("id", purchase.id);
 
     if (updateError) {
-      console.error("[create-checkout] Failed to update purchase:", updateError);
+      logError("Failed to update purchase", updateError, requestId);
     }
 
     // Track coupon usage if coupon was applied
@@ -309,7 +307,7 @@ serve(async (req) => {
         });
 
       if (usageError) {
-        console.error("[create-checkout] Failed to record coupon usage:", usageError);
+        logError("Failed to record coupon usage", usageError, requestId);
       }
 
       // Increment coupon usage counter
@@ -319,13 +317,10 @@ serve(async (req) => {
         .eq("id", couponData.id);
 
       if (incrementError) {
-        console.error("[create-checkout] Failed to increment coupon usage:", incrementError);
+        logError("Failed to increment coupon usage", incrementError, requestId);
       }
 
-      console.log("[create-checkout] Coupon usage tracked:", { 
-        coupon_id: couponData.id, 
-        discount: discountAmountCents 
-      });
+      logInfo("Coupon usage tracked", {}, requestId);
     }
 
     return new Response(
@@ -340,8 +335,8 @@ serve(async (req) => {
       }
     );
   } catch (error) {
+    logError("Checkout error", error, requestId);
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("[create-checkout] ERROR:", errorMessage);
     return new Response(
       JSON.stringify({ error: errorMessage }),
       {

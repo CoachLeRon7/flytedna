@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Shield, Loader2 } from "lucide-react";
+import { Check, Shield, Loader2, ArrowLeft } from "lucide-react";
 import { PaymentOptionModal } from "@/components/payments/PaymentOptionModal";
 import { CoachesContactModal } from "@/components/payments/CoachesContactModal";
 import { useToast } from "@/hooks/use-toast";
@@ -129,6 +129,16 @@ export default function Pricing() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-20">
       <div className="container mx-auto px-4 relative">
+        {/* Back to Homepage */}
+        <Button
+          variant="ghost"
+          className="mb-8"
+          onClick={() => navigate('/')}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Homepage
+        </Button>
+        
         {/* Watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
           <img 

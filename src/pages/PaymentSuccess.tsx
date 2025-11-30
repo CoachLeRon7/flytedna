@@ -1,24 +1,43 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Download, Calendar, FileText, Shield, RefreshCw } from "lucide-react";
+import { CheckCircle2, Download, Calendar, FileText, Shield, RefreshCw, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { getUserFriendlyError } from "@/lib/errorHandling";
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const sessionId = searchParams.get("session_id");
   const [retryCount, setRetryCount] = useState(0);
+  const [authError, setAuthError] = useState(false);
 
-  const { data: purchase, isLoading, refetch } = useQuery({
+  const { data: purchase, isLoading, error, refetch } = useQuery({
     queryKey: ["purchase", sessionId],
     queryFn: async () => {
-      if (!sessionId) throw new Error("No session ID");
+      // Check if user is authenticated first
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
       
+      if (authError || !user) {
+        console.error("Authentication error on payment success page:", authError);
+        setAuthError(true);
+        throw new Error("Not authenticated");
+      }
+
+      console.log("PaymentSuccess: Fetching purchase for session_id:", sessionId);
+      console.log("PaymentSuccess: User authenticated:", user.id);
+      
+      if (!sessionId) {
+        console.error("PaymentSuccess: No session ID provided in URL");
+        throw new Error("No session ID");
+      }
+      
+      // Try to find purchase by session ID first
       const { data, error } = await supabase
         .from("purchases")
         .select(`
@@ -28,12 +47,49 @@ export default function PaymentSuccess() {
           package_access (*)
         `)
         .eq("stripe_checkout_session_id", sessionId)
-        .single();
+        .maybeSingle();
       
-      if (error) throw error;
+      if (error) {
+        console.error("PaymentSuccess: Error fetching purchase by session_id:", error);
+        throw error;
+      }
+
+      // If not found by session ID, try fallback: get most recent purchase for this user
+      if (!data) {
+        console.warn("PaymentSuccess: Purchase not found by session_id, trying fallback query");
+        
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from("purchases")
+          .select(`
+            *,
+            packages (*),
+            payment_plan_installments (*),
+            package_access (*)
+          `)
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (fallbackError) {
+          console.error("PaymentSuccess: Fallback query error:", fallbackError);
+          throw fallbackError;
+        }
+        
+        if (fallbackData) {
+          console.log("PaymentSuccess: Found purchase via fallback query:", fallbackData.id);
+          return fallbackData;
+        }
+        
+        console.error("PaymentSuccess: No purchase found for user");
+        return null;
+      }
+      
+      console.log("PaymentSuccess: Purchase found:", data.id, "Status:", data.status);
       return data;
     },
     enabled: !!sessionId,
+    retry: 3,
     refetchInterval: (query) => {
       // If purchase is still pending and we haven't retried too many times, keep polling
       const data = query.state.data;
@@ -66,26 +122,81 @@ export default function PaymentSuccess() {
     );
   }
 
-  if (!purchase) {
+  // Handle authentication error - redirect to login
+  if (authError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="max-w-md">
+          <CardHeader>
+            <div className="flex items-center gap-2 mb-2">
+              <AlertCircle className="h-5 w-5 text-amber-500" />
+              <CardTitle>Authentication Required</CardTitle>
+            </div>
+            <CardDescription>
+              Please log in to view your purchase confirmation
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              You need to be logged in to view your purchase details. Please log in and you'll be redirected back to this page.
+            </p>
+            <Button 
+              onClick={() => navigate(`/auth?redirect=/payment-success?session_id=${sessionId}`)} 
+              className="w-full"
+            >
+              Log In
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!purchase && !isLoading) {
+    // Log detailed error information for debugging
+    console.error("PaymentSuccess: Purchase not found. Details:", {
+      sessionId,
+      error: error?.message,
+      errorCode: (error as any)?.code,
+    });
+
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card className="max-w-md">
           <CardHeader>
             <CardTitle>Purchase Not Found</CardTitle>
             <CardDescription>
-              We couldn't locate your purchase. This might happen if the payment is still processing.
+              {error ? getUserFriendlyError(error) : "We couldn't locate your purchase details"}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Your payment was received, but it may take a few moments for our system to process it.
-            </p>
-            <Button onClick={handleManualRefresh} className="w-full">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Check Status
-            </Button>
+            <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+              <p className="text-sm font-medium">Possible reasons:</p>
+              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                <li>Payment is still being processed by Stripe</li>
+                <li>Session expired or invalid session ID</li>
+                <li>Database synchronization delay</li>
+              </ul>
+            </div>
+            
+            {sessionId && (
+              <div className="text-xs text-muted-foreground bg-muted/30 p-3 rounded font-mono break-all">
+                Session: {sessionId.substring(0, 20)}...
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <Button onClick={handleManualRefresh} className="flex-1">
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Retry
+              </Button>
+              <Button variant="outline" className="flex-1" asChild>
+                <Link to="/dashboard">Go to Dashboard</Link>
+              </Button>
+            </div>
+            
             <p className="text-xs text-center text-muted-foreground">
-              If the issue persists, please contact support@flyteacademy.com
+              If the issue persists after a few minutes, please contact support@flyteacademy.com with your session ID
             </p>
           </CardContent>
         </Card>

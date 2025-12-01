@@ -49,6 +49,9 @@ interface UserSummary {
   growth_plans_count: number;
   date_of_birth: string | null;
   age: number | null;
+  latest_composite?: number | null;
+  weak_areas?: string[];
+  classification?: string | null;
 }
 
 export function UserManagementDashboard() {
@@ -108,7 +111,24 @@ export function UserManagementDashboard() {
           return acc;
         }, {} as Record<string, any>);
 
-        // Add roles array and age to each user
+        // Fetch latest assessments for all users
+        const { data: assessmentsData, error: assessmentsError } = await supabase
+          .from('assessments')
+          .select('user_id, composite_mean, classification, leadership_dna_mean, excellence_mean, accountability_mean, discipline_mean, belonging_mean, created_at')
+          .in('user_id', userIds)
+          .order('created_at', { ascending: false });
+
+        if (assessmentsError) throw assessmentsError;
+
+        // Get latest assessment per user
+        const latestAssessmentsByUser = assessmentsData?.reduce((acc, assessment) => {
+          if (!acc[assessment.user_id]) {
+            acc[assessment.user_id] = assessment;
+          }
+          return acc;
+        }, {} as Record<string, any>);
+
+        // Add roles, age, and assessment data to each user
         const usersWithRoles = data.map(user => {
           const profile = profilesByUser?.[user.user_id];
           let age = null;
@@ -117,12 +137,34 @@ export function UserManagementDashboard() {
             const today = new Date();
             age = today.getFullYear() - birthDate.getFullYear();
           }
+
+          const latestAssessment = latestAssessmentsByUser?.[user.user_id];
+          let weak_areas: string[] = [];
+          
+          if (latestAssessment) {
+            // Find the 2 lowest scoring domains
+            const domains = [
+              { name: 'Leadership DNA', score: latestAssessment.leadership_dna_mean },
+              { name: 'Excellence', score: latestAssessment.excellence_mean },
+              { name: 'Accountability', score: latestAssessment.accountability_mean },
+              { name: 'Discipline', score: latestAssessment.discipline_mean },
+              { name: 'Belonging', score: latestAssessment.belonging_mean },
+            ].filter(d => d.score !== null);
+
+            weak_areas = domains
+              .sort((a, b) => (a.score || 0) - (b.score || 0))
+              .slice(0, 2)
+              .map(d => d.name);
+          }
           
           return {
             ...user,
             roles: rolesByUser?.[user.user_id] || [user.role || 'student'],
             date_of_birth: profile?.date_of_birth || null,
             age,
+            latest_composite: latestAssessment?.composite_mean || null,
+            weak_areas,
+            classification: latestAssessment?.classification || null,
           };
         });
 
@@ -318,23 +360,24 @@ export function UserManagementDashboard() {
               <TableHead>Role</TableHead>
               <TableHead>Team</TableHead>
               <TableHead>Age</TableHead>
+              <TableHead>Composite</TableHead>
+              <TableHead>Areas of Growth</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Last Login</TableHead>
               <TableHead className="text-center">Assessments</TableHead>
-              <TableHead className="text-center">Peer Reviews</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8">
+                <TableCell colSpan={10} className="text-center py-8">
                   Loading users...
                 </TableCell>
               </TableRow>
             ) : filteredUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                   No users found
                 </TableCell>
               </TableRow>
@@ -401,6 +444,33 @@ export function UserManagementDashboard() {
                     )}
                   </TableCell>
                   <TableCell>
+                    {user.latest_composite !== null && user.latest_composite !== undefined ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-bold text-primary">{user.latest_composite.toFixed(2)}</span>
+                        {user.classification && (
+                          <Badge variant="outline" className="text-xs">
+                            {user.classification}
+                          </Badge>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">No data</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {user.weak_areas && user.weak_areas.length > 0 ? (
+                      <div className="flex flex-col gap-1">
+                        {user.weak_areas.map((area, idx) => (
+                          <Badge key={idx} variant="secondary" className="text-xs">
+                            {area}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
                     <Badge variant={user.is_active ? "default" : "secondary"}>
                       {user.is_active ? "Active" : "Archived"}
                     </Badge>
@@ -416,11 +486,6 @@ export function UserManagementDashboard() {
                   </TableCell>
                   <TableCell className="text-center">
                     <span className="font-medium">{user.total_assessments}</span>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <span className="font-medium">
-                      {user.peer_assessments_given}/{user.peer_assessments_received}
-                    </span>
                   </TableCell>
                   <TableCell>
                     <Button

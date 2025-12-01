@@ -163,6 +163,24 @@ const Auth = () => {
                 title: "🎉 Pilot Access Granted!",
                 description: "You have 90 days of full access to the FLDI platform. Welcome!",
               });
+              
+              // Notify admins of pilot enrollment
+              try {
+                await supabase.functions.invoke('notify-admin-events', {
+                  body: {
+                    event_type: 'pilot_enrollment',
+                    user_email: signUpData.email,
+                    user_name: `${signUpData.firstName} ${signUpData.lastName}`,
+                    additional_data: {
+                      pilot_code: pilotCode,
+                      expires_at: result.expires_at,
+                    },
+                  },
+                });
+              } catch (notifyError) {
+                console.error('[Admin Notification] Failed to notify admins:', notifyError);
+              }
+              
               return true;
             } else {
               toast({
@@ -194,6 +212,24 @@ const Auth = () => {
         };
 
         await validatePilotCode();
+      }
+
+      // Notify admins of new signup
+      try {
+        await supabase.functions.invoke('notify-admin-events', {
+          body: {
+            event_type: 'new_signup',
+            user_email: signUpData.email,
+            user_name: `${signUpData.firstName} ${signUpData.lastName}`,
+            additional_data: {
+              registration_type: 'team', // Default registration type
+              sport: signUpData.sport,
+              referral_source: signUpData.referralSource,
+            },
+          },
+        });
+      } catch (notifyError) {
+        console.error('[Admin Notification] Failed to notify admins of signup:', notifyError);
       }
 
       const roleMessage = (() => {

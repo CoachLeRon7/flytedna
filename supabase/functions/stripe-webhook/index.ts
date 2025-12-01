@@ -124,10 +124,44 @@ serve(async (req) => {
               is_active: true,
             });
 
-          if (accessError) {
+           if (accessError) {
             logError("Access grant failed", accessError, requestId);
           } else {
             logInfo("Access granted", {}, requestId);
+            
+            // Fetch package and user info for admin notification
+            const { data: packageData } = await supabaseClient
+              .from("packages")
+              .select("name")
+              .eq("id", purchase.package_id)
+              .single();
+            
+            const { data: userProfile } = await supabaseClient
+              .from("profiles")
+              .select("first_name, last_name, email")
+              .eq("id", purchase.user_id)
+              .single();
+            
+            // Notify admins of purchase completion
+            if (packageData && userProfile) {
+              try {
+                await supabaseClient.functions.invoke("notify-admin-events", {
+                  body: {
+                    event_type: "purchase_completed",
+                    user_email: userProfile.email,
+                    user_name: `${userProfile.first_name} ${userProfile.last_name}`,
+                    additional_data: {
+                      package_name: packageData.name,
+                      amount_cents: newAmountPaid,
+                      purchase_type: paymentType,
+                    },
+                  },
+                });
+                logInfo("Admin notification sent", {}, requestId);
+              } catch (notifyError) {
+                logError("Admin notification failed", notifyError, requestId);
+              }
+            }
           }
         }
 
@@ -222,6 +256,40 @@ serve(async (req) => {
 
                 if (!accessError) {
                   logInfo("Package access granted after full payment", {}, requestId);
+                  
+                  // Fetch package and user info for admin notification
+                  const { data: packageData } = await supabaseClient
+                    .from("packages")
+                    .select("name")
+                    .eq("id", purchase.package_id)
+                    .single();
+                  
+                  const { data: userProfile } = await supabaseClient
+                    .from("profiles")
+                    .select("first_name, last_name, email")
+                    .eq("id", purchase.user_id)
+                    .single();
+                  
+                  // Notify admins of full payment completion
+                  if (packageData && userProfile) {
+                    try {
+                      await supabaseClient.functions.invoke("notify-admin-events", {
+                        body: {
+                          event_type: "purchase_completed",
+                          user_email: userProfile.email,
+                          user_name: `${userProfile.first_name} ${userProfile.last_name}`,
+                          additional_data: {
+                            package_name: packageData.name,
+                            amount_cents: newAmountPaid,
+                            purchase_type: "installment_completed",
+                          },
+                        },
+                      });
+                      logInfo("Admin notification sent for completed installment", {}, requestId);
+                    } catch (notifyError) {
+                      logError("Admin notification failed", notifyError, requestId);
+                    }
+                  }
                 }
               }
 

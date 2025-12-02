@@ -24,6 +24,7 @@ import { Search, Eye, RefreshCw, Trophy } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { UserDetailDrawer } from "./UserDetailDrawer";
+import { AthleteGrowthReportDrawer } from "./AthleteGrowthReportDrawer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TableSkeleton, StatCardSkeleton } from "@/components/ui/skeleton-components";
@@ -63,6 +64,8 @@ export function UserManagementDashboard() {
   const [statusFilter, setStatusFilter] = useState<string>("active");
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [growthReportUserId, setGrowthReportUserId] = useState<string | null>(null);
+  const [growthReportOpen, setGrowthReportOpen] = useState(false);
   const [firstAdminIds, setFirstAdminIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -234,6 +237,11 @@ export function UserManagementDashboard() {
   const handleViewDetails = (userId: string) => {
     setSelectedUserId(userId);
     setDrawerOpen(true);
+  };
+
+  const handleViewGrowthReport = (userId: string) => {
+    setGrowthReportUserId(userId);
+    setGrowthReportOpen(true);
   };
 
   const getInitials = (firstName: string, lastName: string) => {
@@ -488,14 +496,25 @@ export function UserManagementDashboard() {
                     <span className="font-medium">{user.total_assessments}</span>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleViewDetails(user.user_id)}
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      View
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleViewDetails(user.user_id)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View
+                      </Button>
+                      {user.role === 'student' && user.total_assessments > 0 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewGrowthReport(user.user_id)}
+                        >
+                          📊 Growth Report
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
@@ -508,6 +527,11 @@ export function UserManagementDashboard() {
         userId={selectedUserId}
         open={drawerOpen}
         onOpenChange={setDrawerOpen}
+      />
+      <AthleteGrowthReportDrawer
+        userId={growthReportUserId}
+        open={growthReportOpen}
+        onOpenChange={setGrowthReportOpen}
       />
     </div>
   );

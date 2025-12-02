@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from "recharts";
-import { ClipboardCheck } from "lucide-react";
+import { ClipboardCheck, Target, CheckCircle2, Clock, PlayCircle } from "lucide-react";
 
 interface Assessment {
   id: string;
@@ -53,6 +53,15 @@ interface Profile {
   sport: string;
 }
 
+interface Goal {
+  goal: string;
+  action_step: string;
+  timeline: string;
+  support_needed: string;
+  status: "planned" | "in_progress" | "completed";
+  domain?: string;
+}
+
 interface AthleteDetailDrawerProps {
   athleteId: string;
   semester: string;
@@ -65,7 +74,9 @@ export function AthleteDetailDrawer({ athleteId, semester, open, onClose }: Athl
   const [profile, setProfile] = useState<Profile | null>(null);
   const [assessments, setAssessments] = useState<Record<string, Assessment>>({});
   const [coachAssessments, setCoachAssessments] = useState<Record<string, CoachAssessmentData>>({});
+  const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("assessments");
 
   useEffect(() => {
     if (open && athleteId) {
@@ -116,6 +127,20 @@ export function AthleteDetailDrawer({ athleteId, semester, open, onClose }: Athl
         coachAssessmentsByTimepoint[ca.timepoint] = ca as CoachAssessmentData;
       });
       setCoachAssessments(coachAssessmentsByTimepoint);
+
+      // Load growth plan goals
+      const { data: growthPlan, error: growthError } = await supabase
+        .from("growth_plans")
+        .select("goals")
+        .eq("user_id", athleteId)
+        .eq("semester_label", semester)
+        .maybeSingle();
+
+      if (!growthError && growthPlan?.goals) {
+        setGoals(growthPlan.goals as unknown as Goal[]);
+      } else {
+        setGoals([]);
+      }
     } catch (error) {
       console.error("Error loading athlete data:", error);
     } finally {
@@ -192,12 +217,89 @@ export function AthleteDetailDrawer({ athleteId, semester, open, onClose }: Athl
           </div>
         </SheetHeader>
 
-        <Tabs defaultValue="pre" className="mt-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="pre">Pre</TabsTrigger>
-            <TabsTrigger value="mid">Mid</TabsTrigger>
-            <TabsTrigger value="end">End</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="assessments">Assessments</TabsTrigger>
+            <TabsTrigger value="goals" className="flex items-center gap-1">
+              <Target className="h-3 w-3" />
+              Growth Plan
+            </TabsTrigger>
           </TabsList>
+
+          {/* Goals Tab */}
+          <TabsContent value="goals" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5 text-primary" />
+                  Athlete's Goals
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {goals.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-6">
+                    This athlete hasn't set any goals yet.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {goals.map((goal, index) => (
+                      <div key={index} className="border border-border rounded-lg p-3 bg-card">
+                        {goal.domain && (
+                          <Badge variant="outline" className="mb-2 text-xs">
+                            {goal.domain}
+                          </Badge>
+                        )}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">{goal.goal || "Untitled goal"}</p>
+                            {goal.action_step && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                <strong>Action:</strong> {goal.action_step}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                              {goal.timeline && (
+                                <span className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  {goal.timeline}
+                                </span>
+                              )}
+                              {goal.support_needed && (
+                                <span>Support: {goal.support_needed}</span>
+                              )}
+                            </div>
+                          </div>
+                          <Badge 
+                            variant={goal.status === "completed" ? "default" : "secondary"}
+                            className={`text-xs ${
+                              goal.status === "completed" 
+                                ? "bg-green-500 text-white" 
+                                : goal.status === "in_progress" 
+                                ? "bg-blue-500 text-white" 
+                                : ""
+                            }`}
+                          >
+                            {goal.status === "completed" && <CheckCircle2 className="h-3 w-3 mr-1" />}
+                            {goal.status === "in_progress" && <PlayCircle className="h-3 w-3 mr-1" />}
+                            {goal.status === "planned" ? "Planned" : goal.status === "in_progress" ? "In Progress" : "Completed"}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Assessments Tab */}
+          <TabsContent value="assessments" className="space-y-4">
+            <Tabs defaultValue="pre">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="pre">Pre</TabsTrigger>
+                <TabsTrigger value="mid">Mid</TabsTrigger>
+                <TabsTrigger value="end">End</TabsTrigger>
+              </TabsList>
 
           {["pre", "mid", "end"].map((timepoint) => {
             const assessment = assessments[timepoint];
@@ -373,8 +475,10 @@ export function AthleteDetailDrawer({ athleteId, semester, open, onClose }: Athl
                   </Card>
                 )}
               </TabsContent>
-            );
-          })}
+              );
+            })}
+            </Tabs>
+          </TabsContent>
         </Tabs>
       </SheetContent>
     </Sheet>

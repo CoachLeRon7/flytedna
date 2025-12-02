@@ -32,6 +32,35 @@ const GrowthPlan = () => {
   const [semesterLabel, setSemesterLabel] = useState("");
   const [suggestedInsights, setSuggestedInsights] = useState<any[]>([]);
 
+  // Default suggested goals if no assessment insights exist
+  const defaultSuggestedGoals = [
+    {
+      domain: "Leadership DNA",
+      message: "Take initiative in team situations by volunteering for leadership roles or speaking up during team discussions.",
+      action: "Volunteer to lead one practice drill or team activity this week."
+    },
+    {
+      domain: "Accountability",
+      message: "Own your mistakes and learn from setbacks instead of making excuses or blaming others.",
+      action: "After each practice, identify one thing you could have done better and write it down."
+    },
+    {
+      domain: "Excellence",
+      message: "Push yourself beyond minimum expectations by setting higher personal standards in training.",
+      action: "Add 15 extra minutes of focused skill work to your daily routine."
+    },
+    {
+      domain: "Discipline",
+      message: "Build consistent daily habits that support your athletic and leadership development.",
+      action: "Create a morning routine that includes visualization, goal review, and physical preparation."
+    },
+    {
+      domain: "Belonging",
+      message: "Strengthen team bonds by actively supporting and encouraging your teammates.",
+      action: "Give three specific compliments or words of encouragement to teammates each practice."
+    }
+  ];
+
   useEffect(() => {
     fetchGrowthPlan();
   }, [semesterParam]);
@@ -371,33 +400,58 @@ const GrowthPlan = () => {
                 </CardTitle>
                 <CardDescription>From your latest assessment</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
-                {suggestedInsights.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    Complete an assessment to see personalized suggestions.
-                  </p>
-                ) : (
-                  suggestedInsights.map((insight, index) => (
-                    <div key={index} className="border border-border rounded-lg p-3 bg-muted/30">
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <span className="text-sm font-semibold text-foreground">{insight.domain}</span>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => addSuggestedGoal(insight)}
-                          className="h-6 px-2 text-xs"
-                        >
-                          <Plus className="h-3 w-3 mr-1" />
-                          Add
-                        </Button>
+              <CardContent className="space-y-3 max-h-[60vh] overflow-y-auto">
+                {/* Show assessment insights first if available */}
+                {suggestedInsights.length > 0 && (
+                  <>
+                    <p className="text-xs font-medium text-primary mb-2">From Your Assessment</p>
+                    {suggestedInsights.map((insight, index) => (
+                      <div key={`insight-${index}`} className="border border-primary/30 rounded-lg p-3 bg-primary/5">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <span className="text-sm font-semibold text-foreground">{insight.domain}</span>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => addSuggestedGoal(insight)}
+                            className="h-6 px-2 text-xs hover:bg-primary/10"
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            Add
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-2">{insight.message}</p>
+                        <p className="text-xs text-foreground">
+                          <strong>Action:</strong> {insight.action}
+                        </p>
                       </div>
-                      <p className="text-xs text-muted-foreground mb-2">{insight.message}</p>
-                      <p className="text-xs text-foreground">
-                        <strong>Action:</strong> {insight.action}
-                      </p>
-                    </div>
-                  ))
+                    ))}
+                  </>
                 )}
+                
+                {/* Always show default suggested goals */}
+                <p className="text-xs font-medium text-muted-foreground mb-2 mt-4">
+                  {suggestedInsights.length > 0 ? "More Goal Ideas" : "Suggested Goals"}
+                </p>
+                {defaultSuggestedGoals.map((goal, index) => (
+                  <div key={`default-${index}`} className="border border-border rounded-lg p-3 bg-muted/30 hover:bg-muted/50 transition-colors">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <span className="text-sm font-semibold text-foreground">{goal.domain}</span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => addSuggestedGoal(goal)}
+                        className="h-6 px-2 text-xs"
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        Add
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-2">{goal.message}</p>
+                    <p className="text-xs text-foreground">
+                      <strong>Action:</strong> {goal.action}
+                    </p>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           </div>

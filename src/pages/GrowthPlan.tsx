@@ -5,10 +5,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Plus, Save, Download, Lightbulb, Trash2 } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { ArrowLeft, Plus, Save, Download, Lightbulb, Trash2, Flag, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/flyte-academy-logo.png";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
+
+interface Milestone {
+  id: string;
+  text: string;
+  date: string;
+}
 
 interface Goal {
   goal: string;
@@ -17,7 +25,180 @@ interface Goal {
   support_needed: string;
   status: "planned" | "in_progress" | "completed";
   domain?: string;
+  progress?: number;
+  milestones?: Milestone[];
 }
+
+// Goal Card Component with Progress Tracking
+interface GoalCardProps {
+  goal: Goal;
+  index: number;
+  onUpdateGoal: (index: number, field: keyof Goal, value: string | number) => void;
+  onRemoveGoal: (index: number) => void;
+  onAddMilestone: (goalIndex: number, text: string) => void;
+  onRemoveMilestone: (goalIndex: number, milestoneId: string) => void;
+}
+
+const GoalCard = ({ goal, index, onUpdateGoal, onRemoveGoal, onAddMilestone, onRemoveMilestone }: GoalCardProps) => {
+  const [newMilestone, setNewMilestone] = useState("");
+
+  const handleAddMilestone = () => {
+    if (newMilestone.trim()) {
+      onAddMilestone(index, newMilestone);
+      setNewMilestone("");
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  return (
+    <div className="border border-border rounded-lg p-4 space-y-4 bg-card print:break-inside-avoid">
+      {goal.domain && (
+        <div className="text-xs text-primary font-semibold">{goal.domain}</div>
+      )}
+      
+      {/* Progress Section */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
+            Progress
+          </label>
+          <span className="text-sm font-bold text-primary">{goal.progress || 0}%</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <Progress value={goal.progress || 0} className="flex-1 h-2" />
+          <Slider
+            value={[goal.progress || 0]}
+            onValueChange={(values) => onUpdateGoal(index, "progress", values[0])}
+            max={100}
+            step={5}
+            className="w-32 print:hidden"
+          />
+        </div>
+      </div>
+
+      <div className="grid gap-3">
+        <div>
+          <label className="text-sm font-medium text-muted-foreground">Goal</label>
+          <Input
+            value={goal.goal}
+            onChange={(e) => onUpdateGoal(index, "goal", e.target.value)}
+            placeholder="What do you want to achieve?"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium text-muted-foreground">Action Step</label>
+          <Input
+            value={goal.action_step}
+            onChange={(e) => onUpdateGoal(index, "action_step", e.target.value)}
+            placeholder="How will you achieve it?"
+            className="mt-1"
+          />
+        </div>
+        <div className="grid sm:grid-cols-3 gap-3">
+          <div>
+            <label className="text-sm font-medium text-muted-foreground">Timeline</label>
+            <Input
+              value={goal.timeline}
+              onChange={(e) => onUpdateGoal(index, "timeline", e.target.value)}
+              placeholder="4 weeks"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-muted-foreground">Support Needed</label>
+            <Input
+              value={goal.support_needed}
+              onChange={(e) => onUpdateGoal(index, "support_needed", e.target.value)}
+              placeholder="Coach, teammate"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-muted-foreground">Status</label>
+            <Select
+              value={goal.status}
+              onValueChange={(value) => onUpdateGoal(index, "status", value)}
+            >
+              <SelectTrigger className="mt-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="planned">Planned</SelectItem>
+                <SelectItem value="in_progress">In Progress</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
+      {/* Milestones Section */}
+      <div className="space-y-2 print:hidden">
+        <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+          <Flag className="h-4 w-4" />
+          Milestones
+        </label>
+        
+        {/* Existing Milestones */}
+        {(goal.milestones || []).length > 0 && (
+          <div className="space-y-1">
+            {goal.milestones?.map((milestone) => (
+              <div key={milestone.id} className="flex items-center gap-2 text-sm bg-muted/50 rounded px-2 py-1">
+                <span className="text-xs text-muted-foreground">{formatDate(milestone.date)}</span>
+                <span className="flex-1">{milestone.text}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onRemoveMilestone(index, milestone.id)}
+                  className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {/* Add Milestone Input */}
+        <div className="flex gap-2">
+          <Input
+            value={newMilestone}
+            onChange={(e) => setNewMilestone(e.target.value)}
+            placeholder="Log a milestone..."
+            className="flex-1 h-8 text-sm"
+            onKeyDown={(e) => e.key === "Enter" && handleAddMilestone()}
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleAddMilestone}
+            className="h-8"
+          >
+            <Plus className="h-3 w-3" />
+          </Button>
+        </div>
+      </div>
+
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => onRemoveGoal(index)}
+        className="text-destructive hover:text-destructive print:hidden"
+      >
+        <Trash2 className="mr-2 h-4 w-4" />
+        Remove
+      </Button>
+    </div>
+  );
+};
 
 const GrowthPlan = () => {
   const [searchParams] = useSearchParams();
@@ -152,6 +333,8 @@ const GrowthPlan = () => {
         timeline: "4 weeks",
         support_needed: "",
         status: "planned",
+        progress: 0,
+        milestones: [],
       },
     ]);
   };
@@ -164,6 +347,8 @@ const GrowthPlan = () => {
       support_needed: "Coach/teammate",
       status: "planned",
       domain: insight.domain,
+      progress: 0,
+      milestones: [],
     };
     setGoals([...goals, newGoal]);
     toast({
@@ -172,9 +357,38 @@ const GrowthPlan = () => {
     });
   };
 
-  const updateGoal = (index: number, field: keyof Goal, value: string) => {
+  const updateGoal = (index: number, field: keyof Goal, value: string | number) => {
     const updated = [...goals];
     updated[index] = { ...updated[index], [field]: value };
+    // Auto-update status based on progress
+    if (field === "progress") {
+      const progress = value as number;
+      if (progress === 100) {
+        updated[index].status = "completed";
+      } else if (progress > 0) {
+        updated[index].status = "in_progress";
+      } else {
+        updated[index].status = "planned";
+      }
+    }
+    setGoals(updated);
+  };
+
+  const addMilestone = (goalIndex: number, milestoneText: string) => {
+    if (!milestoneText.trim()) return;
+    const updated = [...goals];
+    const newMilestone: Milestone = {
+      id: crypto.randomUUID(),
+      text: milestoneText,
+      date: new Date().toISOString(),
+    };
+    updated[goalIndex].milestones = [...(updated[goalIndex].milestones || []), newMilestone];
+    setGoals(updated);
+  };
+
+  const removeMilestone = (goalIndex: number, milestoneId: string) => {
+    const updated = [...goals];
+    updated[goalIndex].milestones = (updated[goalIndex].milestones || []).filter(m => m.id !== milestoneId);
     setGoals(updated);
   };
 
@@ -313,76 +527,15 @@ const GrowthPlan = () => {
                 ) : (
                   <div className="space-y-4">
                     {goals.map((goal, index) => (
-                      <div key={index} className="border border-border rounded-lg p-4 space-y-3 bg-card print:break-inside-avoid">
-                        {goal.domain && (
-                          <div className="text-xs text-primary font-semibold">{goal.domain}</div>
-                        )}
-                        <div className="grid gap-3">
-                          <div>
-                            <label className="text-sm font-medium text-muted-foreground">Goal</label>
-                            <Input
-                              value={goal.goal}
-                              onChange={(e) => updateGoal(index, "goal", e.target.value)}
-                              placeholder="What do you want to achieve?"
-                              className="mt-1"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-muted-foreground">Action Step</label>
-                            <Input
-                              value={goal.action_step}
-                              onChange={(e) => updateGoal(index, "action_step", e.target.value)}
-                              placeholder="How will you achieve it?"
-                              className="mt-1"
-                            />
-                          </div>
-                          <div className="grid sm:grid-cols-3 gap-3">
-                            <div>
-                              <label className="text-sm font-medium text-muted-foreground">Timeline</label>
-                              <Input
-                                value={goal.timeline}
-                                onChange={(e) => updateGoal(index, "timeline", e.target.value)}
-                                placeholder="4 weeks"
-                                className="mt-1"
-                              />
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium text-muted-foreground">Support Needed</label>
-                              <Input
-                                value={goal.support_needed}
-                                onChange={(e) => updateGoal(index, "support_needed", e.target.value)}
-                                placeholder="Coach, teammate"
-                                className="mt-1"
-                              />
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium text-muted-foreground">Status</label>
-                              <Select
-                                value={goal.status}
-                                onValueChange={(value) => updateGoal(index, "status", value as any)}
-                              >
-                                <SelectTrigger className="mt-1">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="planned">Planned</SelectItem>
-                                  <SelectItem value="in_progress">In Progress</SelectItem>
-                                  <SelectItem value="completed">Completed</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeGoal(index)}
-                          className="text-destructive hover:text-destructive print:hidden"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Remove
-                        </Button>
-                      </div>
+                      <GoalCard
+                        key={index}
+                        goal={goal}
+                        index={index}
+                        onUpdateGoal={updateGoal}
+                        onRemoveGoal={removeGoal}
+                        onAddMilestone={addMilestone}
+                        onRemoveMilestone={removeMilestone}
+                      />
                     ))}
                   </div>
                 )}

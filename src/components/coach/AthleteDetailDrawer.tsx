@@ -12,8 +12,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from "recharts";
-import { ClipboardCheck, Target, CheckCircle2, Clock, PlayCircle } from "lucide-react";
+import { ClipboardCheck, Target, CheckCircle2, Clock, PlayCircle, Flag, TrendingUp } from "lucide-react";
 
 interface Assessment {
   id: string;
@@ -53,6 +54,12 @@ interface Profile {
   sport: string;
 }
 
+interface Milestone {
+  id: string;
+  text: string;
+  date: string;
+}
+
 interface Goal {
   goal: string;
   action_step: string;
@@ -60,6 +67,8 @@ interface Goal {
   support_needed: string;
   status: "planned" | "in_progress" | "completed";
   domain?: string;
+  progress?: number;
+  milestones?: Milestone[];
 }
 
 interface AthleteDetailDrawerProps {
@@ -249,6 +258,19 @@ export function AthleteDetailDrawer({ athleteId, semester, open, onClose }: Athl
                             {goal.domain}
                           </Badge>
                         )}
+                        
+                        {/* Progress Bar */}
+                        <div className="mb-3">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <TrendingUp className="h-3 w-3" />
+                              Progress
+                            </span>
+                            <span className="text-xs font-bold text-primary">{goal.progress || 0}%</span>
+                          </div>
+                          <Progress value={goal.progress || 0} className="h-2" />
+                        </div>
+                        
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1">
                             <p className="font-medium text-sm">{goal.goal || "Untitled goal"}</p>
@@ -284,6 +306,26 @@ export function AthleteDetailDrawer({ athleteId, semester, open, onClose }: Athl
                             {goal.status === "planned" ? "Planned" : goal.status === "in_progress" ? "In Progress" : "Completed"}
                           </Badge>
                         </div>
+                        
+                        {/* Milestones */}
+                        {(goal.milestones || []).length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-border">
+                            <p className="text-xs font-medium text-muted-foreground flex items-center gap-1 mb-2">
+                              <Flag className="h-3 w-3" />
+                              Milestones ({goal.milestones?.length})
+                            </p>
+                            <div className="space-y-1">
+                              {goal.milestones?.map((milestone) => (
+                                <div key={milestone.id} className="flex items-center gap-2 text-xs bg-muted/50 rounded px-2 py-1">
+                                  <span className="text-muted-foreground">
+                                    {new Date(milestone.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                                  </span>
+                                  <span>{milestone.text}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

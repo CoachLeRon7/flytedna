@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { ArrowLeft, Plus, Save, Download, Lightbulb, Trash2, Flag, TrendingUp } from "lucide-react";
+import { ArrowLeft, Plus, Save, Download, Lightbulb, Trash2, Flag, TrendingUp, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/flyte-academy-logo.png";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -497,6 +497,10 @@ const GrowthPlan = () => {
         <div className="text-center mb-8 print:mb-4">
           <h1 className="text-4xl font-bold text-foreground mb-2">My Leadership Growth Plan</h1>
           <p className="text-muted-foreground">{semesterLabel}</p>
+          <Button variant="outline" className="mt-3 print:hidden" onClick={() => navigate("/curriculum")}>
+            <BookOpen className="mr-2 h-4 w-4" />
+            Explore B.coming Curriculum
+          </Button>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">

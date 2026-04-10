@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { User } from "@supabase/supabase-js";
-import { FileText, TrendingUp, Target, LogOut, User as UserIcon, CreditCard } from "lucide-react";
+import { FileText, TrendingUp, Target, LogOut, User as UserIcon, CreditCard, BookOpen } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/flyte-academy-logo.png";
@@ -369,6 +369,23 @@ const Dashboard = () => {
             <CardContent>
               <Button variant="secondary" className="w-full">
                 View Purchases
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-card hover:shadow-elegant transition-shadow cursor-pointer" onClick={() => navigate("/curriculum")}>
+            <CardHeader>
+              <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center mb-4">
+                <BookOpen className="h-6 w-6 text-accent" />
+              </div>
+              <CardTitle>📚 Learning Modules</CardTitle>
+              <CardDescription>
+                Explore the B.coming Curriculum — 16 leadership development modules
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="secondary" className="w-full">
+                View Curriculum
               </Button>
             </CardContent>
           </Card>

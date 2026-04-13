@@ -45,7 +45,7 @@ const ModuleExperience = () => {
       console.error("Failed to save module completion:", e);
     }
   }, [moduleNumber, track, screenData]);
-
+  const handleScreenComplete = useCallback((data: unknown) => {
     setScreenData((prev) => ({ ...prev, [currentScreen]: data }));
     setCanProceed(true);
   }, [currentScreen]);

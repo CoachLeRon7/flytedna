@@ -73,12 +73,30 @@ export interface ActionScreenData {
   definitionPrompt: string;
 }
 
+export interface StatementSlot {
+  name: string;
+  label: string;
+  /** Screen index to pull choices from, or undefined for static options */
+  sourceScreen?: number;
+  /** How to extract options from the source screen data */
+  sourceKey?: "action-values" | "personal-category" | "workbook-prompt";
+  /** For personal-category / workbook-prompt: which index within that screen */
+  sourceIndex?: number;
+  /** Static fallback options if no source or source has no data */
+  staticOptions?: string[];
+}
+
 export interface StatementScreenData {
   type: "statement";
   title: string;
   description: string;
+  /** Template with {slotName} placeholders */
   template: string;
+  /** Ending text after the last slot (optional freeform) */
+  closingPrompt?: string;
+  closingPlaceholder?: string;
   helpText: string;
+  slots?: StatementSlot[];
 }
 
 export interface PlanScreenData {

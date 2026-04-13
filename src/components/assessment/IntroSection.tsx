@@ -19,11 +19,12 @@ export const IntroSection = ({ form }: IntroSectionProps) => {
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-bold text-foreground mb-2">
-          Welcome to the FLDI Assessment
+          Welcome to the Fly.te Leadership DNA Assessment
         </h2>
         <p className="text-muted-foreground mb-6">
-          This assessment will help you understand your leadership development across five key domains.
-          Please answer honestly – there are no right or wrong answers. Your growth depends on accurate self-reflection.
+          This assessment measures your leadership development across seven core domains.
+          Answer based on how you act <strong>most of the time</strong> — not where you want to be.
+          There are no right or wrong answers. Your honest self-reflection drives your growth.
         </p>
       </div>
 
@@ -92,7 +93,8 @@ export const IntroSection = ({ form }: IntroSectionProps) => {
         <ul className="space-y-2 text-sm text-muted-foreground">
           <li>• Take your time with each question</li>
           <li>• Answer based on your current reality, not where you want to be</li>
-          <li>• Use the full 1-5 scale (1 = Strongly Disagree, 5 = Strongly Agree)</li>
+          <li>• Use the full 1-5 scale (1 = Never Me, 5 = Always Me)</li>
+          <li>• 35 questions across 7 leadership domains</li>
           <li>• Your honest answers help us provide better coaching</li>
         </ul>
       </div>

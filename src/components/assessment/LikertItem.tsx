@@ -17,11 +17,11 @@ interface LikertItemProps {
 }
 
 const LIKERT_LABELS = [
-  "Strongly Disagree",
-  "Disagree",
-  "Neutral",
-  "Agree",
-  "Strongly Agree",
+  "Never Me",
+  "Rarely Me",
+  "Sometimes Me",
+  "Usually Me",
+  "Always Me",
 ];
 
 export const LikertItem = ({ form, name, question, questionNumber, reversed = false }: LikertItemProps) => {
@@ -42,8 +42,8 @@ export const LikertItem = ({ form, name, question, questionNumber, reversed = fa
           <FormControl>
             <div className="space-y-3">
               <div className="flex justify-between text-xs text-muted-foreground px-1">
-                <span className="font-medium">Strongly Disagree</span>
-                <span className="font-medium">Strongly Agree</span>
+                <span className="font-medium">Never Me</span>
+                <span className="font-medium">Always Me</span>
               </div>
               <RadioGroup
                 onValueChange={(value) => field.onChange(Number(value))}

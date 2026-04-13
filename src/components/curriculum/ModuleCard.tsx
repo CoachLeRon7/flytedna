@@ -1,14 +1,19 @@
+import { useNavigate } from "react-router-dom";
 import { CurriculumModule } from "@/lib/curriculumData";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { CheckCircle2, Clock, Lock, BookOpen, Target, Lightbulb } from "lucide-react";
+import { CheckCircle2, Clock, Lock, BookOpen, Target, Lightbulb, Play } from "lucide-react";
 
 interface ModuleCardProps {
   module: CurriculumModule;
+  track?: "middle" | "high";
 }
 
-const ModuleCard = ({ module }: ModuleCardProps) => {
+const ModuleCard = ({ module, track = "middle" }: ModuleCardProps) => {
+  const navigate = useNavigate();
   const isLocked = module.isPlaceholder;
+  const hasInteractive = module.number <= 3;
 
   return (
     <div
@@ -158,6 +163,20 @@ const ModuleCard = ({ module }: ModuleCardProps) => {
             </AccordionItem>
           )}
         </Accordion>
+      )}
+
+      {/* Start Module button */}
+      {!isLocked && hasInteractive && (
+        <div className="px-5 pb-4">
+          <Button
+            onClick={() => navigate(`/curriculum/module/${module.number}?track=${track}`)}
+            className="w-full"
+            size="sm"
+          >
+            <Play className="mr-1 h-4 w-4" />
+            Start Module {module.number}
+          </Button>
+        </div>
       )}
 
       {/* Placeholder message */}

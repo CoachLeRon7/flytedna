@@ -2,6 +2,12 @@ import { useState, useEffect } from "react";
 import { ActionScreenData } from "@/lib/moduleScreenData";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Props {
   data: ActionScreenData;
@@ -19,7 +25,6 @@ const ActionScreen = ({ data, onComplete }: Props) => {
   const isNarrowing = stepIndex > 0;
   const isDone = definingPhase;
 
-  // Check if definitions are complete
   const finalValues = definingPhase ? selected : [];
   const allDefined = finalValues.length > 0 && finalValues.every((v) => (definitions[v] || "").trim().length > 0);
 
@@ -31,14 +36,12 @@ const ActionScreen = ({ data, onComplete }: Props) => {
     if (definingPhase) return;
 
     if (isNarrowing) {
-      // In narrowing mode, you deselect to narrow
       if (selected.includes(value)) {
         setSelected((s) => s.filter((v) => v !== value));
       }
       return;
     }
 
-    // Selection mode
     if (selected.includes(value)) {
       setSelected((s) => s.filter((v) => v !== value));
     } else if (selected.length < targetCount) {
@@ -60,6 +63,8 @@ const ActionScreen = ({ data, onComplete }: Props) => {
     ? data.values.filter((v) => !selected.includes(v))
     : [];
 
+  const defs = data.valueDefinitions || {};
+
   return (
     <div className="animate-fade-in">
       <div className="mb-4">
@@ -68,7 +73,7 @@ const ActionScreen = ({ data, onComplete }: Props) => {
       </div>
 
       {!definingPhase && (
-        <>
+        <TooltipProvider delayDuration={300}>
           <div className="bg-accent/10 border border-accent/30 rounded-xl p-4 mb-4 flex items-center justify-between">
             <p className="text-sm font-bold text-foreground">{currentStep.instruction}</p>
             <Badge variant={readyToAdvance ? "default" : "secondary"} className="text-sm">
@@ -76,12 +81,19 @@ const ActionScreen = ({ data, onComplete }: Props) => {
             </Badge>
           </div>
 
+          {Object.keys(defs).length > 0 && (
+            <p className="text-xs text-muted-foreground mb-3 text-center italic">
+              💡 Tap and hold a value to see its definition
+            </p>
+          )}
+
           <div className="flex flex-wrap gap-2 mb-4">
             {data.values.map((value) => {
               const isSelected = selected.includes(value);
               const isFaded = fadedValues.includes(value);
+              const definition = defs[value];
 
-              return (
+              const chip = (
                 <button
                   key={value}
                   onClick={() => handleToggle(value)}
@@ -97,6 +109,19 @@ const ActionScreen = ({ data, onComplete }: Props) => {
                   {value}
                 </button>
               );
+
+              if (definition && !isFaded) {
+                return (
+                  <Tooltip key={value}>
+                    <TooltipTrigger asChild>{chip}</TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[220px] text-center">
+                      <p className="text-xs">{definition}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              }
+
+              return chip;
             })}
           </div>
 
@@ -110,7 +135,7 @@ const ActionScreen = ({ data, onComplete }: Props) => {
               </button>
             </div>
           )}
-        </>
+        </TooltipProvider>
       )}
 
       {definingPhase && (
@@ -120,6 +145,9 @@ const ActionScreen = ({ data, onComplete }: Props) => {
             <div key={value} className="bg-card border rounded-xl p-4 shadow-card">
               <div className="flex items-center gap-2 mb-2">
                 <Badge>{value}</Badge>
+                {defs[value] && (
+                  <span className="text-xs text-muted-foreground italic">— {defs[value]}</span>
+                )}
               </div>
               <Textarea
                 placeholder={`Define "${value}" as a specific behavior...`}

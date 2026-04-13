@@ -134,7 +134,7 @@ export const module1MS: ModuleExperienceData = {
       description: "Let's explore how your identity connects to your performance. Answer honestly — these answers are private and only visible to you.",
       prompts: [
         { label: "When I perform well I feel...", placeholder: "Select at least 3 words", wordBank: ["Confident","Accomplished","Proud","Energized","Focused","Unstoppable","In control","Locked in","On fire","Empowered","Motivated","Driven","Sharp","Dialed in","Elite","Calm confidence","At peace","Fulfilled","Purposeful","Aligned","Winning","Validated","Respected","Relentless","Fearless","Inspired","Clear minded","Dominant","Resilient","Capable","Limitless","In rhythm","Strong","Elevated","Ready"], minSelections: 3 },
-        { label: "When I perform poorly I tell myself...", placeholder: "e.g., I'm letting people down" },
+        { label: "When I perform poorly I tell myself...", placeholder: "Select at least 3 words", wordBank: ["Do better","I'm Not enough","Keep going","Learn from it","Shake it off","Lock back in","You got this","Try again","Stay focused","Be better","Fix it","Move forward","No excuses","Refocus now","Next play","Bounce back","Stay composed","Reset mentally","Control effort","Trust yourself","Stay disciplined","I quit","Figure it out","Growth moment","Own it","Stay hungry","Keep working","Be resilient","Adjust quickly","Stay confident","Keep faith","Stop trying","Stay ready","Rise up","I'm terrible"], minSelections: 3 },
         { label: "Three words that describe me...", placeholder: "e.g., Competitive", multiField: true, fieldCount: 3 },
         { label: "Something I fear losing...", placeholder: "e.g., My starting position" },
       ],

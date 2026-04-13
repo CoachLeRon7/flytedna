@@ -27,7 +27,25 @@ const ModuleExperience = () => {
   const [canProceed, setCanProceed] = useState(false);
   const [completed, setCompleted] = useState(false);
 
-  const handleScreenComplete = useCallback((data: unknown) => {
+  const saveCompletion = useCallback(async () => {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData?.user) return;
+
+      await supabase.from("module_completions").upsert(
+        {
+          user_id: userData.user.id,
+          module_number: moduleNumber,
+          track,
+          screen_data: screenData as Record<string, unknown>,
+        },
+        { onConflict: "user_id,module_number,track" }
+      );
+    } catch (e) {
+      console.error("Failed to save module completion:", e);
+    }
+  }, [moduleNumber, track, screenData]);
+
     setScreenData((prev) => ({ ...prev, [currentScreen]: data }));
     setCanProceed(true);
   }, [currentScreen]);

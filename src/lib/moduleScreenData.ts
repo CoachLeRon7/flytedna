@@ -73,12 +73,30 @@ export interface ActionScreenData {
   definitionPrompt: string;
 }
 
+export interface StatementSlot {
+  name: string;
+  label: string;
+  /** Screen index to pull choices from, or undefined for static options */
+  sourceScreen?: number;
+  /** How to extract options from the source screen data */
+  sourceKey?: "action-values" | "personal-category" | "workbook-prompt";
+  /** For personal-category / workbook-prompt: which index within that screen */
+  sourceIndex?: number;
+  /** Static fallback options if no source or source has no data */
+  staticOptions?: string[];
+}
+
 export interface StatementScreenData {
   type: "statement";
   title: string;
   description: string;
+  /** Template with {slotName} placeholders */
   template: string;
+  /** Ending text after the last slot (optional freeform) */
+  closingPrompt?: string;
+  closingPlaceholder?: string;
   helpText: string;
+  slots?: StatementSlot[];
 }
 
 export interface PlanScreenData {
@@ -263,8 +281,20 @@ export const module1MS: ModuleExperienceData = {
       type: "statement",
       title: "Your Identity Statement",
       description: "Synthesize everything you've discovered into a single defining statement.",
-      template: "I am not just a [sport] player. I value [value 1], [value 2], and [value 3]. At my best, I show these values through...",
+      template: "I am not just a {role}. I am a {descriptor1}, {descriptor2}, {descriptor3} person who values {value1}, {value2}, and {value3}. What matters most to me is {matters}. At my best, I show these values through",
+      closingPrompt: "how you live your values daily",
+      closingPlaceholder: "e.g., showing up early, encouraging teammates, and never cutting corners",
       helpText: "This statement will become a key part of your Leadership Dashboard.",
+      slots: [
+        { name: "role", label: "Role", sourceScreen: 3, sourceKey: "personal-category", sourceIndex: 0 },
+        { name: "descriptor1", label: "Word 1", sourceScreen: 1, sourceKey: "workbook-prompt", sourceIndex: 2 },
+        { name: "descriptor2", label: "Word 2", sourceScreen: 1, sourceKey: "workbook-prompt", sourceIndex: 2 },
+        { name: "descriptor3", label: "Word 3", sourceScreen: 1, sourceKey: "workbook-prompt", sourceIndex: 2 },
+        { name: "value1", label: "Core Value 1", sourceScreen: 4, sourceKey: "action-values" },
+        { name: "value2", label: "Core Value 2", sourceScreen: 4, sourceKey: "action-values" },
+        { name: "value3", label: "Core Value 3", sourceScreen: 4, sourceKey: "action-values" },
+        { name: "matters", label: "What Matters", sourceScreen: 3, sourceKey: "personal-category", sourceIndex: 3 },
+      ],
     },
     {
       type: "plan",
@@ -357,8 +387,13 @@ export const module2MS: ModuleExperienceData = {
       type: "statement",
       title: "Your Composure Statement",
       description: "Write a short statement that anchors you in moments of pressure.",
-      template: "When I feel [trigger emotion], I choose to [response action]. I reset by [reset strategy]. I am in control of my response.",
+      template: "When I feel {trigger}, I choose to {response}. I reset by {resetStrategy}. I am in control of my response.",
       helpText: "This will be your go-to script when emotions run high.",
+      slots: [
+        { name: "trigger", label: "Trigger Emotion", sourceScreen: 3, sourceKey: "personal-category", sourceIndex: 3, staticOptions: ["angry", "frustrated", "anxious", "overwhelmed", "embarrassed", "discouraged", "nervous"] },
+        { name: "response", label: "Chosen Response", staticOptions: ["pause and breathe", "stay calm and focused", "walk away briefly", "name the emotion", "use positive self-talk", "focus on what I can control"] },
+        { name: "resetStrategy", label: "Reset Strategy", sourceScreen: 4, sourceKey: "action-values" },
+      ],
     },
     {
       type: "plan",
@@ -438,8 +473,14 @@ export const module2HS: ModuleExperienceData = {
       type: "statement",
       title: "Your Identity Statement",
       description: "Craft a statement that connects who you are to what you stand for.",
-      template: "I am a leader who values [value 1], [value 2], and [value 3]. Even under pressure, I choose to [specific behavior]. My values are not feelings — they are decisions.",
+      template: "I am a leader who values {value1}, {value2}, and {value3}. Even under pressure, I choose to {behavior}. My values are not feelings — they are decisions.",
       helpText: "This statement becomes your anchor in high-pressure moments.",
+      slots: [
+        { name: "value1", label: "Core Value 1", sourceScreen: 4, sourceKey: "action-values" },
+        { name: "value2", label: "Core Value 2", sourceScreen: 4, sourceKey: "action-values" },
+        { name: "value3", label: "Core Value 3", sourceScreen: 4, sourceKey: "action-values" },
+        { name: "behavior", label: "Behavior", staticOptions: ["lead by example", "stay disciplined", "own my mistakes", "lift others up", "stay composed", "keep working", "choose integrity", "show up prepared"] },
+      ],
     },
     {
       type: "plan",
@@ -524,8 +565,15 @@ export const module3MS: ModuleExperienceData = {
       type: "statement",
       title: "Your Composure Plan",
       description: "Create a simple 3-step plan you can use anywhere: in a game, in class, at home.",
-      template: "When I feel [emotion], my body does [signal]. I will STOP and [reset move]. Then I will [next action]. My reset word is: [one word].",
+      template: "When I feel {emotion}, my body does {signal}. I will STOP and {resetMove}. Then I will {nextAction}. My reset word is: {resetWord}.",
       helpText: "Keep this short enough to remember in the heat of the moment.",
+      slots: [
+        { name: "emotion", label: "Emotion", staticOptions: ["angry", "frustrated", "anxious", "overwhelmed", "embarrassed", "nervous", "defeated", "panicked"] },
+        { name: "signal", label: "Body Signal", staticOptions: ["tense up", "clench my jaw", "my heart races", "my face gets hot", "I get shaky", "I hold my breath", "my fists clench", "my stomach drops"] },
+        { name: "resetMove", label: "Reset Move", sourceScreen: 4, sourceKey: "action-values" },
+        { name: "nextAction", label: "Next Action", staticOptions: ["focus on the next play", "encourage a teammate", "take a deep breath", "refocus on my goal", "talk to my coach", "reset my body language", "stay positive", "get back in position"] },
+        { name: "resetWord", label: "Reset Word", staticOptions: ["Next", "Breathe", "Reset", "Calm", "Focus", "Steady", "Let go", "Move", "Strong", "Trust"] },
+      ],
     },
     {
       type: "plan",
@@ -609,8 +657,17 @@ export const module3HS: ModuleExperienceData = {
       type: "statement",
       title: "Your Game & Exam Composure Plan",
       description: "Create a composure plan that works in both competition and academics.",
-      template: "Pre-game identity statement: \"I am [identity].\" When I face [trigger], my reframe is: \"[reframed thought].\" My recovery timeline: 5 sec → [action], 30 sec → [action], 2 min → [action]. My anchor phrase: \"[phrase].\"",
+      template: "Pre-game identity statement: \"I am {identity}.\" When I face {trigger}, my reframe is: \"{reframe}.\" My recovery timeline: 5 sec → {action5s}, 30 sec → {action30s}, 2 min → {action2m}. My anchor phrase: \"{anchor}.\"",
       helpText: "This plan covers competition, exams, and high-pressure life moments.",
+      slots: [
+        { name: "identity", label: "Identity", staticOptions: ["a composed competitor", "a disciplined leader", "a resilient athlete", "a focused performer", "a confident student-athlete", "someone who controls their response"] },
+        { name: "trigger", label: "Trigger", staticOptions: ["a bad call", "a mistake", "falling behind", "coach criticism", "crowd pressure", "a tough exam question", "unexpected setback"] },
+        { name: "reframe", label: "Reframed Thought", staticOptions: ["This is a chance to show who I am", "One moment doesn't define me", "I can control my next action", "Pressure is a privilege", "Mistakes help me grow", "Stay process-focused"] },
+        { name: "action5s", label: "5-Second Action", sourceScreen: 4, sourceKey: "action-values" },
+        { name: "action30s", label: "30-Second Action", staticOptions: ["assess the situation calmly", "refocus on my strategy", "use positive self-talk", "watch and learn from the moment", "reset my body language"] },
+        { name: "action2m", label: "2-Minute Action", staticOptions: ["fully re-engage with confidence", "encourage a teammate", "execute my next plan", "return to peak focus", "lock back in mentally"] },
+        { name: "anchor", label: "Anchor Phrase", staticOptions: ["Calm. Clear. Confident.", "Next play mentality.", "Control what I can.", "I am built for this.", "Trust the process.", "Stay locked in.", "Breathe and compete."] },
+      ],
     },
     {
       type: "plan",

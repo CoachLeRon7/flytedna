@@ -151,7 +151,7 @@ const ModuleExperience = () => {
           <ActionScreen data={screen} onComplete={handleScreenComplete} />
         )}
         {screen.type === "statement" && (
-          <StatementScreen data={screen} onComplete={handleScreenComplete} savedData={screenData[currentScreen] as string | undefined} />
+          <StatementScreen data={screen} onComplete={handleScreenComplete} savedData={screenData[currentScreen] as string | undefined} allScreenData={screenData} />
         )}
         {screen.type === "plan" && (
           <PlanScreen data={screen} onComplete={handleScreenComplete} savedData={screenData[currentScreen] as string | undefined} />

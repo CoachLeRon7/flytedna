@@ -33,12 +33,14 @@ const ModuleExperience = () => {
       if (!userData?.user) return;
 
       await supabase.from("module_completions").upsert(
-        {
-          user_id: userData.user.id,
-          module_number: moduleNumber,
-          track,
-          screen_data: screenData as Record<string, unknown>,
-        },
+        [
+          {
+            user_id: userData.user.id,
+            module_number: moduleNumber,
+            track,
+            screen_data: screenData as Record<string, unknown>,
+          },
+        ],
         { onConflict: "user_id,module_number,track" }
       );
     } catch (e) {

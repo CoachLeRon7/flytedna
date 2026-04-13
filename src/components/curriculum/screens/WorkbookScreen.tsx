@@ -84,6 +84,18 @@ const WorkbookScreen = ({ data, onComplete, savedData }: Props) => {
                     );
                   })}
                 </div>
+                {prompt.allowCustom && (
+                  <div className="mt-3">
+                    <Textarea
+                      placeholder={prompt.placeholder || "Or write your own..."}
+                      value={answers[`${i}-custom`] || ""}
+                      onChange={(e) =>
+                        setAnswers((prev) => ({ ...prev, [`${i}-custom`]: e.target.value }))
+                      }
+                      className="min-h-[60px] resize-none"
+                    />
+                  </div>
+                )}
               </div>
             );
           }

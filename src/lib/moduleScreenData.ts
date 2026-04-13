@@ -23,6 +23,7 @@ export interface WorkbookPrompt {
   fieldCount?: number;
   wordBank?: string[]; // clickable word selection instead of free text
   minSelections?: number; // minimum words to select from wordBank
+  allowCustom?: boolean; // show text input alongside word bank
 }
 
 export interface WorkbookScreenData {
@@ -136,7 +137,7 @@ export const module1MS: ModuleExperienceData = {
         { label: "When I perform well I feel...", placeholder: "Select at least 3 words", wordBank: ["Confident","Accomplished","Proud","Energized","Focused","Unstoppable","In control","Locked in","On fire","Empowered","Motivated","Driven","Sharp","Dialed in","Elite","Calm confidence","At peace","Fulfilled","Purposeful","Aligned","Winning","Validated","Respected","Relentless","Fearless","Inspired","Clear minded","Dominant","Resilient","Capable","Limitless","In rhythm","Strong","Elevated","Ready"], minSelections: 3 },
         { label: "When I perform poorly I tell myself...", placeholder: "Select at least 3 words", wordBank: ["Do better","I'm Not enough","Keep going","Learn from it","Shake it off","Lock back in","You got this","Try again","Stay focused","Be better","Fix it","Move forward","No excuses","Refocus now","Next play","Bounce back","Stay composed","Reset mentally","Control effort","Trust yourself","Stay disciplined","I quit","Figure it out","Growth moment","Own it","Stay hungry","Keep working","Be resilient","Adjust quickly","Stay confident","Keep faith","Stop trying","Stay ready","Rise up","I'm terrible"], minSelections: 3 },
         { label: "Three words that describe me...", placeholder: "Select exactly 3 words", wordBank: ["Fast","Strong","Explosive","Agile","Competitive","Tough","Conditioned","Skilled","Focused","Disciplined","Smart","Curious","Dedicated","Organized","Prepared","Determined","Consistent","Accountable","Focused learner","Driven","Leader","Confident","Respectful","Responsible","Resilient","Positive","Trustworthy","Motivated","Coachable","Influential"], minSelections: 3 },
-        { label: "Something I fear losing...", placeholder: "e.g., My starting position" },
+        { label: "Something I fear losing...", placeholder: "Or write your own...", wordBank: ["My chance to reach my potential","The trust people have in me","Opportunities I worked hard to earn","My confidence in tough moments","The respect of my teammates","My love for the game","Control over my own future","The discipline I've built daily","My identity as a leader","The progress I've made so far","My competitive edge and mindset","The support from my family","My focus during important moments","The belief I have in myself","My spot on the team","The habits that keep me consistent","My ability to bounce back","The goals I set for myself","My reputation as a hard worker","The trust from my coaches","My physical and mental strength","The momentum I've been building","My passion for getting better","The discipline to stay committed","My drive to succeed every day","The chance to prove myself","My ability to stay locked in","The standard I hold for myself","My growth as both athlete and leader","The opportunity to make an impact"], minSelections: 1, allowCustom: true },
       ],
     },
     {

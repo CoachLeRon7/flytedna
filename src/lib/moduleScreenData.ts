@@ -68,6 +68,7 @@ export interface ActionScreenData {
   title: string;
   description: string;
   values: string[];
+  valueDefinitions?: Record<string, string>;
   steps: { instruction: string; count: number }[];
   definitionPrompt: string;
 }
@@ -114,6 +115,41 @@ const coreValuesList = [
   "Dependability", "Optimism", "Creativity", "Leadership", "Service",
   "Trustworthiness", "Consistency",
 ];
+
+const coreValuesDefinitions: Record<string, string> = {
+  "Integrity": "Doing the right thing even when no one is watching",
+  "Discipline": "Staying consistent with your habits and standards daily",
+  "Respect": "Treating others the way you'd want to be treated",
+  "Accountability": "Owning your actions, mistakes, and results",
+  "Loyalty": "Standing by your team and people through thick and thin",
+  "Courage": "Doing what's hard or scary because it matters",
+  "Honesty": "Being truthful with yourself and others",
+  "Perseverance": "Pushing through obstacles and never giving up",
+  "Empathy": "Understanding and caring about how others feel",
+  "Humility": "Staying grounded and open to learning from anyone",
+  "Gratitude": "Appreciating what you have and the people around you",
+  "Compassion": "Showing genuine care and kindness to others",
+  "Responsibility": "Following through on what you said you'd do",
+  "Patience": "Trusting the process and staying calm under pressure",
+  "Kindness": "Going out of your way to lift others up",
+  "Fairness": "Treating everyone equally and playing by the rules",
+  "Generosity": "Giving your time, energy, or support freely",
+  "Determination": "Refusing to quit until you reach your goal",
+  "Confidence": "Believing in your ability to rise to the challenge",
+  "Resilience": "Bouncing back stronger after setbacks",
+  "Teamwork": "Putting the team's success above your own",
+  "Excellence": "Giving your absolute best in everything you do",
+  "Faith": "Trusting in something bigger than yourself",
+  "Self-Control": "Managing your emotions and impulses in tough moments",
+  "Commitment": "Staying dedicated even when it gets uncomfortable",
+  "Dependability": "Being someone others can always count on",
+  "Optimism": "Choosing to see possibility even in hard times",
+  "Creativity": "Finding new ways to solve problems and improve",
+  "Leadership": "Influencing others through your actions and character",
+  "Service": "Using your talents to help and serve others",
+  "Trustworthiness": "Being reliable, honest, and true to your word",
+  "Consistency": "Showing up the same way every single day",
+};
 
 // ════════════════════════════════════════════════════════════════
 // MODULE 1 — Middle School: "Who Am I? Discovering Core Values"

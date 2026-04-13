@@ -110,7 +110,7 @@ export function AthleteGrowthReport({ userId }: AthleteGrowthReportProps) {
         const scores: QuestionScore[] = [];
 
         // Process each domain
-        const domains: (keyof DomainQuestions)[] = ['L', 'E', 'A', 'D', 'B'];
+        const domains: (keyof DomainQuestions)[] = ['L', 'I', 'R', 'D', 'C', 'B', 'S'];
         domains.forEach(domain => {
           const domainQuestions = questions[domain];
           domainQuestions.forEach((q, index) => {

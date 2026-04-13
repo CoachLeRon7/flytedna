@@ -715,6 +715,33 @@ export type Database = {
           },
         ]
       }
+      module_completions: {
+        Row: {
+          completed_at: string
+          id: string
+          module_number: number
+          screen_data: Json | null
+          track: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          module_number: number
+          screen_data?: Json | null
+          track: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          module_number?: number
+          screen_data?: Json | null
+          track?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           announcement_id: string | null

@@ -1,24 +1,23 @@
 import { UseFormReturn } from "react-hook-form";
 import { LikertItem } from "./LikertItem";
-import { getQuestionsForAge, QuestionConfig } from "@/lib/assessmentQuestions";
+import { QuestionConfig, DomainCode, DOMAIN_CONFIGS } from "@/lib/assessmentQuestions";
 
 interface DomainSectionProps {
   form: UseFormReturn<any>;
-  domain: "L" | "E" | "A" | "D" | "B";
+  domain: DomainCode;
   title: string;
-  userAge: number | null;
+  questions: QuestionConfig[];
 }
 
-export const DomainSection = ({ form, domain, title, userAge }: DomainSectionProps) => {
-  const allQuestions = getQuestionsForAge(userAge);
-  const questions: QuestionConfig[] = allQuestions[domain];
-
+export const DomainSection = ({ form, domain, title, questions }: DomainSectionProps) => {
+  const config = DOMAIN_CONFIGS[domain];
+  
   return (
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-bold text-foreground mb-2">{title}</h2>
         <p className="text-muted-foreground">
-          Rate each statement on a scale from 1 (Strongly Disagree) to 5 (Strongly Agree).
+          How true is this for you <strong>MOST</strong> of the time? Rate each statement from 1 (Never Me) to 5 (Always Me).
         </p>
       </div>
 

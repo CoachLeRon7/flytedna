@@ -8,9 +8,10 @@ import { CheckCircle2, Clock, Lock, BookOpen, Target, Lightbulb, Play } from "lu
 interface ModuleCardProps {
   module: CurriculumModule;
   track?: "middle" | "high";
+  isCompleted?: boolean;
 }
 
-const ModuleCard = ({ module, track = "middle" }: ModuleCardProps) => {
+const ModuleCard = ({ module, track = "middle", isCompleted = false }: ModuleCardProps) => {
   const navigate = useNavigate();
   const isLocked = module.isPlaceholder;
   const hasInteractive = module.number <= 3;
@@ -43,6 +44,11 @@ const ModuleCard = ({ module, track = "middle" }: ModuleCardProps) => {
           </div>
           {isLocked ? (
             <Lock className="h-5 w-5 text-muted-foreground shrink-0 mt-1" />
+          ) : isCompleted ? (
+            <div className="flex items-center gap-1.5 shrink-0 mt-1">
+              <CheckCircle2 className="h-5 w-5 text-success" />
+              <span className="text-xs font-bold text-success uppercase">Done</span>
+            </div>
           ) : (
             <BookOpen className="h-5 w-5 text-primary shrink-0 mt-1" />
           )}
@@ -172,9 +178,19 @@ const ModuleCard = ({ module, track = "middle" }: ModuleCardProps) => {
             onClick={() => navigate(`/curriculum/module/${module.number}?track=${track}`)}
             className="w-full"
             size="sm"
+            variant={isCompleted ? "outline" : "default"}
           >
-            <Play className="mr-1 h-4 w-4" />
-            Start Module {module.number}
+            {isCompleted ? (
+              <>
+                <Play className="mr-1 h-4 w-4" />
+                Redo Module {module.number}
+              </>
+            ) : (
+              <>
+                <Play className="mr-1 h-4 w-4" />
+                Start Module {module.number}
+              </>
+            )}
           </Button>
         </div>
       )}

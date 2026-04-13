@@ -51,6 +51,9 @@ export interface PersonalCategory {
   label: string;
   placeholder: string;
   isHighlighted?: boolean;
+  wordBank?: string[];
+  minSelections?: number;
+  allowCustom?: boolean;
 }
 
 export interface PersonalScreenData {
@@ -156,10 +159,55 @@ export const module1MS: ModuleExperienceData = {
       title: "Map Your Identity",
       description: "Categorize your life to separate your roles from your core values.",
       categories: [
-        { label: "Roles I Play", placeholder: "e.g., basketball player, student, teammate, older brother" },
-        { label: "Achievements", placeholder: "e.g., points scored, starting lineup, wins" },
-        { label: "Expectations", placeholder: "e.g., play well, lead the team, don't mess up" },
-        { label: "What Matters Most", placeholder: "e.g., discipline, loyalty, respect", isHighlighted: true },
+        {
+          label: "Roles I Play",
+          placeholder: "Select roles that apply to you",
+          wordBank: ["Athlete", "Student", "Brother", "Sister", "Teammate", "Christian", "Mentor", "Mentee", "Employee"],
+          minSelections: 1,
+          allowCustom: true,
+        },
+        {
+          label: "Achievements",
+          placeholder: "Select achievements you're proud of",
+          wordBank: [
+            "Made the team", "Started a game", "Won a championship", "Set a personal record",
+            "Made honor roll", "Earned a scholarship", "Captain or team leader", "All-conference selection",
+            "MVP award", "Most improved player", "Community service award", "Led a team comeback",
+            "Scored a game-winning play", "Maintained a high GPA", "Earned varsity letter",
+            "Helped a teammate succeed", "Overcame an injury", "Earned coach's trust",
+            "Consistent starter", "Led by example daily",
+          ],
+          minSelections: 1,
+          allowCustom: true,
+        },
+        {
+          label: "Expectations",
+          placeholder: "Select expectations placed on you",
+          wordBank: [
+            "Play well every game", "Lead the team", "Don't mess up", "Be the example",
+            "Score more points", "Stay disciplined", "Keep my grades up", "Be tough",
+            "Never show weakness", "Always be ready", "Win at all costs", "Protect my teammates",
+            "Stay composed under pressure", "Live up to my potential", "Outwork everyone",
+            "Represent the program well", "Handle adversity", "Be coachable",
+            "Stay focused 24/7", "Carry the team",
+          ],
+          minSelections: 1,
+          allowCustom: true,
+        },
+        {
+          label: "What Matters Most",
+          placeholder: "Select what matters most to you",
+          isHighlighted: true,
+          wordBank: [
+            "Discipline", "Loyalty", "Respect", "Integrity", "Faith", "Family",
+            "Hard work", "Honesty", "Courage", "Kindness", "Accountability", "Perseverance",
+            "Excellence", "Humility", "Gratitude", "Service", "Self-control", "Trustworthiness",
+            "Compassion", "Purpose", "Consistency", "Commitment", "Leadership", "Passion",
+            "Resilience", "Growth", "Unity", "Fairness", "Confidence", "Selflessness",
+          ],
+          minSelections: 1,
+          allowCustom: true,
+        },
       ],
     },
     {

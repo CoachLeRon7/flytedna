@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,9 +7,12 @@ import logo from "@/assets/flyte-academy-logo.png";
 import { middleSchoolTrack, highSchoolTrack } from "@/lib/curriculumData";
 import ModuleCard from "@/components/curriculum/ModuleCard";
 import LearningLoopVisual from "@/components/curriculum/LearningLoopVisual";
+import { useModuleCompletions } from "@/hooks/useModuleCompletions";
 
 const Curriculum = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<"middle" | "high">("middle");
+  const { completedModules } = useModuleCompletions(activeTab);
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -45,7 +49,7 @@ const Curriculum = () => {
         </div>
 
         {/* Track Tabs */}
-        <Tabs defaultValue="middle" className="space-y-6">
+        <Tabs defaultValue="middle" value={activeTab} onValueChange={(v) => setActiveTab(v as "middle" | "high")} className="space-y-6">
           <TabsList className="w-full max-w-md mx-auto grid grid-cols-2">
             <TabsTrigger value="middle" className="flex items-center gap-2">
               <School className="h-4 w-4" />
@@ -58,14 +62,19 @@ const Curriculum = () => {
           </TabsList>
 
           {[
-            { value: "middle", track: middleSchoolTrack },
-            { value: "high", track: highSchoolTrack },
+            { value: "middle" as const, track: middleSchoolTrack },
+            { value: "high" as const, track: highSchoolTrack },
           ].map(({ value, track }) => (
             <TabsContent key={value} value={value}>
               <p className="text-sm text-muted-foreground mb-6">{track.description}</p>
               <div className="grid gap-5 md:grid-cols-2">
                 {track.modules.map((mod) => (
-                  <ModuleCard key={mod.number} module={mod} track={value as "middle" | "high"} />
+                  <ModuleCard
+                    key={mod.number}
+                    module={mod}
+                    track={value}
+                    isCompleted={completedModules.has(mod.number)}
+                  />
                 ))}
               </div>
             </TabsContent>

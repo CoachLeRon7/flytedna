@@ -1,5 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
@@ -26,6 +27,26 @@ const ModuleExperience = () => {
   const [canProceed, setCanProceed] = useState(false);
   const [completed, setCompleted] = useState(false);
 
+  const saveCompletion = useCallback(async () => {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData?.user) return;
+
+      await supabase.from("module_completions").upsert(
+        [
+          {
+            user_id: userData.user.id,
+            module_number: moduleNumber,
+            track,
+            screen_data: JSON.parse(JSON.stringify(screenData)),
+          },
+        ],
+        { onConflict: "user_id,module_number,track" }
+      );
+    } catch (e) {
+      console.error("Failed to save module completion:", e);
+    }
+  }, [moduleNumber, track, screenData]);
   const handleScreenComplete = useCallback((data: unknown) => {
     setScreenData((prev) => ({ ...prev, [currentScreen]: data }));
     setCanProceed(true);
@@ -51,6 +72,8 @@ const ModuleExperience = () => {
   const handleNext = () => {
     if (isLastScreen) {
       setCompleted(true);
+      // Save completion to database
+      saveCompletion();
     } else {
       setCurrentScreen((s) => s + 1);
       setCanProceed(false);

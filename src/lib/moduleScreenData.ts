@@ -133,7 +133,7 @@ export const module1MS: ModuleExperienceData = {
       title: "Challenge the Mind",
       description: "Let's explore how your identity connects to your performance. Answer honestly — these answers are private and only visible to you.",
       prompts: [
-        { label: "When I perform well I feel...", placeholder: "e.g., Confident and respected" },
+        { label: "When I perform well I feel...", placeholder: "Select at least 3 words", wordBank: ["Confident","Accomplished","Proud","Energized","Focused","Unstoppable","In control","Locked in","On fire","Empowered","Motivated","Driven","Sharp","Dialed in","Elite","Calm confidence","At peace","Fulfilled","Purposeful","Aligned","Winning","Validated","Respected","Relentless","Fearless","Inspired","Clear minded","Dominant","Resilient","Capable","Limitless","In rhythm","Strong","Elevated","Ready"], minSelections: 3 },
         { label: "When I perform poorly I tell myself...", placeholder: "e.g., I'm letting people down" },
         { label: "Three words that describe me...", placeholder: "e.g., Competitive", multiField: true, fieldCount: 3 },
         { label: "Something I fear losing...", placeholder: "e.g., My starting position" },

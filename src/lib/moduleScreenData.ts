@@ -23,6 +23,7 @@ export interface WorkbookPrompt {
   fieldCount?: number;
   wordBank?: string[]; // clickable word selection instead of free text
   minSelections?: number; // minimum words to select from wordBank
+  allowCustom?: boolean; // show text input alongside word bank
 }
 
 export interface WorkbookScreenData {

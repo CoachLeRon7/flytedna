@@ -21,6 +21,8 @@ export interface WorkbookPrompt {
   placeholder: string;
   multiField?: boolean; // e.g. "three words" → 3 separate inputs
   fieldCount?: number;
+  wordBank?: string[]; // clickable word selection instead of free text
+  minSelections?: number; // minimum words to select from wordBank
 }
 
 export interface WorkbookScreenData {

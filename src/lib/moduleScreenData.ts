@@ -251,6 +251,7 @@ export const module1MS: ModuleExperienceData = {
       title: "The Values Draft",
       description: "Draft your core values like building a team roster. You'll narrow down to the 3 values that are non-negotiable for who you want to be.",
       values: coreValuesList,
+      valueDefinitions: coreValuesDefinitions,
       steps: [
         { instruction: "Select 10 values that resonate with you", count: 10 },
         { instruction: "Narrow to your top 5", count: 5 },
@@ -425,6 +426,7 @@ export const module2HS: ModuleExperienceData = {
       title: "The Values Draft",
       description: "Draft your core values like a team roster. Prioritize ruthlessly — these become your decision-making framework.",
       values: coreValuesList,
+      valueDefinitions: coreValuesDefinitions,
       steps: [
         { instruction: "Select 10 values that resonate with you", count: 10 },
         { instruction: "Narrow to your top 5", count: 5 },

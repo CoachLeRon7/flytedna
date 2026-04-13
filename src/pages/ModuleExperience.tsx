@@ -38,7 +38,7 @@ const ModuleExperience = () => {
             user_id: userData.user.id,
             module_number: moduleNumber,
             track,
-            screen_data: screenData as Record<string, unknown>,
+            screen_data: JSON.parse(JSON.stringify(screenData)),
           },
         ],
         { onConflict: "user_id,module_number,track" }

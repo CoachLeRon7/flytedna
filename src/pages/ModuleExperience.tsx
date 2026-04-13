@@ -1,5 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
@@ -51,6 +52,8 @@ const ModuleExperience = () => {
   const handleNext = () => {
     if (isLastScreen) {
       setCompleted(true);
+      // Save completion to database
+      saveCompletion();
     } else {
       setCurrentScreen((s) => s + 1);
       setCanProceed(false);

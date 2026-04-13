@@ -65,7 +65,7 @@ const Curriculum = () => {
               <p className="text-sm text-muted-foreground mb-6">{track.description}</p>
               <div className="grid gap-5 md:grid-cols-2">
                 {track.modules.map((mod) => (
-                  <ModuleCard key={mod.number} module={mod} />
+                  <ModuleCard key={mod.number} module={mod} track={value as "middle" | "high"} />
                 ))}
               </div>
             </TabsContent>

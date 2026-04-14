@@ -69,11 +69,10 @@ export const PeerFeedbackSection = ({ userId, timepoint, semesterLabel, selfScor
   };
 
   const getTierBadge = (composite: number) => {
-    if (composite >= 4.6) return <Badge className="bg-green-500">Transformational Teammate</Badge>;
-    if (composite >= 3.9) return <Badge className="bg-blue-500">Emerging Teammate Leader</Badge>;
-    if (composite >= 3.0) return <Badge className="bg-yellow-500">Developing Teammate</Badge>;
-    if (composite >= 2.5) return <Badge className="bg-orange-500">Foundational Teammate</Badge>;
-    return <Badge variant="secondary">Observation Tier</Badge>;
+    if (composite >= 85) return <Badge className="bg-green-500">Transformational Teammate</Badge>;
+    if (composite >= 70) return <Badge className="bg-blue-500">Emerging Teammate Leader</Badge>;
+    if (composite >= 50) return <Badge className="bg-yellow-500">Developing Teammate</Badge>;
+    return <Badge className="bg-orange-500">Foundational Teammate</Badge>;
   };
 
   if (loading) {
@@ -135,9 +134,9 @@ export const PeerFeedbackSection = ({ userId, timepoint, semesterLabel, selfScor
         <div>
           <div className="flex justify-between mb-2">
             <span className="font-semibold">Peer Composite Score</span>
-            <span className="text-2xl font-bold">{feedback.avg_composite.toFixed(2)}</span>
+            <span className="text-2xl font-bold">{feedback.avg_composite.toFixed(0)}</span>
           </div>
-          <Progress value={feedback.avg_composite * 20} className="h-2" />
+          <Progress value={feedback.avg_composite} className="h-2" />
           {selfScores && (
             <div className="mt-3 p-3 bg-muted/50 rounded-lg">
               <p className="text-sm font-medium mb-1">Impact on Your Final Score</p>

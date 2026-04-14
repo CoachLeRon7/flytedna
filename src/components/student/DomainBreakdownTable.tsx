@@ -27,9 +27,9 @@ export function DomainBreakdownTable({ scores, userRole }: DomainBreakdownTableP
   };
 
   const getScoreBadgeColor = (score: number) => {
-    if (score >= 4.5) return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-    if (score >= 3.8) return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-    if (score >= 3.0) return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+    if (score >= 85) return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+    if (score >= 70) return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+    if (score >= 50) return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
     return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
   };
 

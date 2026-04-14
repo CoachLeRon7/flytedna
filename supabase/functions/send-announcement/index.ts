@@ -119,7 +119,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log("Processing announcement:", { title: title.substring(0, 50), targetAudience, sendEmail });
+    logInfo('Processing announcement', { targetAudience, sendEmail }, requestId);
 
     // Get target users based on audience
     let targetUserIds: string[] = [];

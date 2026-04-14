@@ -252,7 +252,7 @@ const PurchasesDashboard = () => {
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <img src={logo} alt="Flyte Academy" className="h-8" />
+            <img src={logo} alt="Flyte DNA" className="h-14 w-auto" />
             <h1 className="text-xl font-semibold">Purchases & Billing</h1>
           </div>
         </div>

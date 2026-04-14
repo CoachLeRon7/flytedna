@@ -35,14 +35,14 @@ export function TrendAnalysisCard({ current, previous }: TrendAnalysisCardProps)
   };
 
   const getTrendIcon = (change: number) => {
-    if (change > 0.2) return <TrendingUp className="h-4 w-4 text-green-600" />;
-    if (change < -0.2) return <TrendingDown className="h-4 w-4 text-orange-600" />;
+    if (change > 4) return <TrendingUp className="h-4 w-4 text-green-600" />;
+    if (change < -4) return <TrendingDown className="h-4 w-4 text-orange-600" />;
     return <Minus className="h-4 w-4 text-muted-foreground" />;
   };
 
   const getTrendColor = (change: number) => {
-    if (change > 0.2) return "text-green-600 dark:text-green-400";
-    if (change < -0.2) return "text-orange-600 dark:text-orange-400";
+    if (change > 4) return "text-green-600 dark:text-green-400";
+    if (change < -4) return "text-orange-600 dark:text-orange-400";
     return "text-muted-foreground";
   };
 

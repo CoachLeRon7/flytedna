@@ -21,8 +21,8 @@ export function DomainBreakdownTable({ scores, userRole }: DomainBreakdownTableP
   const getComparisonIcon = (self: number, external?: number) => {
     if (!external) return null;
     const diff = external - self;
-    if (diff > 0.3) return <TrendingUp className="h-4 w-4 text-green-600" />;
-    if (diff < -0.3) return <TrendingDown className="h-4 w-4 text-orange-600" />;
+    if (diff > 5) return <TrendingUp className="h-4 w-4 text-green-600" />;
+    if (diff < -5) return <TrendingDown className="h-4 w-4 text-orange-600" />;
     return <Minus className="h-4 w-4 text-muted-foreground" />;
   };
 

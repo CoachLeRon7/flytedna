@@ -63,8 +63,8 @@ export const PeerFeedbackSection = ({ userId, timepoint, semesterLabel, selfScor
   const getComparisonIcon = (peerScore: number, selfScore?: number) => {
     if (!selfScore) return <Minus className="h-4 w-4" />;
     const diff = peerScore - selfScore;
-    if (diff > 0.2) return <TrendingUp className="h-4 w-4 text-green-500" />;
-    if (diff < -0.2) return <TrendingDown className="h-4 w-4 text-orange-500" />;
+    if (diff > 4) return <TrendingUp className="h-4 w-4 text-green-500" />;
+    if (diff < -4) return <TrendingDown className="h-4 w-4 text-orange-500" />;
     return <Minus className="h-4 w-4 text-muted-foreground" />;
   };
 

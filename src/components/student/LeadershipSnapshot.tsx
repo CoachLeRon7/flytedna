@@ -73,7 +73,7 @@ export function LeadershipSnapshot({ latestAssessment, assessmentHistory }: Lead
               <RadarChart data={radarData}>
                 <PolarGrid />
                 <PolarAngleAxis dataKey="domain" tick={{ fontSize: 12 }} />
-                <PolarRadiusAxis domain={[0, 5]} />
+                <PolarRadiusAxis domain={[0, 100]} />
                 <Radar name="Scores" dataKey="value" stroke="hsl(var(--student-accent))" fill="hsl(var(--student-accent))" fillOpacity={0.6} />
               </RadarChart>
             </ResponsiveContainer>
@@ -86,7 +86,7 @@ export function LeadershipSnapshot({ latestAssessment, assessmentHistory }: Lead
                 <LineChart data={trendData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="timepoint" />
-                  <YAxis domain={[0, 5]} />
+                  <YAxis domain={[0, 100]} />
                   <Tooltip />
                   <Line type="monotone" dataKey="composite" stroke="hsl(var(--student-accent))" strokeWidth={2} />
                 </LineChart>

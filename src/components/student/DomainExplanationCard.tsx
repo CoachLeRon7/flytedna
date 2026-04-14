@@ -24,9 +24,9 @@ export function DomainExplanationCard({ explanation, showCoachingTips = false }:
   const [isOpen, setIsOpen] = useState(false);
 
   const getScoreColor = (score: number) => {
-    if (score >= 4.5) return "text-green-600 dark:text-green-400";
-    if (score >= 3.8) return "text-blue-600 dark:text-blue-400";
-    if (score >= 3.0) return "text-yellow-600 dark:text-yellow-400";
+    if (score >= 85) return "text-green-600 dark:text-green-400";
+    if (score >= 70) return "text-blue-600 dark:text-blue-400";
+    if (score >= 50) return "text-yellow-600 dark:text-yellow-400";
     return "text-orange-600 dark:text-orange-400";
   };
 
@@ -50,7 +50,7 @@ export function DomainExplanationCard({ explanation, showCoachingTips = false }:
               </div>
               <div className="flex items-center gap-3 ml-4">
                 <span className={`text-2xl font-bold ${getScoreColor(explanation.score)}`}>
-                  {explanation.score.toFixed(2)}
+                  {explanation.score.toFixed(0)}
                 </span>
                 <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
               </div>

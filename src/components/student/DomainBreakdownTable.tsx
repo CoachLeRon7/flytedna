@@ -21,15 +21,15 @@ export function DomainBreakdownTable({ scores, userRole }: DomainBreakdownTableP
   const getComparisonIcon = (self: number, external?: number) => {
     if (!external) return null;
     const diff = external - self;
-    if (diff > 0.3) return <TrendingUp className="h-4 w-4 text-green-600" />;
-    if (diff < -0.3) return <TrendingDown className="h-4 w-4 text-orange-600" />;
+    if (diff > 5) return <TrendingUp className="h-4 w-4 text-green-600" />;
+    if (diff < -5) return <TrendingDown className="h-4 w-4 text-orange-600" />;
     return <Minus className="h-4 w-4 text-muted-foreground" />;
   };
 
   const getScoreBadgeColor = (score: number) => {
-    if (score >= 4.5) return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-    if (score >= 3.8) return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-    if (score >= 3.0) return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+    if (score >= 85) return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+    if (score >= 70) return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+    if (score >= 50) return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
     return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
   };
 

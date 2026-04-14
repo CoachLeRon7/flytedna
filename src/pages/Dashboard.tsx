@@ -145,7 +145,7 @@ const Dashboard = () => {
         <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <img src={logo} alt="Flyte DNA" className="h-16 w-auto" />
+              <img src={logo} alt="Flyte Academy" className="h-10" />
             </div>
             <Skeleton className="h-10 w-24" />
           </div>

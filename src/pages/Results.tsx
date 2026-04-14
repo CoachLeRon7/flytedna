@@ -402,7 +402,7 @@ const Results = () => {
                 in your leadership journey, relative to your age and development stage. 
                 {userAge < 19 && " As you mature, higher classifications will become available."}
               </p>
-              {assessment.composite_mean >= 4.6 && assessment.classification !== 'Transformational' && (
+              {assessment.composite_mean >= 85 && assessment.classification !== 'Transformational' && (
                 <p className="text-sm text-blue-700 dark:text-blue-300 mt-3 italic">
                   Your scores show strong leadership potential. Continue developing these skills, 
                   and your classification will reflect your growth as you gain more experience.
@@ -422,12 +422,12 @@ const Results = () => {
             <CardContent className="space-y-6">
               <div className="text-center">
                 <div className="text-6xl font-bold text-primary mb-4">
-                  {assessment.final_composite_mean?.toFixed(2) || assessment.composite_mean?.toFixed(2) || "N/A"}
+                  {assessment.final_composite_mean?.toFixed(0) || assessment.composite_mean?.toFixed(0) || "N/A"}
                 </div>
                 <Badge className={`${getClassificationColor(assessment.classification)} text-lg px-4 py-2`}>
                   {assessment.classification || "Processing..."}
                 </Badge>
-                <p className="text-sm text-muted-foreground mt-4">out of 5.0</p>
+                <p className="text-sm text-muted-foreground mt-4">out of 100</p>
               </div>
               
               {/* Score Breakdown */}
@@ -436,16 +436,16 @@ const Results = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Self-Assessment (60%)</span>
-                    <span className="font-semibold">{assessment.composite_mean?.toFixed(2)}</span>
+                    <span className="font-semibold">{assessment.composite_mean?.toFixed(0)}</span>
                   </div>
                   {assessment.peer_adjusted_composite && (
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Peer Feedback (15%)</span>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold">{assessment.peer_adjusted_composite.toFixed(2)}</span>
+                        <span className="font-semibold">{assessment.peer_adjusted_composite.toFixed(0)}</span>
                         {assessment.peer_modifier !== 0 && (
                           <span className={`text-xs ${assessment.peer_modifier > 0 ? 'text-green-600' : 'text-orange-600'}`}>
-                            {assessment.peer_modifier > 0 ? '+' : ''}{assessment.peer_modifier.toFixed(2)}
+                            {assessment.peer_modifier > 0 ? '+' : ''}{assessment.peer_modifier.toFixed(1)}
                           </span>
                         )}
                       </div>
@@ -455,10 +455,10 @@ const Results = () => {
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Coach Assessment (25%)</span>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold">{assessment.coach_adjusted_composite.toFixed(2)}</span>
+                        <span className="font-semibold">{assessment.coach_adjusted_composite.toFixed(0)}</span>
                         {assessment.coach_modifier !== 0 && (
                           <span className={`text-xs ${assessment.coach_modifier > 0 ? 'text-green-600' : 'text-orange-600'}`}>
-                            {assessment.coach_modifier > 0 ? '+' : ''}{assessment.coach_modifier.toFixed(2)}
+                            {assessment.coach_modifier > 0 ? '+' : ''}{assessment.coach_modifier.toFixed(1)}
                           </span>
                         )}
                       </div>
@@ -490,7 +490,7 @@ const Results = () => {
                   />
                   <PolarRadiusAxis 
                     angle={90} 
-                    domain={[0, 5]} 
+                    domain={[0, 100]} 
                     tick={{ fill: 'hsl(var(--muted-foreground))' }}
                   />
                   <Radar
@@ -580,9 +580,9 @@ const Results = () => {
                   "Others naturally look to me for direction",
                   "I inspire teammates through my actions"
                 ],
-                interpretation: assessment.leadership_dna_mean >= 4.0 
+                interpretation: assessment.leadership_dna_mean >= 70 
                   ? "You demonstrate strong leadership identity and vision. You're seen as a natural leader who inspires and guides others."
-                  : assessment.leadership_dna_mean >= 3.0
+                  : assessment.leadership_dna_mean >= 50
                   ? "You're developing your leadership identity. Continue building confidence in your vision and influence."
                   : "Focus on clarifying your leadership vision and practicing influence skills. Seek mentorship from established leaders.",
                 coachingTips: [
@@ -590,7 +590,7 @@ const Results = () => {
                   "Help them articulate their personal leadership philosophy",
                   "Provide feedback on how their actions inspire (or don't inspire) teammates"
                 ],
-                riskFlag: assessment.leadership_dna_mean < 3.0,
+                riskFlag: assessment.leadership_dna_mean < 50,
               }}
               showCoachingTips={userRole === "coach" || userRole === "admin"}
             />
@@ -606,9 +606,9 @@ const Results = () => {
                   "I hold myself to high standards in everything I do",
                   "I seek feedback to enhance my performance"
                 ],
-                interpretation: assessment.excellence_mean >= 4.0
+                interpretation: assessment.excellence_mean >= 70
                   ? "You maintain exceptional standards and continuously push for improvement. Your commitment to excellence is evident."
-                  : assessment.excellence_mean >= 3.0
+                  : assessment.excellence_mean >= 50
                   ? "You demonstrate good commitment to quality and growth. Continue seeking ways to elevate your performance."
                   : "Develop more consistent standards and seek regular feedback. Excellence requires daily commitment to improvement.",
                 coachingTips: [
@@ -616,7 +616,7 @@ const Results = () => {
                   "Create a feedback loop with regular check-ins",
                   "Celebrate small wins while maintaining high expectations"
                 ],
-                riskFlag: assessment.excellence_mean < 3.0,
+                riskFlag: assessment.excellence_mean < 50,
               }}
               showCoachingTips={userRole === "coach" || userRole === "admin"}
             />
@@ -632,9 +632,9 @@ const Results = () => {
                   "I take responsibility for my mistakes",
                   "I hold teammates accountable in constructive ways"
                 ],
-                interpretation: assessment.accountability_mean >= 4.0
+                interpretation: assessment.accountability_mean >= 70
                   ? "You excel at taking ownership and following through. Teammates can depend on you to deliver on your promises."
-                  : assessment.accountability_mean >= 3.0
+                  : assessment.accountability_mean >= 50
                   ? "You generally follow through on commitments. Work on consistency and proactively addressing shortfalls."
                   : "Focus on reliability and ownership. Start with small commitments and build a track record of follow-through.",
                 coachingTips: [
@@ -642,7 +642,7 @@ const Results = () => {
                   "Create accountability partnerships with teammates",
                   "Teach them to anticipate obstacles and communicate proactively"
                 ],
-                riskFlag: assessment.accountability_mean < 3.0,
+                riskFlag: assessment.accountability_mean < 50,
               }}
               showCoachingTips={userRole === "coach" || userRole === "admin"}
             />
@@ -658,9 +658,9 @@ const Results = () => {
                   "I resist distractions to stay focused on goals",
                   "I manage my time effectively"
                 ],
-                interpretation: assessment.discipline_mean >= 4.0
+                interpretation: assessment.discipline_mean >= 70
                   ? "You demonstrate exceptional self-control and consistency. Your routines and focus drive sustained performance."
-                  : assessment.discipline_mean >= 3.0
+                  : assessment.discipline_mean >= 50
                   ? "You have good foundational discipline. Continue building consistent habits and managing distractions."
                   : "Work on establishing basic routines and time management. Discipline is built through small daily choices.",
                 coachingTips: [
@@ -668,7 +668,7 @@ const Results = () => {
                   "Identify and address specific sources of distraction",
                   "Track progress on discipline-related behaviors weekly"
                 ],
-                riskFlag: assessment.discipline_mean < 3.0,
+                riskFlag: assessment.discipline_mean < 50,
               }}
               showCoachingTips={userRole === "coach" || userRole === "admin"}
             />
@@ -684,9 +684,9 @@ const Results = () => {
                   "I build strong relationships across the team",
                   "I create a positive team culture"
                 ],
-                interpretation: assessment.belonging_mean >= 4.0
+                interpretation: assessment.belonging_mean >= 70
                   ? "You excel at creating inclusive environments and building connections. Your presence strengthens team cohesion."
-                  : assessment.belonging_mean >= 3.0
+                  : assessment.belonging_mean >= 50
                   ? "You contribute to team culture positively. Continue being intentional about inclusion and relationship-building."
                   : "Focus on actively including others and strengthening connections. Small gestures of recognition go a long way.",
                 coachingTips: [
@@ -694,7 +694,7 @@ const Results = () => {
                   "Highlight specific moments when they made others feel included",
                   "Encourage them to initiate team-building activities"
                 ],
-                riskFlag: assessment.belonging_mean < 3.0,
+                riskFlag: assessment.belonging_mean < 50,
               }}
               showCoachingTips={userRole === "coach" || userRole === "admin"}
             />
@@ -880,7 +880,7 @@ const Results = () => {
               <div className="p-4 bg-muted/50 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-semibold">Coach's Composite Score</span>
-                  <span className="text-2xl font-bold text-primary">{coachFeedback.composite_mean.toFixed(2)}</span>
+                  <span className="text-2xl font-bold text-primary">{coachFeedback.composite_mean.toFixed(0)}</span>
                 </div>
                 <p className="text-sm text-muted-foreground">
                   Based on observed behaviors during {assessment.timepoint === "pre" ? "Pre-Season" : assessment.timepoint === "mid" ? "Mid-Season" : "Post-Season"}
@@ -940,7 +940,7 @@ const Results = () => {
                     {coachFeedback.ai_insights.strengths?.map((strength: any, idx: number) => (
                       <div key={idx} className="mb-3 p-4 bg-green-50 border border-green-200 rounded-lg">
                         <p className="font-medium text-sm mb-1">
-                          {strength.domain} <span className="text-green-700">({strength.score.toFixed(2)}/5.0)</span>
+                          {strength.domain} <span className="text-green-700">({strength.score.toFixed(0)}/100)</span>
                         </p>
                         <p className="text-sm text-muted-foreground">{strength.analysis}</p>
                       </div>
@@ -954,7 +954,7 @@ const Results = () => {
                     {coachFeedback.ai_insights.weaknesses?.map((weakness: any, idx: number) => (
                       <div key={idx} className="mb-3 p-4 bg-orange-50 border border-orange-200 rounded-lg">
                         <p className="font-medium text-sm mb-1">
-                          {weakness.domain} <span className="text-orange-700">({weakness.score.toFixed(2)}/5.0)</span>
+                          {weakness.domain} <span className="text-orange-700">({weakness.score.toFixed(0)}/100)</span>
                         </p>
                         <p className="text-sm text-muted-foreground">{weakness.analysis}</p>
                       </div>

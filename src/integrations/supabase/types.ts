@@ -1019,6 +1019,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "package_access_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "package_access_purchase_id_fkey"
             columns: ["purchase_id"]
             isOneToOne: false
@@ -1475,6 +1482,13 @@ export type Database = {
             columns: ["package_id"]
             isOneToOne: false
             referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchases_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages_public"
             referencedColumns: ["id"]
           },
           {
@@ -1989,6 +2003,51 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      packages_public: {
+        Row: {
+          base_price_cents: number | null
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          features: Json | null
+          has_payment_plan: boolean | null
+          id: string | null
+          includes_summer_program: boolean | null
+          is_active: boolean | null
+          name: string | null
+          slug: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          base_price_cents?: number | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          features?: Json | null
+          has_payment_plan?: boolean | null
+          id?: string | null
+          includes_summer_program?: boolean | null
+          is_active?: boolean | null
+          name?: string | null
+          slug?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          base_price_cents?: number | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          features?: Json | null
+          has_payment_plan?: boolean | null
+          id?: string | null
+          includes_summer_program?: boolean | null
+          is_active?: boolean | null
+          name?: string | null
+          slug?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       peer_feedback_aggregated: {
         Row: {

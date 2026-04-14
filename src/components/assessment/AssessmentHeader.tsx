@@ -1,4 +1,4 @@
-import logo from "@/assets/flyte-academy-logo.png";
+import logo from "@/assets/flyte-dna-logo.png";
 
 export const AssessmentHeader = () => {
   return (

@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { ArrowLeft, Plus, Save, Download, Lightbulb, Trash2, Flag, TrendingUp, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import logo from "@/assets/flyte-academy-logo.png";
+import logo from "@/assets/flyte-dna-logo.png";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 

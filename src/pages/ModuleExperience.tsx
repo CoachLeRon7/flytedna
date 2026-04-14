@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
-import logo from "@/assets/flyte-academy-logo.png";
+import logo from "@/assets/flyte-dna-logo.png";
 import { getModuleExperience } from "@/lib/moduleScreenData";
 import HookScreen from "@/components/curriculum/screens/HookScreen";
 import WorkbookScreen from "@/components/curriculum/screens/WorkbookScreen";

@@ -8,7 +8,7 @@ import { User } from "@supabase/supabase-js";
 import { FileText, TrendingUp, Target, LogOut, User as UserIcon, CreditCard, BookOpen } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import logo from "@/assets/flyte-academy-logo.png";
+import logo from "@/assets/flyte-dna-logo.png";
 import { LeadershipSnapshot } from "@/components/student/LeadershipSnapshot";
 import { NudgesList } from "@/components/student/NudgesList";
 import { PeerAssessmentPrompt } from "@/components/student/PeerAssessmentPrompt";

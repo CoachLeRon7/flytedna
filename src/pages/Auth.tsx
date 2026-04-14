@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, AlertTriangle } from "lucide-react";
-import logo from "@/assets/flyte-academy-logo.png";
+import logo from "@/assets/flyte-dna-logo.png";
 import { z } from "zod";
 import { getUserFriendlyError } from "@/lib/errorHandling";
 import {

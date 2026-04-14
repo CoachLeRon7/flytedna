@@ -13,7 +13,7 @@ import { TeamColorCustomizer } from "@/components/coach/TeamColorCustomizer";
 import { NotificationBell } from "@/components/NotificationBell";
 import { RoleRequestButton } from "@/components/RoleRequestButton";
 import { Target, LogOut, AlertTriangle, ClipboardCheck, Bell, Compass, ArrowRight, Menu } from "lucide-react";
-import logo from "@/assets/flyte-academy-logo.png";
+import logo from "@/assets/flyte-dna-logo.png";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TableSkeleton, ChartSkeleton, StatCardSkeleton } from "@/components/ui/skeleton-components";

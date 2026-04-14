@@ -9,7 +9,7 @@ import { PaymentOptionModal } from "@/components/payments/PaymentOptionModal";
 import { CoachesContactModal } from "@/components/payments/CoachesContactModal";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import logo from "@/assets/flyte-academy-logo.png";
+import logo from "@/assets/flyte-dna-logo.png";
 
 interface Package {
   id: string;

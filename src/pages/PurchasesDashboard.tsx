@@ -18,7 +18,7 @@ import {
   RefreshCcw
 } from "lucide-react";
 import { formatTimepointDisplay } from "@/lib/utils";
-import logo from "@/assets/flyte-academy-logo.png";
+import logo from "@/assets/flyte-dna-logo.png";
 import { RefundRequestDialog } from "@/components/payments/RefundRequestDialog";
 
 interface Purchase {

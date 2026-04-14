@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, Target, Plus, BookOpen } from "lucide-react";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from "recharts";
 import { useToast } from "@/hooks/use-toast";
-import logo from "@/assets/flyte-academy-logo.png";
+import logo from "@/assets/flyte-dna-logo.png";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChartSkeleton, TableSkeleton } from "@/components/ui/skeleton-components";
 import { PeerFeedbackSection } from "@/components/student/PeerFeedbackSection";

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, GraduationCap, School } from "lucide-react";
-import logo from "@/assets/flyte-academy-logo.png";
+import logo from "@/assets/flyte-dna-logo.png";
 import { middleSchoolTrack, highSchoolTrack } from "@/lib/curriculumData";
 import ModuleCard from "@/components/curriculum/ModuleCard";
 import LearningLoopVisual from "@/components/curriculum/LearningLoopVisual";

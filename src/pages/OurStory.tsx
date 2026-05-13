@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, ArrowLeft, Target, TrendingUp, Heart, Calendar, BookOpen, Award } from "lucide-react";
-import logo from "@/assets/flyte-dna-logo.png";
+import logo from "@/assets/flyte-dna-shield-letters.png";
 import founderPhoto from "@/assets/founder-photo.jpg";
 
 const OurStory = () => {

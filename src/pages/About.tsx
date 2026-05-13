@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Target, TrendingUp, Users, Award, Heart, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import logo from "@/assets/flyte-dna-logo.png";
+import logo from "@/assets/flyte-dna-shield-letters.png";
 import studentsBg from "@/assets/students-hero-bg.jpg";
 
 const About = () => {

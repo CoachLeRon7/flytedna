@@ -65,6 +65,87 @@ export type Database = {
         }
         Relationships: []
       }
+      assessment_questions: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          kind: Database["public"]["Enums"]["question_kind"]
+          mirror_group: string | null
+          prompt: string
+          updated_at: string
+          weight_multiplier: number
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          kind?: Database["public"]["Enums"]["question_kind"]
+          mirror_group?: string | null
+          prompt: string
+          updated_at?: string
+          weight_multiplier?: number
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          kind?: Database["public"]["Enums"]["question_kind"]
+          mirror_group?: string | null
+          prompt?: string
+          updated_at?: string
+          weight_multiplier?: number
+        }
+        Relationships: []
+      }
+      assessment_trait_scores: {
+        Row: {
+          assessment_id: string
+          created_at: string
+          id: string
+          normalized_score: number
+          raw_score: number
+          trait_key: string
+          user_id: string
+        }
+        Insert: {
+          assessment_id: string
+          created_at?: string
+          id?: string
+          normalized_score?: number
+          raw_score?: number
+          trait_key: string
+          user_id: string
+        }
+        Update: {
+          assessment_id?: string
+          created_at?: string
+          id?: string
+          normalized_score?: number
+          raw_score?: number
+          trait_key?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_trait_scores_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_trait_scores_trait_key_fkey"
+            columns: ["trait_key"]
+            isOneToOne: false
+            referencedRelation: "leadership_traits"
+            referencedColumns: ["trait_key"]
+          },
+        ]
+      }
       assessments: {
         Row: {
           a1: number | null
@@ -715,6 +796,193 @@ export type Database = {
           },
         ]
       }
+      house_placements: {
+        Row: {
+          assessment_id: string
+          consistency_score: number | null
+          created_at: string
+          id: string
+          insights: Json
+          leadership_level: string | null
+          primary_confidence: number | null
+          primary_house_id: string | null
+          probability_vector: Json
+          readiness_composite: number | null
+          secondary_house_id: string | null
+          user_id: string
+        }
+        Insert: {
+          assessment_id: string
+          consistency_score?: number | null
+          created_at?: string
+          id?: string
+          insights?: Json
+          leadership_level?: string | null
+          primary_confidence?: number | null
+          primary_house_id?: string | null
+          probability_vector?: Json
+          readiness_composite?: number | null
+          secondary_house_id?: string | null
+          user_id: string
+        }
+        Update: {
+          assessment_id?: string
+          consistency_score?: number | null
+          created_at?: string
+          id?: string
+          insights?: Json
+          leadership_level?: string | null
+          primary_confidence?: number | null
+          primary_house_id?: string | null
+          probability_vector?: Json
+          readiness_composite?: number | null
+          secondary_house_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "house_placements_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: true
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "house_placements_primary_house_id_fkey"
+            columns: ["primary_house_id"]
+            isOneToOne: false
+            referencedRelation: "houses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "house_placements_secondary_house_id_fkey"
+            columns: ["secondary_house_id"]
+            isOneToOne: false
+            referencedRelation: "houses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      house_trait_weights: {
+        Row: {
+          created_at: string
+          house_id: string
+          id: string
+          trait_key: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          house_id: string
+          id?: string
+          trait_key: string
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          house_id?: string
+          id?: string
+          trait_key?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "house_trait_weights_house_id_fkey"
+            columns: ["house_id"]
+            isOneToOne: false
+            referencedRelation: "houses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "house_trait_weights_trait_key_fkey"
+            columns: ["trait_key"]
+            isOneToOne: false
+            referencedRelation: "leadership_traits"
+            referencedColumns: ["trait_key"]
+          },
+        ]
+      }
+      houses: {
+        Row: {
+          color_hex: string | null
+          core_traits: string[]
+          created_at: string
+          description: string | null
+          display_order: number
+          growth_areas: string[]
+          id: string
+          is_active: boolean
+          leadership_style: string | null
+          name: string
+          oath: string | null
+          slug: string
+          symbol: string | null
+          tagline: string | null
+          updated_at: string
+        }
+        Insert: {
+          color_hex?: string | null
+          core_traits?: string[]
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          growth_areas?: string[]
+          id?: string
+          is_active?: boolean
+          leadership_style?: string | null
+          name: string
+          oath?: string | null
+          slug: string
+          symbol?: string | null
+          tagline?: string | null
+          updated_at?: string
+        }
+        Update: {
+          color_hex?: string | null
+          core_traits?: string[]
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          growth_areas?: string[]
+          id?: string
+          is_active?: boolean
+          leadership_style?: string | null
+          name?: string
+          oath?: string | null
+          slug?: string
+          symbol?: string | null
+          tagline?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      leadership_traits: {
+        Row: {
+          category: Database["public"]["Enums"]["trait_category"]
+          created_at: string
+          description: string | null
+          display_name: string
+          display_order: number
+          trait_key: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["trait_category"]
+          created_at?: string
+          description?: string | null
+          display_name: string
+          display_order?: number
+          trait_key: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["trait_category"]
+          created_at?: string
+          description?: string | null
+          display_name?: string
+          display_order?: number
+          trait_key?: string
+        }
+        Relationships: []
+      }
       module_completions: {
         Row: {
           completed_at: string
@@ -812,6 +1080,45 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      option_trait_weights: {
+        Row: {
+          created_at: string
+          id: string
+          option_id: string
+          trait_key: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_id: string
+          trait_key: string
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_id?: string
+          trait_key?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "option_trait_weights_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "question_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "option_trait_weights_trait_key_fkey"
+            columns: ["trait_key"]
+            isOneToOne: false
+            referencedRelation: "leadership_traits"
+            referencedColumns: ["trait_key"]
+          },
+        ]
       }
       organization_invitations: {
         Row: {
@@ -1504,6 +1811,38 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_activity_summary"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      question_options: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          label: string
+          question_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          label: string
+          question_id: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          label?: string
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_questions"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2242,6 +2581,8 @@ export type Database = {
         | "Unanchored"
       nudge_frequency: "daily" | "weekly"
       nudge_status: "scheduled" | "sent" | "snoozed" | "completed"
+      question_kind: "scenario" | "preference" | "reflection" | "mirror"
+      trait_category: "readiness" | "dna" | "meta"
       user_role: "student" | "coach" | "admin"
     }
     CompositeTypes: {
@@ -2382,6 +2723,8 @@ export const Constants = {
       ],
       nudge_frequency: ["daily", "weekly"],
       nudge_status: ["scheduled", "sent", "snoozed", "completed"],
+      question_kind: ["scenario", "preference", "reflection", "mirror"],
+      trait_category: ["readiness", "dna", "meta"],
       user_role: ["student", "coach", "admin"],
     },
   },
